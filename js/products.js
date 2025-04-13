@@ -1,9 +1,10 @@
-// Instagram Products Fetcher - Updated for Instagram Graph API
+// Instagram Products Fetcher with Image Proxy
 
 // Configuration
 const config = {
     useInstagram: true,
-    localProductsPath: 'data/products.json'
+    localProductsPath: 'data/products.json',
+    imageProxyEndpoint: '/api/instagram-image-proxy'
 };
 
 // Define the products from your Instagram links
@@ -101,6 +102,9 @@ async function loadProducts() {
             products = await fetchLocalProducts();
         }
         
+        // Ensure all products have permanent image URLs
+        await ensurePermanentImageUrls(products);
+        
         displayProducts();
         hideLoading();
     } catch (error) {
@@ -109,9 +113,44 @@ async function loadProducts() {
         
         // Fallback to predefined products
         products = enisiProducts;
+        await ensurePermanentImageUrls(products);
         displayProducts();
         hideLoading();
     }
+}
+
+// Ensure all products have permanent image URLs
+async function ensurePermanentImageUrls(productsList) {
+    const productsWithImages = await Promise.all(
+        productsList.map(async product => {
+            if (product.instagramLink) {
+                try {
+                    // Use the image proxy to get a permanent URL
+                    const proxyUrl = `${config.imageProxyEndpoint}?url=${encodeURIComponent(product.instagramLink)}`;
+                    const response = await fetch(proxyUrl);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.imageUrl) {
+                            // Update the product image URL
+                            return {
+                                ...product,
+                                image: data.imageUrl
+                            };
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Failed to fetch permanent image for ${product.name}:`, error);
+                }
+            }
+            
+            // If anything fails, return the original product
+            return product;
+        })
+    );
+    
+    // Replace the products array with the updated one
+    return productsWithImages;
 }
 
 // Fetch products from local JSON file as fallback
@@ -157,7 +196,19 @@ function createProductElement(product) {
     productElement.dataset.productId = product.id;
     
     const productImage = document.createElement('img');
-    productImage.src = product.image;
+    
+    // Try to get the image from our cache first
+    if (product.instagramLink && window.getInstagramImage) {
+        const cachedImage = window.getInstagramImage(product.instagramLink);
+        if (cachedImage) {
+            productImage.src = cachedImage;
+        } else {
+            productImage.src = product.image;
+        }
+    } else {
+        productImage.src = product.image;
+    }
+    
     productImage.alt = product.name;
     productImage.onerror = function() {
         this.src = 'https://via.placeholder.com/300x300?text=Pa+Foto';
@@ -207,6 +258,31 @@ function createProductElement(product) {
     productElement.appendChild(productInfo);
     
     return productElement;
+}
+
+// Directly fetch Instagram image URL as fallback
+async function fetchInstagramImageDirectly(instagramUrl) {
+    // This is a client-side fallback when the Netlify function fails
+    try {
+        // Use a CORS proxy service (you might need to replace this with a reliable one)
+        const corsProxy = 'https://corsproxy.io/?';
+        const response = await fetch(corsProxy + encodeURIComponent(instagramUrl));
+        const html = await response.text();
+        
+        // Extract image URL from HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const metaTag = doc.querySelector('meta[property="og:image"]');
+        
+        if (metaTag) {
+            return metaTag.getAttribute('content');
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error fetching Instagram image directly:', error);
+        return null;
+    }
 }
 
 // Show/hide loading indicator
