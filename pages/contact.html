@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontakti | Faqja e Produkteve</title>
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Na Kontaktoni</h1>
+            <div class="cart-icon">
+                <a href="checkout.html"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Kryefaqja</a></li>
+                <li><a href="products.html">Produktet</a></li>
+                <li><a href="checkout.html">Shporta</a></li>
+                <li><a href="about.html">Rreth Nesh</a></li>
+                <li><a href="contact.html" class="active">Kontakti</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="contact-section">
+            <div class="container">
+                <h2>Na Dërgoni një Mesazh</h2>
+                <div class="contact-container">
+                    <div class="contact-form">
+                        <form id="contact-form">
+                            <div class="form-group">
+                                <label for="name">Emri i plotë</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Numër telefoni</label>
+                                <input type="tel" id="phone" name="phone">
+                            </div>
+                            <div class="form-group">
+                                <label for="subject">Subjekti</label>
+                                <input type="text" id="subject" name="subject" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Mesazhi juaj</label>
+                                <textarea id="message" name="message" rows="6" required></textarea>
+                            </div>
+                            <button type="submit" class="btn">Dërgo Mesazhin</button>
+                        </form>
+                    </div>
+                    
+                    <div class="contact-info">
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Adresa</h3>
+                                <p>Rruga e Durrësit, Nr. 120</p>
+                                <p>Tiranë, Shqipëri</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Telefoni</h3>
+                                <p>+355 69 123 4567</p>
+                                <p>+355 42 345 678</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Email</h3>
+                                <p>info@dyqani.com</p>
+                                <p>support@dyqani.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Orari</h3>
+                                <p>E Hënë - E Premte: 9:00 - 20:00</p>
+                                <p>E Shtunë: 10:00 - 18:00</p>
+                                <p>E Dielë: Mbyllur</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="map-section">
+            <div class="container">
+                <h2>Na Gjeni</h2>
+                <div class="map-container">
+                    <!-- Replace with your actual Google Maps embed code -->
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2996.0046734489604!2d19.80873161541518!3d41.33189970752069!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1350310470fac5db%3A0x40c76c111ab231c1!2sRruga%20e%20Durr%C3%ABsit%2C%20Tiran%C3%AB%2C%20Albania!5e0!3m2!1sen!2s!4v1649443275771!5m2!1sen!2s" 
+                        width="100%" 
+                        height="450" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <div class="container">
+                <h2>Pyetje të Shpeshta</h2>
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Si mund të bëj një porosi?</h3>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Për të bërë një porosi, zgjidhni produktin që dëshironi dhe klikoni butonin "Shto në shportë". Pastaj shkoni te faqja "Shporta" dhe plotësoni formën e porosisë.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Cilat janë metodat e pagesës?</h3>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Ne pranojmë pagesa me kartë krediti/debiti, transferta bankare dhe pagesë me dorëzim (cash on delivery).</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Sa kohë duhet për dorëzimin e produkteve?</h3>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Koha e dorëzimit varet nga vendndodhja juaj. Zakonisht, produktet dorëzohen brenda 1-3 ditësh pune për Tiranën dhe 2-5 ditë pune për qytetet e tjera në Shqipëri.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>A mund të kthej një produkt?</h3>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Po, ne ofrojmë kthime dhe zëvendësime për produktet brenda 14 ditëve nga marrja e produktit. Produkti duhet të jetë në gjendjen origjinale dhe i papërdorur.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <section id="newsletter">
+        <div class="newsletter-container">
+            <h3>Abonohuni për të rejat më të fundit</h3>
+            <p>Merrni njoftime për produktet e reja dhe ofertat speciale</p>
+            <form id="newsletter-form">
+                <input type="email" placeholder="E-mail juaj" required>
+                <button type="submit" class="btn">Abonohu</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>Dyqani Ynë</h4>
+                <p>Ofrojmë produktet më të mira për klientët tanë që nga viti 2020.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Kontakti</h4>
+                <p>Email: info@dyqani.com</p>
+                <p>Tel: +355 69 123 4567</p>
+                <p>Adresa: Rruga e Durrësit, Tiranë</p>
+            </div>
+            <div class="footer-section">
+                <h4>Na ndiqni</h4>
+                <div class="social-icons">
+                    <a href="https://instagram.com/enisi.center" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/enisi.center.pd"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Faqja e Produkteve. Të gjitha të drejtat e rezervuara.</p>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/cart.js"></script>
+    <script>
+        // Handle contact form submission
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // In a real implementation, you would send the form data to a server
+            // For this demo, we'll just show a success message
+            
+            alert('Faleminderit! Mesazhi juaj u dërgua me sukses. Do t\'ju kontaktojmë së shpejti.');
+            this.reset();
+        });
+        
+        // Make FAQ items interactive
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const faqItem = question.parentElement;
+                faqItem.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>

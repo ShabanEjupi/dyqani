@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produktet | Faqja e Produkteve</title>
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Produktet Tona</h1>
+            <div class="cart-icon">
+                <a href="checkout.html"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Kryefaqja</a></li>
+                <li><a href="products.html" class="active">Produktet</a></li>
+                <li><a href="checkout.html">Shporta</a></li>
+                <li><a href="about.html">Rreth Nesh</a></li>
+                <li><a href="contact.html">Kontakti</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="products-header">
+            <h2>Të gjitha produktet</h2>
+            <div class="filters">
+                <select id="sort-products">
+                    <option value="default">Renditja e paracaktuar</option>
+                    <option value="price-asc">Çmimi: Ulët në të lartë</option>
+                    <option value="price-desc">Çmimi: Lartë në të ulët</option>
+                    <option value="name-asc">Emri: A-Z</option>
+                    <option value="name-desc">Emri: Z-A</option>
+                </select>
+            </div>
+        </section>
+
+        <section id="all-products">
+            <div id="product-list" class="product-grid"></div>
+            <div class="loading" id="loading-products">Duke ngarkuar produktet...</div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>Dyqani Ynë</h4>
+                <p>Ofrojmë produktet më të mira për klientët tanë që nga viti 2020.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Kontakti</h4>
+                <p>Email: info@dyqani.com</p>
+                <p>Tel: +355 69 123 4567</p>
+                <p>Adresa: Rruga e Durrësit, Tiranë</p>
+            </div>
+            <div class="footer-section">
+                <h4>Na ndiqni</h4>
+                <div class="social-icons">
+                    <a href="https://instagram.com/enisi.center" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/enisi.center.pd"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Faqja e Produkteve. Të gjitha të drejtat e rezervuara.</p>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/products.js"></script>
+    <script src="../js/cart.js"></script>
+</body>
+</html>
