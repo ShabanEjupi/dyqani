@@ -400,7 +400,7 @@ footer {
     transition: var(--transition);
 }
 
-social-icons a:hover {
+.social-icons a:hover {
     background-color: var(--accent-color);
     transform: translateY(-3px);
 }
@@ -414,6 +414,15 @@ social-icons a:hover {
 .footer-bottom p {
     font-size: 14px;
     opacity: 0.8;
+}
+
+.footer-bottom a {
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+
+.footer-bottom a:hover {
+    color: var(--white);
 }
 
 /* Products Page */
@@ -904,4 +913,102 @@ social-icons a:hover {
     .team-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
+}
+
+/* Additional styles for component-based structure and PayPal */
+
+/* PayPal styles */
+.payment-options {
+    margin-top: 20px;
+    border-top: 1px solid var(--medium-gray);
+    padding-top: 15px;
+}
+
+.payment-options p {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.payment-methods {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.payment-method {
+    flex: 1;
+    background-color: var(--light-gray);
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.payment-method:hover {
+    background-color: #e8e8e8;
+}
+
+.paypal-link {
+    display: block;
+    color: #003087;
+    font-weight: bold;
+}
+
+.payment-instructions {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    text-align: left;
+}
+
+.checkout-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.payment-method-details {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.payment-method-details h4 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-paypal {
+    background-color: #0070BA;
+    margin-top: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-paypal:hover {
+    background-color: #003087;
+}
+
+/* Content containers for component-based structure */
+#header-container, #footer-container {
+    width: 100%;
+}
+
+/* Fix for nested links in components */
+a[href].active {
+    color: var(--primary-color);
+    background-color: rgba(74, 109, 167, 0.1);
+}
+
+/* Fix for footer social links */
+.social-icons a:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-3px);
 }

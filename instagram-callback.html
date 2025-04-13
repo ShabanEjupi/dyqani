@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Authentication | Enisi Center</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main>
+        <div class="container">
+            <section class="auth-section">
+                <h2>Instagram Authentication</h2>
+                <div id="auth-status" class="auth-status">
+                    <div class="loading">Duke përpunuar autorizimin...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="js/components.js"></script>
+    <script src="js/instagram-api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the authorization code from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+            
+            const authStatus = document.getElementById('auth-status');
+            
+            if (error) {
+                authStatus.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Gabim në autorizim</h3>
+                        <p>${error}</p>
+                        <a href="index.html" class="btn">Kthehu në faqen kryesore</a>
+                    </div>
+                `;
+            } else if (code) {
+                // Handle the authorization code
+                const result = window.instagramApi.handleCallback(code);
+                
+                if (result.success) {
+                    authStatus.innerHTML = `
+                        <div class="success-message">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>Autorizimi u krye me sukses</h3>
+                            <p>Lidhja me Instagram u realizua me sukses.</p>
+                            <a href="index.html" class="btn">Kthehu në faqen kryesore</a>
+                        </div>
+                    `;
+                } else {
+                    authStatus.innerHTML = `
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <h3>Gabim në autorizim</h3>
+                            <p>${result.message || 'Ndodhi një gabim gjatë autorizimit.'}</p>
+                            <a href="index.html" class="btn">Kthehu në faqen kryesore</a>
+                        </div>
+                    `;
+                }
+            } else {
+                authStatus.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Autorizimi mungon</h3>
+                        <p>Nuk u gjet asnjë kod autorizimi.</p>
+                        <a href="index.html" class="btn">Kthehu në faqen kryesore</a>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

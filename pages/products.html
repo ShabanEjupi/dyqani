@@ -3,29 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produktet | Faqja e Produkteve</title>
+    <title>Produktet | Enisi Center</title>
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <h1>Produktet Tona</h1>
-            <div class="cart-icon">
-                <a href="checkout.html"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
-            </div>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="../index.html">Kryefaqja</a></li>
-                <li><a href="products.html" class="active">Produktet</a></li>
-                <li><a href="checkout.html">Shporta</a></li>
-                <li><a href="about.html">Rreth Nesh</a></li>
-                <li><a href="contact.html">Kontakti</a></li>
-            </ul>
-        </nav>
-    </header>
+    <div id="header-container"></div>
 
     <main>
         <section class="products-header">
@@ -47,31 +31,20 @@
         </section>
     </main>
 
-    <footer>
-        <div class="footer-container">
-            <div class="footer-section">
-                <h4>Dyqani Ynë</h4>
-                <p>Ofrojmë produktet më të mira për klientët tanë që nga viti 2020.</p>
-            </div>
-            <div class="footer-section">
-                <h4>Kontakti</h4>
-                <p>Email: info@dyqani.com</p>
-                <p>Tel: +355 69 123 4567</p>
-                <p>Adresa: Rruga e Durrësit, Tiranë</p>
-            </div>
-            <div class="footer-section">
-                <h4>Na ndiqni</h4>
-                <div class="social-icons">
-                    <a href="https://instagram.com/enisi.center" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.facebook.com/enisi.center.pd"><i class="fab fa-facebook"></i></a>
-                </div>
-            </div>
+    <section id="newsletter">
+        <div class="newsletter-container">
+            <h3>Abonohuni për të rejat më të fundit</h3>
+            <p>Merrni njoftime për produktet e reja dhe ofertat speciale</p>
+            <form id="newsletter-form">
+                <input type="email" placeholder="E-mail juaj" required>
+                <button type="submit" class="btn">Abonohu</button>
+            </form>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Faqja e Produkteve. Të gjitha të drejtat e rezervuara.</p>
-        </div>
-    </footer>
+    </section>
 
+    <div id="footer-container"></div>
+
+    <script src="../js/components.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/products.js"></script>
     <script src="../js/cart.js"></script>

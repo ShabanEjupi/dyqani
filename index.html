@@ -3,29 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faqja e Produkteve</title>
+    <title>Enisi Center - Produktet më cilësore</title>
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <h1>Mirë se vini në Dyqanin Tonë</h1>
-            <div class="cart-icon">
-                <a href="pages/checkout.html"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
-            </div>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="index.html">Kryefaqja</a></li>
-                <li><a href="pages/products.html">Produktet</a></li>
-                <li><a href="pages/checkout.html">Shporta</a></li>
-                <li><a href="pages/about.html">Rreth Nesh</a></li>
-                <li><a href="pages/contact.html">Kontakti</a></li>
-            </ul>
-        </nav>
-    </header>
+    <div id="header-container"></div>
 
     <section class="hero">
         <div class="hero-content">
@@ -47,7 +31,7 @@
             <h2>Rreth Nesh</h2>
             <div class="about-container">
                 <div class="about-image">
-                    <img src="assets/images/shop.jpg" alt="Dyqani ynë" onerror="this.src='https://via.placeholder.com/400x300?text=Dyqani+Ynë'">
+                    <img src="assets/images/shop.jpg" alt="Enisi Center" onerror="this.src='https://via.placeholder.com/400x300?text=Enisi+Center'">
                 </div>
                 <div class="about-text">
                     <p>Ne jemi një dyqan që ofron produktet më të mira dhe me cilësi të lartë për klientët tanë. Qëllimi ynë është të sigurojmë një përvojë blerje të shkëlqyer dhe produkte që plotësojnë nevojat tuaja.</p>
@@ -89,31 +73,9 @@
         </div>
     </section>
 
-    <footer>
-        <div class="footer-container">
-            <div class="footer-section">
-                <h4>Dyqani Ynë</h4>
-                <p>Ofrojmë produktet më të mira për klientët tanë që nga viti 2020.</p>
-            </div>
-            <div class="footer-section">
-                <h4>Kontakti</h4>
-                <p>Email: info@dyqani.com</p>
-                <p>Tel: +355 69 123 4567</p>
-                <p>Adresa: Rruga e Durrësit, Tiranë</p>
-            </div>
-            <div class="footer-section">
-                <h4>Na ndiqni</h4>
-                <div class="social-icons">
-                    <a href="https://instagram.com/enisi.center" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.facebook.com/enisi.center.pd"><i class="fab fa-facebook"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Faqja e Produkteve. Të gjitha të drejtat e rezervuara.</p>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
+    <script src="js/components.js"></script>
     <script src="js/main.js"></script>
     <script src="js/products.js"></script>
     <script src="js/cart.js"></script>
