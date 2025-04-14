@@ -11,66 +11,66 @@ const config = {
 const enisiProducts = [
     {
         id: 'insta1',
-        name: 'Dhurata për femra',
-        description: 'Set dhuratash elegant për femra',
-        price: 15.99,
-        image: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/432619302_122132594209257416_9132967593412667683_n.jpg?stp=dst-jpg_p1080x2048&_nc_cat=105&ccb=1-7&_nc_sid=3635dc&_nc_ohc=IR6336L6Xl8AX9XTAW7&_nc_ht=scontent.xx&oh=00_AfCvcg1NG-BAWwrLm2f_FDmDFTaQN-d5qNxJY6zKYynEsg&oe=660FF795',
+        name: 'Trenerka termo për vajza',
+        description: 'Mosha: 6 - 12 vjeç',
+        price: 12.00,
+        image: 'https://instagram.fprn12-1.fna.fbcdn.net/v/t51.2885-15/468653015_18123224347400312_2374986536723326172_n.jpg?stp=dst-jpg_e35_s640x640_sh0.08_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQuaW1hZ2VfdXJsZ2VuLjcxNXg3MTUuc2RyLmY3NTc2MS5kZWZhdWx0X2ltYWdlIn0&_nc_ht=instagram.fprn12-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QEoYu6ujimiAl8vIrTZWW6JVyV93joQH1eqrxszRrQwX4ulRJJWJVAHrjKFRgJxHbg&_nc_ohc=sG2efIAGVIUQ7kNvwGb7Wjk&_nc_gid=vX6PzaRvDbrW1lwd5YiBKw&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MzUxMjEzNzI1NDcwNTQyMzE4Nw%3D%3D.3-ccb7-5&oh=00_AfE7qvYCMHB-gZw5gYcZ2PT82U2VWmeQzB3v-VCWPVGvqA&oe=68033E4F&_nc_sid=10d13b',
         instagramLink: 'https://www.instagram.com/p/DC9njmdIeNT/'
     },
     {
         id: 'insta2',
-        name: 'Vazo dhe lule artificiale',
-        description: 'Vazo dekorative me lule artificiale',
-        price: 25.99,
-        image: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/432427786_122132602914357416_9043348931282074934_n.jpg?stp=dst-jpg_p720x720&_nc_cat=111&ccb=1-7&_nc_sid=3635dc&_nc_ohc=Znvo0F7CcFQAX-OTzZn&_nc_ht=scontent.xx&oh=00_AfCQIWTS-gC5YR8F4xCblafPso5qr-KXWZuhpvb9Dalm-Q&oe=660FD450',
+        name: 'Fustana për vajza',
+        description: 'Mosha: 6 - 24 muaj',
+        price: 8.00,
+        image: 'https://instagram.fprn12-1.fna.fbcdn.net/v/t51.2885-15/468637252_18123225220400312_7896748840369774594_n.jpg?stp=dst-jpg_e35_s720x720_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQuaW1hZ2VfdXJsZ2VuLjE0NDB4MTQ0MC5zZHIuZjc1NzYxLmRlZmF1bHRfaW1hZ2UifQ&_nc_ht=instagram.fprn12-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QGlGqm2bVks8tQ0L_eBs0MMBSjqt3nDWvYl19IFLNSQncs5ZBG6883UFNMH8AaUHx4&_nc_ohc=TfOXA8atXMQQ7kNvwHJlKWt&_nc_gid=jLoiTvLmVuGNoNMBAGQ1YA&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MzUxMjE0MTMwMDQ3MzMwMjA4Mw%3D%3D.3-ccb7-5&oh=00_AfGrWvuQHrfhCRfusQ-0Gsn3jh890mxqdiVUHc9JbOIo1A&oe=68033D2C&_nc_sid=10d13b',
         instagramLink: 'https://www.instagram.com/p/DC9oeeXsIxD/'
     },
     {
         id: 'insta3',
-        name: 'Set për banim',
-        description: 'Set dekorativ modern për banesë',
-        price: 49.99,
-        image: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/436879257_122132599755557416_3234135770201719232_n.jpg?stp=dst-jpg_p720x720&_nc_cat=104&ccb=1-7&_nc_sid=3635dc&_nc_ohc=JXR0COF5clUAX80L051&_nc_ht=scontent.xx&oh=00_AfCcriF1WCpEUjq81RHbLEt5yLIy87rLYoDktqyiLvCd3w&oe=660E96D3',
+        name: 'Fustana për vajza',
+        description: 'Mosha: 7 - 11 vjeç',
+        price: 12.00,
+        image: 'https://instagram.fprn12-1.fna.fbcdn.net/v/t51.29350-15/470157298_1533192894036663_180335926716180664_n.heic?stp=dst-jpg_e35_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQuaW1hZ2VfdXJsZ2VuLjk2MHg5NjAuc2RyLmYyOTM1MC5kZWZhdWx0X2ltYWdlIn0&_nc_ht=instagram.fprn12-1.fna.fbcdn.net&_nc_cat=103&_nc_oc=Q6cZ2QFplLy09esSBO8lsOhN01YBmWNLSoAF-VzOYROEhRRurHLRBorNm9lUMI6pKn5xlE4&_nc_ohc=SmxQJcQOVhoQ7kNvwFE-U__&_nc_gid=DnM2dkLtfht8MREPu03H9w&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MzUyNTAzMDcyNzA0MTI5MTM2Ng%3D%3D.3-ccb7-5&oh=00_AfG6Kws2XpRuc_1mpMA3qyhbzgvVGr7ugQBLczG3QH0uWA&oe=680339AD&_nc_sid=10d13b',
         instagramLink: 'https://www.instagram.com/p/DDrbMUTohRm/'
     },
     {
         id: 'insta4',
-        name: 'Aksesorë për shtëpi',
-        description: 'Pajisje dhe dekorime të ndryshme për shtëpi',
-        price: 18.50,
-        image: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/439647599_122132773871257416_4984890609171797155_n.jpg?stp=dst-jpg_p720x720&_nc_cat=108&ccb=1-7&_nc_sid=3635dc&_nc_ohc=yWnCsVEapxgAX_59l1Z&_nc_ht=scontent.xx&oh=00_AfBs53gZToeCyfC5jCgkRzfpnHWpMRHyffyRugABJGFuQg&oe=660EBE09',
+        name: 'Bluza për vajza',
+        description: 'Mosha: 9 - 12 vjeç',
+        price: 5.00,
+        image: 'https://instagram.fprn12-1.fna.fbcdn.net/v/t51.2885-15/472047492_18128043481400312_5177866163732224127_n.jpg?stp=dst-jpg_e35_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjcyM3g0ODQuc2RyLmY3NTc2MS5kZWZhdWx0X2ltYWdlIn0&_nc_ht=instagram.fprn12-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QHGgHB-mjmo2igOPZ1auA7pyLMqAxpfByBHHX3Xjq9AlSJn970Zpxih9iPnwpuT708&_nc_ohc=TzwqE_AC2kIQ7kNvwHue09J&_nc_gid=gUa_vbxc5wNw-AxFTBnP5g&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MzU0NjA1NjM3NTk4NjIwODIzOQ%3D%3D.3-ccb7-5&oh=00_AfEcSp_3oNCKPwZ83PPf-3Lxq6a5HqoCL1VvAL7SEXpUxQ&oe=68033C94&_nc_sid=10d13b',
         instagramLink: 'https://www.instagram.com/p/DE2H4BGqEy9/'
     },
     {
         id: 'insta5',
-        name: 'Set dekorimi',
-        description: 'Set i plotë për dekorim të ambienteve',
-        price: 35.99,
-        image: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/439607129_122132776759357416_6685974088155811121_n.jpg?stp=dst-jpg_p720x720&_nc_cat=105&ccb=1-7&_nc_sid=3635dc&_nc_ohc=nb2Camrew9AAX-FDNwy&_nc_ht=scontent.xx&oh=00_AfAguFC9gALsbtqXJ3rXxNKvaVaXyBntXFiPyglFvyexug&oe=660FE0C1',
+        name: 'Bluza për djem',
+        description: 'Mosha: 9 - 12 vjeç',
+        price: 5.00,
+        image: 'https://instagram.fprn12-1.fna.fbcdn.net/v/t51.2885-15/471754915_18128043856400312_2992821411035262859_n.jpg?stp=dst-jpg_e35_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjExMjB4MTI4MC5zZHIuZjc1NzYxLmRlZmF1bHRfaW1hZ2UifQ&_nc_ht=instagram.fprn12-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QHdQHSZg6bU2DNRjWu-lTBQetosNqzuVwk5jb_PTu49CfUfxYA3wPXe5A-Yzci4yRs&_nc_ohc=hRYzuI0WVg8Q7kNvwH_FAwi&_nc_gid=YiJ7hAWiqFMQEAuMQU9EUQ&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MzU0NjA1ODkzMDc1MzYyMzUwNw%3D%3D.3-ccb7-5&oh=00_AfFCJrE8aUaeqP6HsG-bqgbxtfGP1SF2mOBrPI_Ze8cjtw&oe=68033ACE&_nc_sid=10d13b',
         instagramLink: 'https://www.instagram.com/p/DE2IdJ5qub5/'
     },
     {
         id: 'insta6',
-        name: 'Çanta elegante',
-        description: 'Çanta cilësore me dizajn elegant për femra',
-        price: 40.00,
-        image: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/439607114_122132779496257416_8451287197382423138_n.jpg?stp=dst-jpg_p720x720&_nc_cat=110&ccb=1-7&_nc_sid=3635dc&_nc_ohc=ft8zO68cXPsAX8kMjRS&_nc_ht=scontent.xx&oh=00_AfDlt7QbjomM6gJG5d7JwEf07QitwrDJuxakXmCQTBpnAA&oe=660F8D52',
+        name: 'Trenerka të poshtme për djem',
+        description: 'Mosha: 8 - 16 vjeç',
+        price: 5.00,
+        image: 'https://instagram.fprn12-1.fna.fbcdn.net/v/t51.2885-15/471744620_18128044786400312_8346093827122126_n.jpg?stp=dst-jpg_e35_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjU5Mng3NDAuc2RyLmY3NTc2MS5kZWZhdWx0X2ltYWdlIn0&_nc_ht=instagram.fprn12-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QH1KcJt0aXCwIfL_oW3RzCxM9lXrjebSaVZwZjjwEjXWr7AwCzR0rTA4kgtvVvy7Kc&_nc_ohc=Pv1XG_WzIosQ7kNvwEHYVa7&_nc_gid=mUDKBuLf0x1BBXEPP7eOTQ&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MzU0NjA2NDgxODEyMTkxNjkyMw%3D%3D.3-ccb7-5&oh=00_AfHUOWvady2O3sUMMjnLAVpz5nj3VY3OYzuDm0-9EoIyBQ&oe=680360BB&_nc_sid=10d13b',
         instagramLink: 'https://www.instagram.com/p/DE2Jy0NKbLi/'
     },
     {
         id: 'insta7',
-        name: 'Telefon mbajtës',
-        description: 'Mbajtës elegante për telefonin tuaj',
-        price: 12.99,
-        image: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/439679961_122132785160357416_7815203774037290097_n.jpg?stp=dst-jpg_p720x720&_nc_cat=103&ccb=1-7&_nc_sid=3635dc&_nc_ohc=dl1l2QXdYWkAX95X46G&_nc_ht=scontent.xx&oh=00_AfDIHX-RGb_Nbv5GFcfUbZlONH982Wld92QlsXU5KPxfKA&oe=660FBC10',
+        name: 'Trenerka set për djem',
+        description: 'Mosha: 8 - 16 vjeç',
+        price: 12.00,
+        image: 'https://instagram.fprn12-1.fna.fbcdn.net/v/t51.2885-15/472646561_18128045023400312_8245777691868293454_n.jpg?stp=dst-jpg_e35_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjg1MngxMDY1LnNkci5mNzU3NjEuZGVmYXVsdF9pbWFnZSJ9&_nc_ht=instagram.fprn12-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QHgKnZ3roxmpKg2Rs5iJv_wnCICAULlxOpM5ZWi3_dfEoQW9209my9u_G1Ndp-x_lc&_nc_ohc=mkE5SW0ZUTQQ7kNvwEWNv-4&_nc_gid=9xOzufc_eo7ZexGl4Inyeg&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MzU0NjA2NjExOTQ1NDk3MDE1Nw%3D%3D.3-ccb7-5&oh=00_AfEmIaIISScuohtsQUB6fdO5CthEbo-i8cZHhTWmkRsqgQ&oe=68032A0A&_nc_sid=10d13b',
         instagramLink: 'https://www.instagram.com/p/DE2KF1RK7yK/'
     },
     {
         id: 'insta8',
-        name: 'Set dhuratash',
-        description: 'Set i përsosur dhuratash për çdo rast',
-        price: 29.99,
-        image: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/431891675_122132640393357416_7074018585134061418_n.jpg?stp=dst-jpg_p720x720&_nc_cat=107&ccb=1-7&_nc_sid=3635dc&_nc_ohc=oO_G2JPePHsAX8NWlgr&_nc_ht=scontent.xx&oh=00_AfBeXQys0EexDi-_IbI5O4RU4Fhwogtt06u_w2Hnvh3IMg&oe=660F2CEA',
+        name: 'Set 3-pjesësh për vajza',
+        description: 'Mosha: 6 - 24 muaj',
+        price: 10.00,
+        image: 'https://instagram.fprn12-1.fna.fbcdn.net/v/t51.2885-15/468449599_18123221773400312_7424695642133080002_n.jpg?stp=dst-jpg_e35_p640x640_sh0.08_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQuaW1hZ2VfdXJsZ2VuLjEzMTl4MTU1NC5zZHIuZjc1NzYxLmRlZmF1bHRfaW1hZ2UifQ&_nc_ht=instagram.fprn12-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QFWOFbHv_BbIxy19nb7nz51Upl3zcEzNj73fYFkxdJSYlpr3zx7JGBV3y5d8aAPazQ&_nc_ohc=Cnuy6d8-pq4Q7kNvwFseHgE&_nc_gid=A9OwBOELaqY5KN89JHxPXA&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MzUxMjEyMzg5ODcxNjA3MjYxMw%3D%3D.3-ccb7-5&oh=00_AfF2wCHvuoH0pYUeXteLFYqO1iceoyX1MbxmxqfYYQlLlg&oe=68032BE9&_nc_sid=10d13b',
         instagramLink: 'https://www.instagram.com/p/DC9khPuIaql/'
     }
 ];
