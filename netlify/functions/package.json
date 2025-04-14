@@ -1,9 +1,0 @@
-{
-  "name": "enisi-center-functions",
-  "version": "1.0.0",
-  "description": "Netlify functions for Enisi Center",
-  "dependencies": {
-    "axios": "^0.26.1",
-    "cheerio": "^1.0.0-rc.10"
-  }
-}

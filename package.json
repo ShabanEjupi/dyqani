@@ -1,0 +1,16 @@
+{
+  "name": "enisi-center",
+  "version": "1.0.0",
+  "description": "Enisi Center E-commerce Website",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo 'Building site...'"
+  },
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cheerio": "^1.0.0-rc.10"
+  },
+  "author": "",
+  "license": "ISC"
+}
