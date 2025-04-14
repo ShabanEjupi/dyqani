@@ -201,17 +201,19 @@ function createProductElement(product) {
     if (product.instagramLink && window.getInstagramImage) {
         const cachedImage = window.getInstagramImage(product.instagramLink);
         if (cachedImage) {
-            productImage.src = cachedImage;
+            // Set image and add a timestamp to prevent caching issues
+            productImage.src = cachedImage + "?t=" + new Date().getTime();
         } else {
-            productImage.src = product.image;
+            // Use a simpler fallback URL if needed
+            productImage.src = getSimpleProductImage(product.id) || product.image;
         }
     } else {
-        productImage.src = product.image;
+        productImage.src = getSimpleProductImage(product.id) || product.image;
     }
     
     productImage.alt = product.name;
     productImage.onerror = function() {
-        this.src = 'https://via.placeholder.com/300x300?text=Pa+Foto';
+        this.src = getSimpleProductImage(product.id) || 'https://via.placeholder.com/300x300?text=Pa+Foto';
     };
     
     const productInfo = document.createElement('div');
@@ -258,6 +260,22 @@ function createProductElement(product) {
     productElement.appendChild(productInfo);
     
     return productElement;
+}
+
+// Add a simple function to provide direct image URLs by product ID
+function getSimpleProductImage(productId) {
+    const imageMap = {
+        'insta1': 'https://i.imgur.com/v9YYyPP.jpg', // Trenerka termo për vajza
+        'insta2': 'https://i.imgur.com/QTFCNuq.jpg', // Fustana për vajza
+        'insta3': 'https://i.imgur.com/8bvSnXk.jpg', // Fustana për vajza
+        'insta4': 'https://i.imgur.com/h5rQ0NF.jpg', // Bluza për vajza
+        'insta5': 'https://i.imgur.com/PCmnb80.jpg', // Bluza për djem
+        'insta6': 'https://i.imgur.com/LZfCVvn.jpg', // Trenerka të poshtme për djem
+        'insta7': 'https://i.imgur.com/yJpXeuo.jpg', // Trenerka set për djem
+        'insta8': 'https://i.imgur.com/j4YoS9K.jpg'  // Set 3-pjesësh për vajza
+    };
+    
+    return imageMap[productId];
 }
 
 // Directly fetch Instagram image URL as fallback
@@ -310,3 +328,28 @@ function showError(message) {
         productList.appendChild(errorElement);
     }
 }
+
+// Debug function to check image loading
+function debugImageCache() {
+    console.log("Instagram Image Cache Available:", !!window.getInstagramImage);
+    if (window.getInstagramImage) {
+        enisiProducts.forEach(product => {
+            const cachedUrl = window.getInstagramImage(product.instagramLink);
+            console.log(`Product ${product.id} (${product.name}): ${cachedUrl ? "Has cached image" : "No cached image"}`);
+            
+            // Try to preload the image to check if it works
+            if (cachedUrl) {
+                const img = new Image();
+                img.onload = () => console.log(`Image for ${product.id} loaded successfully`);
+                img.onerror = () => console.error(`Image for ${product.id} failed to load`);
+                img.src = cachedUrl;
+            }
+        });
+    }
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    debugImageCache();
+    // Rest of your initialization code
+});
