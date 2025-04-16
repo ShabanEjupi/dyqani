@@ -1,24 +1,34 @@
 document.addEventListener('DOMContentLoaded', async function() {
+    // Determine base path for components
+    const path = window.location.pathname.toLowerCase();
+    const isSubPage = path.includes('/pages/');
+    const basePath = isSubPage ? '../components/' : 'components/';
+    
+    console.log("Loading components with base path:", basePath);
+    
     // Load header
     const headerContainer = document.querySelector('#header-container');
     if (headerContainer) {
         try {
-            const headerResponse = await fetch('/components/header.html');
+            const headerResponse = await fetch(basePath + 'header.html');
             const headerHtml = await headerResponse.text();
             headerContainer.innerHTML = headerHtml;
             
-            // Highlight active navigation link
-            const currentPath = window.location.pathname;
-            if (currentPath.includes('products.html')) {
-                document.getElementById('nav-products').classList.add('active');
-            } else if (currentPath.includes('checkout.html')) {
-                document.getElementById('nav-cart').classList.add('active');
-            } else if (currentPath.includes('about.html')) {
-                document.getElementById('nav-about').classList.add('active');
-            } else if (currentPath.includes('contact.html')) {
-                document.getElementById('nav-contact').classList.add('active');
-            } else if (currentPath === '/' || currentPath.includes('index.html')) {
-                document.getElementById('nav-home').classList.add('active');
+            // Fix navigation links for current page
+            if (isSubPage) {
+                const homeLink = headerContainer.querySelector('#nav-home');
+                if (homeLink) homeLink.setAttribute('href', '../index.html');
+                
+                const cartLink = headerContainer.querySelector('.cart-icon a');
+                if (cartLink) cartLink.setAttribute('href', 'checkout.html');
+            } else {
+                const cartLink = headerContainer.querySelector('.cart-icon a');
+                if (cartLink) cartLink.setAttribute('href', 'pages/checkout.html');
+            }
+            
+            // Update cart count
+            if (typeof updateCartCount === 'function') {
+                setTimeout(updateCartCount, 100);
             }
         } catch (error) {
             console.error('Error loading header:', error);
@@ -29,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const footerContainer = document.querySelector('#footer-container');
     if (footerContainer) {
         try {
-            const footerResponse = await fetch('/components/footer.html');
+            const footerResponse = await fetch(basePath + 'footer.html');
             const footerHtml = await footerResponse.text();
             footerContainer.innerHTML = footerHtml;
             

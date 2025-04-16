@@ -175,11 +175,17 @@ function displayProducts() {
     // Clear existing products
     productList.innerHTML = '';
     
-    // Only display up to 4 products on the homepage
-    const isHomePage = window.location.pathname.endsWith('index.html') || 
-                        window.location.pathname === '/' || 
-                        window.location.pathname.endsWith('/Store/');
-                        
+    // More robust homepage detection
+    const path = window.location.pathname.toLowerCase();
+    const isHomePage = path.endsWith('index.html') || 
+                       path === '/' || 
+                       path.endsWith('/store/') ||
+                       path.endsWith('/store') ||
+                       path === '';
+    
+    console.log("Current path:", path, "Is homepage:", isHomePage);
+    
+    // Always show the first 4 products on homepage
     const displayProducts = isHomePage ? products.slice(0, 4) : products;
     
     // Create product elements
@@ -197,23 +203,24 @@ function createProductElement(product) {
     
     const productImage = document.createElement('img');
     
-    // Try to get the image from our cache first
-    if (product.instagramLink && window.getInstagramImage) {
+    // Use Imgur images directly for better reliability
+    const imgurImage = getSimpleProductImage(product.id);
+    if (imgurImage) {
+        productImage.src = imgurImage;
+    } else if (product.instagramLink && window.getInstagramImage) {
         const cachedImage = window.getInstagramImage(product.instagramLink);
         if (cachedImage) {
-            // Set image and add a timestamp to prevent caching issues
-            productImage.src = cachedImage + "?t=" + new Date().getTime();
+            productImage.src = cachedImage;
         } else {
-            // Use a simpler fallback URL if needed
-            productImage.src = getSimpleProductImage(product.id) || product.image;
+            productImage.src = product.image;
         }
     } else {
-        productImage.src = getSimpleProductImage(product.id) || product.image;
+        productImage.src = product.image;
     }
     
     productImage.alt = product.name;
     productImage.onerror = function() {
-        this.src = getSimpleProductImage(product.id) || 'https://via.placeholder.com/300x300?text=Pa+Foto';
+        this.src = 'https://via.placeholder.com/300x300?text=Pa+Foto';
     };
     
     const productInfo = document.createElement('div');
