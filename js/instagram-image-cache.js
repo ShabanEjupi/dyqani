@@ -19,7 +19,7 @@ const instagramImageCache = {
  * @param {string} instagramUrl - The Instagram post URL
  * @returns {string|null} - The permanent image URL or null if not found
  */
-function getInstagramImage(instagramUrl) {q
+function getInstagramImage(instagramUrl) {
     return instagramImageCache[instagramUrl] || null;
 }
 
