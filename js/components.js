@@ -1,4 +1,10 @@
+let componentsLoaded = false; // Flag to prevent multiple executions
+
 document.addEventListener('DOMContentLoaded', async function() {
+    // Prevent multiple executions
+    if (componentsLoaded) return;
+    componentsLoaded = true;
+    
     // Determine base path for components
     const path = window.location.pathname.toLowerCase();
     const isSubPage = path.includes('/pages/');
@@ -39,9 +45,27 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const homeLink = headerContainer.querySelector('#nav-home');
                 if (homeLink) homeLink.setAttribute('href', '../index.html');
                 
+                const productLink = headerContainer.querySelector('#nav-products');
+                if (productLink) productLink.setAttribute('href', 'products.html');
+                
+                const aboutLink = headerContainer.querySelector('#nav-about');
+                if (aboutLink) aboutLink.setAttribute('href', 'about.html');
+                
+                const contactLink = headerContainer.querySelector('#nav-contact');
+                if (contactLink) contactLink.setAttribute('href', 'contact.html');
+                
                 const cartLink = headerContainer.querySelector('.cart-icon a');
                 if (cartLink) cartLink.setAttribute('href', 'checkout.html');
             } else {
+                const productLink = headerContainer.querySelector('#nav-products');
+                if (productLink) productLink.setAttribute('href', 'pages/products.html');
+                
+                const aboutLink = headerContainer.querySelector('#nav-about');
+                if (aboutLink) aboutLink.setAttribute('href', 'pages/about.html');
+                
+                const contactLink = headerContainer.querySelector('#nav-contact');
+                if (contactLink) contactLink.setAttribute('href', 'pages/contact.html');
+                
                 const cartLink = headerContainer.querySelector('.cart-icon a');
                 if (cartLink) cartLink.setAttribute('href', 'pages/checkout.html');
             }
