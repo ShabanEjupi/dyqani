@@ -3,7 +3,6 @@
 // Configuration
 const config = {
     useInstagram: true,
-    localProductsPath: 'data/products.json',
     imageProxyEndpoint: '/api/instagram-image-proxy'
 };
 
