@@ -14,7 +14,7 @@ const enisiProducts = [
         name: 'Trenerka termo për vajza',
         description: 'Mosha: 6 - 12 vjeç',
         price: 12.00,
-        image: './assets/icons/product1.png',
+        image: '../assets/icons/product1.png',
         instagramLink: 'https://www.instagram.com/p/DC9njmdIeNT/'
     },
     {
@@ -22,7 +22,7 @@ const enisiProducts = [
         name: 'Fustana për vajza',
         description: 'Mosha: 6 - 24 muaj',
         price: 8.00,
-        image: './assets/icons/product2.png',
+        image: '../assets/icons/product2.png',
         instagramLink: 'https://www.instagram.com/p/DC9oeeXsIxD/'
     },
     {
@@ -30,7 +30,7 @@ const enisiProducts = [
         name: 'Fustana për vajza',
         description: 'Mosha: 7 - 11 vjeç',
         price: 12.00,
-        image: './assets/icons/product3.png',
+        image: '../assets/icons/product3.png',
         instagramLink: 'https://www.instagram.com/p/DDrbMUTohRm/'
     },
     {
@@ -38,7 +38,7 @@ const enisiProducts = [
         name: 'Bluza për vajza',
         description: 'Mosha: 9 - 12 vjeç',
         price: 5.00,
-        image: './assets/icons/product4.png',
+        image: '../assets/icons/product4.png',
         instagramLink: 'https://www.instagram.com/p/DE2H4BGqEy9/'
     },
     {
@@ -46,7 +46,7 @@ const enisiProducts = [
         name: 'Bluza për djem',
         description: 'Mosha: 9 - 12 vjeç',
         price: 5.00,
-        image: './assets/icons/product5.png',
+        image: '../assets/icons/product5.png',
         instagramLink: 'https://www.instagram.com/p/DE2IdJ5qub5/'
     },
     {
@@ -54,7 +54,7 @@ const enisiProducts = [
         name: 'Trenerka të poshtme për djem',
         description: 'Mosha: 8 - 16 vjeç',
         price: 5.00,
-        image: './assets/icons/product6.png',
+        image: '../assets/icons/product6.png',
         instagramLink: 'https://www.instagram.com/p/DE2Jy0NKbLi/'
     },
     {
@@ -62,7 +62,7 @@ const enisiProducts = [
         name: 'Trenerka set për djem',
         description: 'Mosha: 8 - 16 vjeç',
         price: 12.00,
-        image: './assets/icons/product7.png',
+        image: '../assets/icons/product7.png',
         instagramLink: 'https://www.instagram.com/p/DE2KF1RK7yK/'
     },
     {
@@ -70,7 +70,7 @@ const enisiProducts = [
         name: 'Set 3-pjesësh për vajza',
         description: 'Mosha: 6 - 24 muaj',
         price: 10.00,
-        image: './assets/icons/product8.png',
+        image: '../assets/icons/product8.png',
         instagramLink: 'https://www.instagram.com/p/DC9khPuIaql/'
     }
 ];
@@ -271,15 +271,26 @@ function createProductElement(product) {
 
 // Add a simple function to provide direct image URLs by product ID
 function getSimpleProductImage(productId) {
+    // Detect if we're on the homepage or in a subpage to use correct path
+    const path = window.location.pathname.toLowerCase();
+    const isHomePage = path.endsWith('index.html') || 
+                       path === '/' || 
+                       path.endsWith('/store/') ||
+                       path.endsWith('/store') ||
+                       path === '';
+    
+    // Use correct path prefix based on current page
+    const basePath = isHomePage ? 'assets/icons/' : '../assets/icons/';
+    
     const imageMap = {
-        'insta1': './assets/icons/product1.png', // Trenerka termo për vajza
-        'insta2': './assets/icons/product2.png', // Fustana për vajza
-        'insta3': './assets/icons/product3.png', // Fustana për vajza
-        'insta4': './assets/icons/product4.png', // Bluza për vajza
-        'insta5': './assets/icons/product5.png', // Bluza për djem
-        'insta6': './assets/icons/product6.png', // Trenerka të poshtme për djem
-        'insta7': './assets/icons/product7.png', // Trenerka set për djem
-        'insta8': './assets/icons/product8.png'  // Set 3-pjesësh për vajza
+        'insta1': basePath + 'product1.png', // Trenerka termo për vajza
+        'insta2': basePath + 'product2.png', // Fustana për vajza
+        'insta3': basePath + 'product3.png', // Fustana për vajza
+        'insta4': basePath + 'product4.png', // Bluza për vajza
+        'insta5': basePath + 'product5.png', // Bluza për djem
+        'insta6': basePath + 'product6.png', // Trenerka të poshtme për djem
+        'insta7': basePath + 'product7.png', // Trenerka set për djem
+        'insta8': basePath + 'product8.png'  // Set 3-pjesësh për vajza
     };
     
     return imageMap[productId];
