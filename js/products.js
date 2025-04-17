@@ -272,14 +272,14 @@ function createProductElement(product) {
 // Add a simple function to provide direct image URLs by product ID
 function getSimpleProductImage(productId) {
     const imageMap = {
-        'insta1': 'https://i.imgur.com/v9YYyPP.jpg', // Trenerka termo për vajza
-        'insta2': 'https://i.imgur.com/QTFCNuq.jpg', // Fustana për vajza
-        'insta3': 'https://i.imgur.com/8bvSnXk.jpg', // Fustana për vajza
-        'insta4': 'https://i.imgur.com/h5rQ0NF.jpg', // Bluza për vajza
-        'insta5': 'https://i.imgur.com/PCmnb80.jpg', // Bluza për djem
-        'insta6': 'https://i.imgur.com/LZfCVvn.jpg', // Trenerka të poshtme për djem
-        'insta7': 'https://i.imgur.com/yJpXeuo.jpg', // Trenerka set për djem
-        'insta8': 'https://i.imgur.com/j4YoS9K.jpg'  // Set 3-pjesësh për vajza
+        'insta1': './assets/icons/product1.png', // Trenerka termo për vajza
+        'insta2': './assets/icons/product2.png', // Fustana për vajza
+        'insta3': './assets/icons/product3.png', // Fustana për vajza
+        'insta4': './assets/icons/product4.png', // Bluza për vajza
+        'insta5': './assets/icons/product5.png', // Bluza për djem
+        'insta6': './assets/icons/product6.png', // Trenerka të poshtme për djem
+        'insta7': './assets/icons/product7.png', // Trenerka set për djem
+        'insta8': './assets/icons/product8.png'  // Set 3-pjesësh për vajza
     };
     
     return imageMap[productId];
