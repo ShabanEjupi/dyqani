@@ -725,7 +725,7 @@ footer {
 /* Team Section */
 .team-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 30px;
     margin-top: 40px;
 }
@@ -756,6 +756,13 @@ footer {
 .team-member p {
     color: var(--dark-gray);
     margin-bottom: 15px;
+}
+
+/* Responsive adjustment for mobile */
+@media (max-width: 768px) {
+    .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
 }
 
 /* Values Section */
