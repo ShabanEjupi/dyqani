@@ -364,9 +364,3 @@ function debugImageCache() {
         });
     }
 }
-
-// Call this function when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    debugImageCache();
-    // Rest of your initialization code
-});
