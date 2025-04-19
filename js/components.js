@@ -1,93 +1,106 @@
-let componentsLoaded = false; // Flag to prevent multiple executions
+// Simplified components loader to prevent infinite loops
 
-document.addEventListener('DOMContentLoaded', async function() {
+// Global flag to prevent multiple executions
+let componentsLoaded = false;
+
+document.addEventListener('DOMContentLoaded', function() {
     // Prevent multiple executions
-    if (componentsLoaded) return;
+    if (componentsLoaded) {
+        console.log("Components already loaded, skipping");
+        return;
+    }
     componentsLoaded = true;
     
-    // Determine if we're on a page in the pages directory
-    const path = window.location.pathname.toLowerCase();
-    let basePath = '../components/';
-    let isIndexPage = false;
-    
-    // Set appropriate base path
-    if (path.includes('/pages/index') || path === '/pages/') {
-        isIndexPage = true;
-    }
-    
-    console.log("Loading components with base path:", basePath, "isIndexPage:", isIndexPage);
-    
-    // Add a timeout to prevent hanging forever
-    const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeout);
-        
-        try {
-            const response = await fetch(url, {
-                ...options,
-                signal: controller.signal
-            });
-            clearTimeout(id);
-            return response;
-        } catch (error) {
-            clearTimeout(id);
-            throw error;
-        }
-    };
+    console.log("Loading components...");
     
     // Load header
-    const headerContainer = document.querySelector('#header-container');
-    if (headerContainer) {
-        try {
-            const headerResponse = await fetchWithTimeout(basePath + 'header.html');
-            if (!headerResponse.ok) throw new Error(`Failed to load header: ${headerResponse.status}`);
-            
-            const headerHtml = await headerResponse.text();
-            headerContainer.innerHTML = headerHtml;
-            
-            // Fix navigation links
-            const homeLink = headerContainer.querySelector('#nav-home');
-            if (homeLink) homeLink.setAttribute('href', isIndexPage ? 'index' : 'index');
-            
-            const productLink = headerContainer.querySelector('#nav-products');
-            if (productLink) productLink.setAttribute('href', 'products');
-            
-            const checkoutLink = headerContainer.querySelector('#nav-cart');
-            if (checkoutLink) checkoutLink.setAttribute('href', 'checkout');
-            
-            const aboutLink = headerContainer.querySelector('#nav-about');
-            if (aboutLink) aboutLink.setAttribute('href', 'about');
-            
-            const contactLink = headerContainer.querySelector('#nav-contact');
-            if (contactLink) contactLink.setAttribute('href', 'contact');
-            
-            const cartLink = headerContainer.querySelector('.cart-icon a');
-            if (cartLink) cartLink.setAttribute('href', 'checkout');
-            
-        } catch (error) {
-            console.error('Error loading header:', error);
-            headerContainer.innerHTML = '<header><h1>Mirë se vini në Enisi Center</h1></header>';
-        }
-    }
+    loadComponent('header-container', '../components/header.html', function() {
+        // Fix navigation links after header is loaded
+        updateNavigationLinks();
+    });
     
-    // Load footer with similar approach
-    const footerContainer = document.querySelector('#footer-container');
-    if (footerContainer) {
-        try {
-            const footerResponse = await fetchWithTimeout(basePath + 'footer.html');
-            if (!footerResponse.ok) throw new Error(`Failed to load footer: ${footerResponse.status}`);
-            
-            const footerHtml = await footerResponse.text();
-            footerContainer.innerHTML = footerHtml;
-            
-        } catch (error) {
-            console.error('Error loading footer:', error);
-            footerContainer.innerHTML = '<footer><p>&copy; 2025 Enisi Center. Të gjitha të drejtat e rezervuara.</p></footer>';
-        }
-    }
-    
-    // Update cart count if function exists
-    if (typeof updateCartCount === 'function') {
-        setTimeout(updateCartCount, 300);
-    }
+    // Load footer
+    loadComponent('footer-container', '../components/footer.html', function() {
+        // Update copyright year after footer is loaded
+        updateCopyrightYear();
+    });
 });
+
+// Function to load a component with timeout and error handling
+function loadComponent(containerId, componentPath, callback) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    console.log(`Loading ${componentPath} into #${containerId}`);
+    
+    // Create a timeout to prevent hanging
+    const timeoutId = setTimeout(function() {
+        console.error(`Loading ${componentPath} timed out!`);
+        container.innerHTML = `<div class="error">Failed to load component</div>`;
+    }, 3000);
+    
+    // Load the component
+    fetch(componentPath)
+        .then(response => {
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`Failed to load ${componentPath}: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(html => {
+            container.innerHTML = html;
+            if (typeof callback === 'function') {
+                callback();
+            }
+        })
+        .catch(error => {
+            clearTimeout(timeoutId);
+            console.error(`Error loading ${componentPath}:`, error);
+            container.innerHTML = `<div class="error">Failed to load component</div>`;
+        });
+}
+
+// Update navigation links based on current page
+function updateNavigationLinks() {
+    // Get all navigation links
+    const navLinks = document.querySelectorAll('nav a');
+    if (!navLinks.length) return;
+    
+    // Determine if we're in a subdirectory
+    const isInPagesDir = window.location.pathname.includes('/pages/');
+    
+    // Update each link
+    navLinks.forEach(link => {
+        const originalHref = link.getAttribute('href');
+        
+        // Skip external links
+        if (originalHref.startsWith('http')) return;
+        
+        // Update links based on current location
+        if (isInPagesDir) {
+            // We're in the pages directory, keep relative links simple
+            if (originalHref === '/') {
+                link.setAttribute('href', '../pages/index');
+            } else if (originalHref.startsWith('/pages/')) {
+                const page = originalHref.replace('/pages/', '');
+                link.setAttribute('href', page);
+            }
+        }
+    });
+    
+    // Also fix cart icon link specifically
+    const cartLink = document.querySelector('.cart-icon a');
+    if (cartLink && isInPagesDir) {
+        cartLink.setAttribute('href', 'checkout');
+    }
+}
+
+// Update copyright year in footer
+function updateCopyrightYear() {
+    const yearEl = document.querySelector('.footer-bottom p');
+    if (yearEl) {
+        const year = new Date().getFullYear();
+        yearEl.innerHTML = yearEl.innerHTML.replace(/\d{4}/, year);
+    }
+}

@@ -7,6 +7,31 @@
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Extra styles for the loading indicator */
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+        }
+        .loading-indicator.active {
+            display: block;
+        }
+        .loading-indicator .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div id="header-container"></div>
@@ -15,20 +40,24 @@
         <div class="hero-content">
             <h2>Produktet më të reja dhe cilësore</h2>
             <p>Zbuloni koleksionin tonë të veçantë të produkteve të cilësisë së lartë</p>
-            <a href="products" class="btn">Shiko Produktet</a>
+            <a href="products" class="btn">Shiko produktet</a>
         </div>
     </section>
 
     <main>
-        <section id="all-products">
+        <section id="featured-products">
             <h2>Produktet e Veçanta</h2>
             <p class="section-description">Produktet tona më të populluara dhe më të shitura</p>
-            <div id="product-list" class="product-grid"></div>
-            <div class="loading" id="loading-products">Duke ngarkuar produktet...</div>
+            
+            <div class="loading-indicator active">
+                <span class="spinner"></span> Duke ngarkuar produktet...
+            </div>
+            
+            <div id="featured-products-grid" class="product-grid"></div>
         </section>
 
         <section id="about-preview">
-            <h2>Rreth Nesh</h2>
+            <h2>Rreth nesh</h2>
             <div class="about-container">
                 <div class="about-image">
                     <img src="../assets/images/shop.jpg" alt="Enisi Center" onerror="this.src='https://via.placeholder.com/400x300?text=Enisi+Center'">
@@ -75,10 +104,118 @@
 
     <div id="footer-container"></div>
 
-    <script src="../js/instagram-image-cache.js"></script>
     <script src="../js/components.js"></script>
-    <script src="../js/main.js"></script>
-    <script src="../js/products.js"></script>
-    <script src="../js/cart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const featuredProducts = [
+                {
+                    id: 'insta1',
+                    name: 'Trenerka termo për vajza',
+                    description: 'Mosha: 6 - 12 vjeç',
+                    price: 12.00,
+                    image: '../assets/icons/product1.png'
+                },
+                {
+                    id: 'insta2',
+                    name: 'Fustana për vajza',
+                    description: 'Mosha: 6 - 24 muaj',
+                    price: 8.00,
+                    image: '../assets/icons/product2.png'
+                },
+                {
+                    id: 'insta3',
+                    name: 'Fustana për vajza',
+                    description: 'Mosha: 7 - 11 vjeç',
+                    price: 12.00,
+                    image: '../assets/icons/product3.png'
+                },
+                {
+                    id: 'insta4',
+                    name: 'Bluza për vajza',
+                    description: 'Mosha: 9 - 12 vjeç',
+                    price: 5.00,
+                    image: '../assets/icons/product4.png'
+                }
+            ];
+            
+            displayFeaturedProducts(featuredProducts);
+            
+            const form = document.getElementById('newsletter-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Faleminderit që u abonuat!');
+                    this.reset();
+                });
+            }
+        });
+        
+        function displayFeaturedProducts(products) {
+            const grid = document.getElementById('featured-products-grid');
+            const loader = document.querySelector('.loading-indicator');
+            
+            if (!grid) return;
+            
+            if (loader) {
+                loader.classList.remove('active');
+            }
+            
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.dataset.productId = product.id;
+                
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/300x300?text=Pa+Foto'">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p class="product-description">${product.description}</p>
+                        <p class="product-price">${product.price.toFixed(2)} €</p>
+                        <button class="btn add-to-cart">Shto në shportë</button>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+                
+                const addButton = card.querySelector('.add-to-cart');
+                if (addButton) {
+                    addButton.addEventListener('click', function() {
+                        addToCart(product);
+                    });
+                }
+            });
+        }
+        
+        function addToCart(product) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            const existingProduct = cart.find(item => item.id === product.id);
+            
+            if (existingProduct) {
+                existingProduct.quantity += 1;
+            } else {
+                cart.push({
+                    ...product,
+                    quantity: 1
+                });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            updateCartCount();
+            
+            alert(`${product.name} u shtua në shportë!`);
+        }
+        
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            
+            const countElement = document.getElementById('cart-count');
+            if (countElement) {
+                countElement.textContent = count;
+            }
+        }
+    </script>
 </body>
 </html>
