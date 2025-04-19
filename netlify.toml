@@ -10,6 +10,27 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
+# Redirect clean URLs to HTML files
+[[redirects]]
+  from = "/pages/about"
+  to = "/pages/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/pages/products"
+  to = "/pages/products.html"
+  status = 200
+
+[[redirects]]
+  from = "/pages/checkout"
+  to = "/pages/checkout.html"
+  status = 200
+
+[[redirects]]
+  from = "/pages/contact"
+  to = "/pages/contact.html"
+  status = 200
+
 [[redirects]]
   from = "/instagram-callback"
   to = "/instagram-callback.html"
@@ -20,6 +41,7 @@
   to = "/privacy-policy.html"
   status = 200
 
+# Default redirect with conditional language
 [[redirects]]
   from = "/*"
   to = "/index.html"

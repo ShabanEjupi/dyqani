@@ -43,31 +43,31 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Fix navigation links for current page
             if (isSubPage) {
                 const homeLink = headerContainer.querySelector('#nav-home');
-                if (homeLink) homeLink.setAttribute('href', '../index.html');
+                if (homeLink) homeLink.setAttribute('href', '/');
                 
                 const productLink = headerContainer.querySelector('#nav-products');
-                if (productLink) productLink.setAttribute('href', 'products.html');
+                if (productLink) productLink.setAttribute('href', '/pages/products');
                 
                 const aboutLink = headerContainer.querySelector('#nav-about');
-                if (aboutLink) aboutLink.setAttribute('href', 'about.html');
+                if (aboutLink) aboutLink.setAttribute('href', '/pages/about');
                 
                 const contactLink = headerContainer.querySelector('#nav-contact');
-                if (contactLink) contactLink.setAttribute('href', 'contact.html');
+                if (contactLink) contactLink.setAttribute('href', '/pages/contact');
                 
                 const cartLink = headerContainer.querySelector('.cart-icon a');
-                if (cartLink) cartLink.setAttribute('href', 'checkout.html');
+                if (cartLink) cartLink.setAttribute('href', '/pages/checkout');
             } else {
                 const productLink = headerContainer.querySelector('#nav-products');
-                if (productLink) productLink.setAttribute('href', 'pages/products.html');
+                if (productLink) productLink.setAttribute('href', '/pages/products');
                 
                 const aboutLink = headerContainer.querySelector('#nav-about');
-                if (aboutLink) aboutLink.setAttribute('href', 'pages/about.html');
+                if (aboutLink) aboutLink.setAttribute('href', '/pages/about');
                 
                 const contactLink = headerContainer.querySelector('#nav-contact');
-                if (contactLink) contactLink.setAttribute('href', 'pages/contact.html');
+                if (contactLink) contactLink.setAttribute('href', '/pages/contact');
                 
                 const cartLink = headerContainer.querySelector('.cart-icon a');
-                if (cartLink) cartLink.setAttribute('href', 'pages/checkout.html');
+                if (cartLink) cartLink.setAttribute('href', '/pages/checkout');
             }
             
         } catch (error) {
