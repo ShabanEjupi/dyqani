@@ -124,34 +124,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Show notification when theme is changed
 function showThemeNotification(theme) {
-    // Create notification if it doesn't exist
+    let themeName = 'çelët';
+    if (theme === 'dark') themeName = 'errët';
+    if (theme === 'blue') themeName = 'blu';
+    
+    // Create notification element if it doesn't exist
     let notification = document.querySelector('.theme-notification');
+    
     if (!notification) {
         notification = document.createElement('div');
-        notification.className = 'theme-notification';
+        notification.className = 'notification theme-notification';
         document.body.appendChild(notification);
     }
     
-    // Set message based on theme
-    let message = '';
-    switch(theme) {
-        case 'light':
-            message = 'Tema e çelët është aktivizuar';
-            break;
-        case 'dark':
-            message = 'Tema e errët është aktivizuar';
-            break;
-        case 'blue':
-            message = 'Tema blu special është aktivizuar';
-            break;
-    }
-    
     // Set message and show
-    notification.textContent = message;
+    notification.textContent = `Tema u ndryshua në ${themeName}`;
     notification.classList.add('show');
     
-    // Hide after 3 seconds
+    // Hide after 2 seconds
     setTimeout(() => {
         notification.classList.remove('show');
-    }, 3000);
+    }, 2000);
 }

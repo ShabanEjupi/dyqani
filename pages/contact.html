@@ -6,24 +6,73 @@
     <title>Kontakti | Enisi Center</title>
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <link rel="stylesheet" href="../css/contact.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div id="header-container"></div>
 
+    <section class="contact-hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Na Kontaktoni</h1>
+                <p>Jemi këtu për t'ju ndihmuar me çdo pyetje që keni.</p>
+                
+                <!-- Quick contact options -->
+                <div class="quick-contact">
+                    <a href="tel:+38345594549" class="quick-contact-item">
+                        <div class="quick-icon phone-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div class="quick-info">
+                            <h3>Na telefononi</h3>
+                            <p>+383 45 594 549</p>
+                        </div>
+                    </a>
+                    
+                    <a href="mailto:center.enisi@gmail.com" class="quick-contact-item">
+                        <div class="quick-icon email-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="quick-info">
+                            <h3>Na shkruani</h3>
+                            <p>center.enisi@gmail.com</p>
+                        </div>
+                    </a>
+                    
+                    <a href="https://www.instagram.com/enisi.center" target="_blank" class="quick-contact-item">
+                        <div class="quick-icon insta-icon">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        <div class="quick-info">
+                            <h3>Na ndiqni</h3>
+                            <p>@enisi.center</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <main>
         <section class="contact-section">
             <div class="container">
-                <h2>Na Dërgoni një Mesazh</h2>
                 <div class="contact-container">
-                    <div class="contact-form">
-                        <form id="contact-form">
+                    <div class="contact-form-container">
+                        <h2>Na Dërgoni një Mesazh</h2>
+                        <p class="form-description">
+                            Plotësoni formën më poshtë dhe do t'ju kontaktojmë sa më shpejt që të jetë e mundur. 
+                            Zakonisht përgjigjemi brenda 24 orëve.
+                        </p>
+                        
+                        <form id="contact-form" class="contact-form">
                             <div class="form-group">
-                                <label for="name">Emri i plotë</label>
+                                <label for="name">Emri i plotë <span class="required">*</span></label>
                                 <input type="text" id="name" name="name" required>
                             </div>
                             <div class="form-group">
-                                <label for="email">Email</label>
+                                <label for="email">Email <span class="required">*</span></label>
                                 <input type="email" id="email" name="email" required>
                             </div>
                             <div class="form-group">
@@ -31,58 +80,123 @@
                                 <input type="tel" id="phone" name="phone">
                             </div>
                             <div class="form-group">
-                                <label for="subject">Subjekti</label>
-                                <input type="text" id="subject" name="subject" required>
+                                <label for="reason">Arsyeja e kontaktit <span class="required">*</span></label>
+                                <select id="reason" name="reason" required>
+                                    <option value="">Zgjidhni arsyen</option>
+                                    <option value="question">Pyetje për produkte</option>
+                                    <option value="order">Informata për porosi</option>
+                                    <option value="return">Kthim/zëvendësim</option>
+                                    <option value="complaint">Ankesë</option>
+                                    <option value="collaboration">Bashkëpunim</option>
+                                    <option value="other">Tjetër</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label for="message">Mesazhi juaj</label>
+                                <label for="message">Mesazhi juaj <span class="required">*</span></label>
                                 <textarea id="message" name="message" rows="6" required></textarea>
                             </div>
-                            <button type="submit" class="btn">Dërgo Mesazhin</button>
+                            
+                            <!-- Privacy policy consent -->
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="privacy-consent" name="privacy-consent" required>
+                                <label for="privacy-consent">
+                                    Pranoj që të dhënat e mia të përdoren sipas <a href="/privacy-policy.html" target="_blank">Politikës së Privatësisë</a>
+                                </label>
+                            </div>
+                            
+                            <!-- Simple anti-spam verification -->
+                            <div class="form-group anti-spam">
+                                <label for="verify">Sa është 3 + 2? <span class="required">*</span></label>
+                                <input type="number" id="verify" name="verify" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-submit">Dërgo Mesazhin</button>
                         </form>
+                        
+                        <!-- Success message (initially hidden) -->
+                        <div id="form-success" class="form-success" style="display: none;">
+                            <div class="success-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3>Faleminderit për mesazhin tuaj!</h3>
+                            <p>Mesazhi juaj u dërgua me sukses. Do t'ju kontaktojmë sa më shpejt që të jetë e mundur.</p>
+                            <button id="send-another" class="btn">Dërgo një mesazh tjetër</button>
+                        </div>
                     </div>
                     
-                    <div class="contact-info">
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-map-marker-alt"></i>
+                    <div class="contact-info-container">
+                        <div class="store-info">
+                            <h2>Dyqani Ynë</h2>
+                            <div class="info-card">
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h3>Adresa</h3>
+                                        <p>Rr. Bedri Bajrami, nr. 15</p>
+                                        <p>Podujevë, Kosovë</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h3>Orari</h3>
+                                        <div class="schedule-item">
+                                            <span class="day">E Hënë - E Premte:</span>
+                                            <span class="hours">9:00 - 20:00</span>
+                                        </div>
+                                        <div class="schedule-item">
+                                            <span class="day">E Shtunë:</span>
+                                            <span class="hours">10:00 - 18:00</span>
+                                        </div>
+                                        <div class="schedule-item">
+                                            <span class="day">E Dielë:</span>
+                                            <span class="hours">Mbyllur</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="info-content">
-                                <h3>Adresa</h3>
-                                <p>Rr. Bedri Bajrami, nr. 15</p>
-                                <p>Podujevë, Kosovë</p>
+                            
+                            <!-- Social media links -->
+                            <div class="social-links">
+                                <h3>Na ndiqni</h3>
+                                <div class="social-icons">
+                                    <a href="https://www.instagram.com/enisi.center" target="_blank" class="instagram-icon">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                    <a href="https://www.facebook.com/enisi.center.pd" target="_blank" class="facebook-icon">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="https://wa.me/38345594549" target="_blank" class="whatsapp-icon">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </a>
+                                    <a href="https://www.tiktok.com/@enisi.center" target="_blank" class="tiktok-icon">
+                                        <i class="fab fa-tiktok"></i>
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-phone-alt"></i>
-                            </div>
-                            <div class="info-content">
-                                <h3>Telefoni</h3>
-                                <p>+383 45 594 549</p>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <div class="info-content">
-                                <h3>Email</h3>
-                                <p>center.enisi@gmail.com</p>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="info-content">
-                                <h3>Orari</h3>
-                                <p>E Hënë - E Premte: 9:00 - 20:00</p>
-                                <p>E Shtunë: 10:00 - 18:00</p>
-                                <p>E Dielë: Mbyllur</p>
+                            
+                            <!-- Latest Instagram posts -->
+                            <div class="instagram-feed">
+                                <h3>Instagram <a href="https://www.instagram.com/enisi.center" target="_blank">@enisi.center</a></h3>
+                                <div class="instagram-grid">
+                                    <a href="https://www.instagram.com/p/DC9njmdIeNT/" target="_blank" class="instagram-item">
+                                        <img src="../assets/icons/product1.png" alt="Instagram post">
+                                    </a>
+                                    <a href="https://www.instagram.com/p/DC9oeeXsIxD/" target="_blank" class="instagram-item">
+                                        <img src="../assets/icons/product2.png" alt="Instagram post">
+                                    </a>
+                                    <a href="https://www.instagram.com/p/DDrbMUTohRm/" target="_blank" class="instagram-item">
+                                        <img src="../assets/icons/product3.png" alt="Instagram post">
+                                    </a>
+                                    <a href="https://www.instagram.com/p/DE2H4BGqEy9/" target="_blank" class="instagram-item">
+                                        <img src="../assets/icons/product4.png" alt="Instagram post">
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -94,15 +208,33 @@
             <div class="container">
                 <h2>Na Gjeni</h2>
                 <div class="map-container">
-                    <!-- Updated Google Maps embed code for Podujevë -->
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d23456.789012345!2d21.19293!3d42.909722!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x13537a04e1dd2ab9%3A0xe45781acdd965c7f!2sPodujevo!5e0!3m2!1sen!2s!4v1649443275771!5m2!1sen!2s" 
-                        width="100%" 
-                        height="450" 
-                        style="border:0;" 
-                        allowfullscreen="" 
-                        loading="lazy">
-                    </iframe>
+                    <!-- Interactive map with marker for the store location -->
+                    <div id="store-map">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d23456.789012345!2d21.19293!3d42.909722!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x13537a04e1dd2ab9%3A0xe45781acdd965c7f!2sPodujevo!5e0!3m2!1sen!2s!4v1649443275771!5m2!1sen!2s" 
+                            width="100%" 
+                            height="450" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                    
+                    <!-- Map instructions -->
+                    <div class="map-info">
+                        <div class="info-card">
+                            <h3>Si të na gjeni</h3>
+                            <p><i class="fas fa-map-signs"></i> Ne gjendemi në qendër të Podujevës, 100 metra nga sheshi kryesor.</p>
+                            <p><i class="fas fa-bus"></i> Linjat e autobusëve 1, 3, dhe 5 ndalojnë afër dyqanit tonë.</p>
+                            <p><i class="fas fa-car"></i> Parkimi është i disponueshëm përballë dyqanit.</p>
+                            
+                            <div class="get-directions">
+                                <a href="https://www.google.com/maps/dir//Podujevo/@42.9097222,21.1929305,14z/data=!4m9!4m8!1m0!1m5!1m1!1s0x13537a04e1dd2ab9:0xe45781acdd965c7f!2m2!1d21.1929305!2d42.9097222!3e0" target="_blank" class="btn btn-directions">
+                                    <i class="fas fa-directions"></i> Merr udhëzimet
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -114,36 +246,81 @@
                     <div class="faq-item">
                         <div class="faq-question">
                             <h3>Si mund të bëj një porosi?</h3>
+                            <span class="faq-icon"></span>
                         </div>
                         <div class="faq-answer">
                             <p>Për të bërë një porosi, zgjidhni produktin që dëshironi dhe klikoni butonin "Shto në shportë". Pastaj shkoni te faqja "Shporta" dhe plotësoni formën e porosisë.</p>
+                            <p>Gjithashtu mund të na kontaktoni në numrin e telefonit <a href="tel:+38345594549">+383 45 594 549</a> për të bërë porosi.</p>
                         </div>
                     </div>
                     
                     <div class="faq-item">
                         <div class="faq-question">
                             <h3>Cilat janë metodat e pagesës?</h3>
+                            <span class="faq-icon"></span>
                         </div>
                         <div class="faq-answer">
-                            <p>Ne pranojmë pagesa me para në dorë (cash) dhe transferta bankare përmes PayPal në adresën: <a href="https://www.paypal.com/paypalme/shabanejupi5" target="_blank">paypal.me/shabanejupi5</a></p>
+                            <p>Ne pranojmë këto metoda pagese:</p>
+                            <ul class="payment-methods-list">
+                                <li><i class="fas fa-money-bill-wave"></i> Para në dorë (kur merrni produktin)</li>
+                                <li><i class="fab fa-paypal"></i> PayPal (<a href="https://www.paypal.com/paypalme/shabanejupi5" target="_blank">paypal.me/shabanejupi5</a>)</li>
+                                <li><i class="fas fa-university"></i> Transfertë bankare (detajet jepen pas porosisë)</li>
+                            </ul>
                         </div>
                     </div>
                     
                     <div class="faq-item">
                         <div class="faq-question">
                             <h3>Sa kohë duhet për dorëzimin e produkteve?</h3>
+                            <span class="faq-icon"></span>
                         </div>
                         <div class="faq-answer">
-                            <p>Koha e dorëzimit varet nga vendndodhja juaj. Zakonisht, produktet dorëzohen brenda 1-2 ditësh pune për Podujevë dhe 2-4 ditë pune për qytetet e tjera në Kosovë.</p>
+                            <p>Koha e dorëzimit varet nga vendndodhja juaj:</p>
+                            <ul>
+                                <li><strong>Podujevë:</strong> 1-2 ditë pune</li>
+                                <li><strong>Qytetet e tjera në Kosovë:</strong> 2-4 ditë pune</li>
+                            </ul>
+                            <p>Gjithashtu ofrojmë shërbimin e dërgesës ekspres brenda 24 orëve me një kosto shtesë.</p>
                         </div>
                     </div>
                     
                     <div class="faq-item">
                         <div class="faq-question">
                             <h3>A mund të kthej një produkt?</h3>
+                            <span class="faq-icon"></span>
                         </div>
                         <div class="faq-answer">
-                            <p>Po, ne ofrojmë kthim të parave brenda të njëjtës ditë të pranimit të produktit. Pas kësaj, ofrojmë ndërrim produkti brenda 14 ditëve nga marrja e produktit. Produkti duhet të jetë në gjendjen origjinale dhe i papërdorur.</p>
+                            <p>Po, ne ofrojmë:</p>
+                            <ul>
+                                <li>Kthim të parave brenda të njëjtës ditë të pranimit të produktit</li>
+                                <li>Ndërrim produkti brenda 14 ditëve nga marrja e produktit</li>
+                            </ul>
+                            <p>Produkti duhet të jetë në gjendjen origjinale dhe i papërdorur.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>A keni madhësi të tjera përveç atyre të listuara?</h3>
+                            <span class="faq-icon"></span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Ne mbajmë një gamë të gjerë madhësish për shumicën e produkteve tona. Nëse nuk e gjeni madhësinë që kërkoni në faqen e produktit, ju lutemi na kontaktoni drejtpërdrejt dhe ne do të kontrollojmë disponueshmërinë për ju.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Si mund të marr pjesë në ofertat speciale?</h3>
+                            <span class="faq-icon"></span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Mënyra më e mirë për të qenë të informuar për ofertat tona speciale është:</p>
+                            <ul>
+                                <li>Të na ndiqni në <a href="https://www.instagram.com/enisi.center" target="_blank">Instagram</a></li>
+                                <li>Të na ndiqni në <a href="https://www.facebook.com/enisi.center.pd" target="_blank">Facebook</a></li>
+                                <li>Të abonoheni në buletinin tonë informativ duke plotësuar formularin në fund të faqes</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -164,26 +341,10 @@
 
     <div id="footer-container"></div>
 
+    <script src="../js/theme-switcher.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/cart.js"></script>
-    <script>
-        // Handle contact form submission
-        document.getElementById('contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // In a real implementation, you would send the form data to a server
-            alert('Faleminderit! Mesazhi juaj u dërgua me sukses. Do t\'ju kontaktojmë së shpejti.');
-            this.reset();
-        });
-        
-        // Make FAQ items interactive
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const faqItem = question.parentElement;
-                faqItem.classList.toggle('active');
-            });
-        });
-    </script>
+    <script src="../js/contact.js"></script>
 </body>
 </html>
