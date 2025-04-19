@@ -1,45 +1,19 @@
-let componentsLoaded = false; // Flag to prevent multiple executions
+let componentsLoaded = false;
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // Prevent multiple executions
     if (componentsLoaded) return;
     componentsLoaded = true;
     
-    // Determine if we're on a page in the pages directory
     const path = window.location.pathname.toLowerCase();
     let basePath = '../components/';
-    let isIndexPage = false;
     
-    // Set appropriate base path
-    if (path.includes('/pages/index') || path === '/pages/') {
-        isIndexPage = true;
-    }
-    
-    console.log("Loading components with base path:", basePath, "isIndexPage:", isIndexPage);
-    
-    // Add a timeout to prevent hanging forever
-    const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeout);
-        
-        try {
-            const response = await fetch(url, {
-                ...options,
-                signal: controller.signal
-            });
-            clearTimeout(id);
-            return response;
-        } catch (error) {
-            clearTimeout(id);
-            throw error;
-        }
-    };
+    console.log("Loading components with base path:", basePath);
     
     // Load header
     const headerContainer = document.querySelector('#header-container');
     if (headerContainer) {
         try {
-            const headerResponse = await fetchWithTimeout(basePath + 'header.html');
+            const headerResponse = await fetch(basePath + 'header.html');
             if (!headerResponse.ok) throw new Error(`Failed to load header: ${headerResponse.status}`);
             
             const headerHtml = await headerResponse.text();
@@ -47,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             // Fix navigation links
             const homeLink = headerContainer.querySelector('#nav-home');
-            if (homeLink) homeLink.setAttribute('href', isIndexPage ? 'index' : 'index');
+            if (homeLink) homeLink.setAttribute('href', 'home');
             
             const productLink = headerContainer.querySelector('#nav-products');
             if (productLink) productLink.setAttribute('href', 'products');
@@ -56,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (checkoutLink) checkoutLink.setAttribute('href', 'checkout');
             
             const aboutLink = headerContainer.querySelector('#nav-about');
-            if (aboutLink) aboutLink.setAttribute('href', 'about');
+            if (aboutLink) aboutLink.setAttribute('href', 'aboutus');
             
             const contactLink = headerContainer.querySelector('#nav-contact');
             if (contactLink) contactLink.setAttribute('href', 'contact');
@@ -74,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const footerContainer = document.querySelector('#footer-container');
     if (footerContainer) {
         try {
-            const footerResponse = await fetchWithTimeout(basePath + 'footer.html');
+            const footerResponse = await fetch(basePath + 'footer.html');
             if (!footerResponse.ok) throw new Error(`Failed to load footer: ${footerResponse.status}`);
             
             const footerHtml = await footerResponse.text();

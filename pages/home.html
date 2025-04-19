@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enisi Center - Produktet më cilësore</title>
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Produktet më të reja dhe cilësore</h2>
+            <p>Zbuloni koleksionin tonë të veçantë të produkteve të cilësisë së lartë</p>
+            <a href="products" class="btn">Shiko të gjitha produktet</a>
+        </div>
+    </section>
+
+    <main>
+        <section id="featured-products">
+            <h2>Produktet e Veçanta</h2>
+            <p class="section-description">Produktet tona më të populluara dhe më të shitura</p>
+            
+            <div id="product-list" class="product-grid"></div>
+            <div class="loading" id="loading-products">Duke ngarkuar produktet...</div>
+            
+            <div class="view-all-container">
+                <a href="products" class="btn btn-secondary">Shiko të gjitha produktet</a>
+            </div>
+        </section>
+
+        <section id="about-preview">
+            <h2>Rreth Nesh</h2>
+            <div class="about-container">
+                <div class="about-image">
+                    <img src="../assets/images/shop.jpg" alt="Enisi Center" onerror="this.src='https://via.placeholder.com/400x300?text=Enisi+Center'">
+                </div>
+                <div class="about-text">
+                    <p>Ne jemi një dyqan që ofron produktet më të mira dhe me cilësi të lartë për klientët tanë. Qëllimi ynë është të sigurojmë një përvojë blerje të shkëlqyer dhe produkte që plotësojnë nevojat tuaja.</p>
+                    <a href="aboutus" class="btn btn-secondary">Mëso më shumë</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonials">
+            <h2>Çfarë thonë klientët tanë</h2>
+            <div class="testimonial-container">
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"Produktet janë të një cilësie shumë të mirë dhe shërbimi është i shkëlqyeshëm!"</p>
+                    <p class="client-name">- Andi K.</p>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"Gjithmonë gjej atë që më duhet në këtë dyqan. Çmime të mira dhe personel shumë i sjellshëm."</p>
+                    <p class="client-name">- Elona M.</p>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"Transporti ishte shumë i shpejtë dhe produktet ishin saktësisht siç i prisja."</p>
+                    <p class="client-name">- Dritan L.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <section id="newsletter">
+        <div class="newsletter-container">
+            <h3>Abonohuni për të rejat më të fundit</h3>
+            <p>Merrni njoftime për produktet e reja dhe ofertat speciale</p>
+            <form id="newsletter-form">
+                <input type="email" placeholder="E-mail juaj" required>
+                <button type="submit" class="btn">Abonohu</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="footer-container"></div>
+
+    <script src="../js/theme-switcher.js"></script>
+    <script src="../js/instagram-image-cache.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/products.js"></script>
+    <script src="../js/cart.js"></script>
+</body>
+</html>
