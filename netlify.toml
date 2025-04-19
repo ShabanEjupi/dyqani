@@ -6,6 +6,11 @@
   package = "@netlify/plugin-functions-install-core"
 
 [[redirects]]
+  from = "/"
+  to = "/pages/index"
+  status = 302
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
@@ -19,6 +24,11 @@
 [[redirects]]
   from = "/pages/products"
   to = "/pages/products.html"
+  status = 200
+
+[[redirects]]
+  from = "/pages/index"
+  to = "/pages/index.html"
   status = 200
 
 [[redirects]]

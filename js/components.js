@@ -5,12 +5,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (componentsLoaded) return;
     componentsLoaded = true;
     
-    // Determine base path for components
+    // Determine if we're on a page in the pages directory
     const path = window.location.pathname.toLowerCase();
-    const isSubPage = path.includes('/pages/');
-    const basePath = isSubPage ? '../components/' : 'components/';
+    let basePath = '../components/';
+    let isIndexPage = false;
     
-    console.log("Loading components with base path:", basePath);
+    // Set appropriate base path
+    if (path.includes('/pages/index') || path === '/pages/') {
+        isIndexPage = true;
+    }
+    
+    console.log("Loading components with base path:", basePath, "isIndexPage:", isIndexPage);
     
     // Add a timeout to prevent hanging forever
     const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
@@ -40,35 +45,24 @@ document.addEventListener('DOMContentLoaded', async function() {
             const headerHtml = await headerResponse.text();
             headerContainer.innerHTML = headerHtml;
             
-            // Fix navigation links for current page
-            if (isSubPage) {
-                const homeLink = headerContainer.querySelector('#nav-home');
-                if (homeLink) homeLink.setAttribute('href', '/');
-                
-                const productLink = headerContainer.querySelector('#nav-products');
-                if (productLink) productLink.setAttribute('href', '/pages/products');
-                
-                const aboutLink = headerContainer.querySelector('#nav-about');
-                if (aboutLink) aboutLink.setAttribute('href', '/pages/about');
-                
-                const contactLink = headerContainer.querySelector('#nav-contact');
-                if (contactLink) contactLink.setAttribute('href', '/pages/contact');
-                
-                const cartLink = headerContainer.querySelector('.cart-icon a');
-                if (cartLink) cartLink.setAttribute('href', '/pages/checkout');
-            } else {
-                const productLink = headerContainer.querySelector('#nav-products');
-                if (productLink) productLink.setAttribute('href', '/pages/products');
-                
-                const aboutLink = headerContainer.querySelector('#nav-about');
-                if (aboutLink) aboutLink.setAttribute('href', '/pages/about');
-                
-                const contactLink = headerContainer.querySelector('#nav-contact');
-                if (contactLink) contactLink.setAttribute('href', '/pages/contact');
-                
-                const cartLink = headerContainer.querySelector('.cart-icon a');
-                if (cartLink) cartLink.setAttribute('href', '/pages/checkout');
-            }
+            // Fix navigation links
+            const homeLink = headerContainer.querySelector('#nav-home');
+            if (homeLink) homeLink.setAttribute('href', isIndexPage ? 'index' : 'index');
+            
+            const productLink = headerContainer.querySelector('#nav-products');
+            if (productLink) productLink.setAttribute('href', 'products');
+            
+            const checkoutLink = headerContainer.querySelector('#nav-cart');
+            if (checkoutLink) checkoutLink.setAttribute('href', 'checkout');
+            
+            const aboutLink = headerContainer.querySelector('#nav-about');
+            if (aboutLink) aboutLink.setAttribute('href', 'about');
+            
+            const contactLink = headerContainer.querySelector('#nav-contact');
+            if (contactLink) contactLink.setAttribute('href', 'contact');
+            
+            const cartLink = headerContainer.querySelector('.cart-icon a');
+            if (cartLink) cartLink.setAttribute('href', 'checkout');
             
         } catch (error) {
             console.error('Error loading header:', error);

@@ -3,14 +3,8 @@
  * This script helps load Instagram images by providing permanent URLs
  */
 
-// Detect if we are on the main page or subpage
-const isMainPage = window.location.pathname.endsWith('index.html') || 
-                  window.location.pathname === '/' || 
-                  window.location.pathname.endsWith('/Store/') ||
-                  window.location.pathname === '';
-
-// Use correct paths based on page location
-const basePath = isMainPage ? 'assets/icons/' : '../assets/icons/';
+// Now that all pages are in the pages directory, use the same path for all
+const basePath = '../assets/icons/';
 
 const instagramImageCache = {
     'https://www.instagram.com/p/DC9njmdIeNT/': basePath + 'product1.png',

@@ -268,28 +268,20 @@ function createProductElement(product) {
     return productElement;
 }
 
-// Add a simple function to provide direct image URLs by product ID
+// Update the getSimpleProductImage function to handle the new directory structure
 function getSimpleProductImage(productId) {
-    // Detect if we're on the homepage or in a subpage to use correct path
-    const path = window.location.pathname.toLowerCase();
-    const isHomePage = path.endsWith('index.html') || 
-                       path === '/' || 
-                       path.endsWith('/store/') ||
-                       path.endsWith('/store') ||
-                       path === '';
-    
-    // Use correct path prefix based on current page
-    const basePath = isHomePage ? 'assets/icons/' : '../assets/icons/';
+    // Everything is now in the pages directory, so always use the same path
+    const basePath = '../assets/icons/';
     
     const imageMap = {
-        'insta1': basePath + 'product1.png', // Trenerka termo për vajza
-        'insta2': basePath + 'product2.png', // Fustana për vajza
-        'insta3': basePath + 'product3.png', // Fustana për vajza
-        'insta4': basePath + 'product4.png', // Bluza për vajza
-        'insta5': basePath + 'product5.png', // Bluza për djem
-        'insta6': basePath + 'product6.png', // Trenerka të poshtme për djem
-        'insta7': basePath + 'product7.png', // Trenerka set për djem
-        'insta8': basePath + 'product8.png'  // Set 3-pjesësh për vajza
+        'insta1': basePath + 'product1.png',
+        'insta2': basePath + 'product2.png',
+        'insta3': basePath + 'product3.png',
+        'insta4': basePath + 'product4.png',
+        'insta5': basePath + 'product5.png',
+        'insta6': basePath + 'product6.png',
+        'insta7': basePath + 'product7.png',
+        'insta8': basePath + 'product8.png'
     };
     
     return imageMap[productId];
