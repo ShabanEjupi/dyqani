@@ -1,0 +1,199 @@
+/* Dark Mode Theme for Enisi Center */
+
+/* Dark mode variables */
+:root {
+    /* Light theme (default) */
+    --primary-color: #4a6da7;
+    --secondary-color: #5a81c5;
+    --accent-color: #f8b400;
+    --text-color: #333;
+    --bg-color: #f4f4f4;
+    --card-bg: #fff;
+    --light-gray: #f4f4f4;
+    --medium-gray: #ddd;
+    --dark-gray: #888;
+    --white: #fff;
+    --footer-bg: #333;
+    --footer-text: #fff;
+    --shadow: 0 2px 10px rgba(0,0,0,0.1);
+    --hero-overlay: rgba(0, 0, 0, 0.5);
+    --newsletter-bg: #4a6da7;
+}
+
+/* Dark theme */
+.dark-theme {
+    --primary-color: #5d84c2;
+    --secondary-color: #7095d9;
+    --accent-color: #ffb700;
+    --text-color: #e0e0e0;
+    --bg-color: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --light-gray: #2a2a2a;
+    --medium-gray: #3d3d3d;
+    --dark-gray: #999;
+    --white: #2d2d2d;
+    --footer-bg: #121212;
+    --footer-text: #e0e0e0;
+    --shadow: 0 2px 10px rgba(0,0,0,0.5);
+    --hero-overlay: rgba(0, 0, 0, 0.7);
+    --newsletter-bg: #1e2b46;
+}
+
+/* Apply theme variables */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+header {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.hero {
+    background-image: linear-gradient(var(--hero-overlay), var(--hero-overlay)), url('https://via.placeholder.com/1200x400?text=Produktet+Tona');
+}
+
+.product-card, 
+.team-member, 
+.testimonial, 
+.value-item,
+.cart-items-container,
+.customer-info,
+.cart-summary,
+.contact-form,
+.info-item,
+.faq-item,
+.payment-method-details {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+footer {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
+}
+
+#newsletter {
+    background-color: var(--newsletter-bg);
+}
+
+/* Dark mode toggle button */
+.theme-toggle {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 20px;
+}
+
+.theme-toggle::before {
+    content: "";
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle.dark {
+    background-color: #5d84c2;
+}
+
+.theme-toggle.dark::before {
+    transform: translateX(30px);
+}
+
+.theme-toggle-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.theme-label {
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+/* Adapt specific components */
+.dark-theme .product-price {
+    color: var(--accent-color);
+}
+
+.dark-theme .cart-icon a {
+    color: var(--text-color);
+}
+
+.dark-theme .faq-question:after {
+    color: var(--accent-color);
+}
+
+.dark-theme input,
+.dark-theme textarea,
+.dark-theme select {
+    background-color: var(--light-gray);
+    color: var(--text-color);
+    border: 1px solid var(--medium-gray);
+}
+
+.dark-theme .social-icons a {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .value-icon {
+    color: var(--accent-color);
+}
+
+.dark-theme .btn {
+    background-color: var(--primary-color);
+}
+
+.dark-theme .btn-secondary {
+    background-color: var(--dark-gray);
+}
+
+.dark-theme .notification {
+    background-color: var(--accent-color);
+    color: #000;
+}
+
+/* Team members in dark mode */
+.dark-theme .team-member {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+/* Fix for links in dark mode */
+.dark-theme a {
+    color: var(--accent-color);
+}
+
+.dark-theme nav ul li a {
+    color: var(--text-color);
+}
+
+.dark-theme nav ul li a:hover,
+.dark-theme nav ul li a.active {
+    color: var(--accent-color);
+    background-color: rgba(93, 132, 194, 0.2);
+}
+
+.dark-theme .footer-bottom a {
+    color: var(--accent-color);
+}
+
+/* Text input placeholders in dark mode */
+.dark-theme ::placeholder {
+    color: #999;
+    opacity: 1;
+}

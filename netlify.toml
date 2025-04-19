@@ -10,16 +10,26 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
-# Redirect root to products page
+# Redirect root to index page
 [[redirects]]
   from = "/"
-  to = "/pages/products"
+  to = "/pages/index"
   status = 302
 
 # Redirect clean URLs to HTML files
 [[redirects]]
+  from = "/pages/index"
+  to = "/pages/index.html"
+  status = 200
+
+[[redirects]]
   from = "/pages/products"
   to = "/pages/products.html"
+  status = 200
+
+[[redirects]]
+  from = "/pages/about"
+  to = "/pages/about.html"
   status = 200
 
 [[redirects]]
