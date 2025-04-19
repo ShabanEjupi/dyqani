@@ -448,6 +448,33 @@ social-icons a:hover {
     background-color: var(--white);
 }
 
+/* Products page as home page styles */
+.products-hero {
+    min-height: 250px;
+    padding: 40px 0;
+    margin-bottom: 30px;
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(../assets/images/product1.png);
+    background-size: cover;
+    background-position: center;
+}
+
+.products-hero .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    color: white;
+}
+
+.products-hero h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.products-hero p {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
 /* Checkout Page */
 .checkout-container {
     display: grid;

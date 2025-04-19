@@ -6,29 +6,20 @@
   package = "@netlify/plugin-functions-install-core"
 
 [[redirects]]
-  from = "/"
-  to = "/pages/index"
-  status = 302
-
-[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# Redirect clean URLs to HTML files
+# Redirect root to products page
 [[redirects]]
-  from = "/pages/about"
-  to = "/pages/about.html"
-  status = 200
+  from = "/"
+  to = "/pages/products"
+  status = 302
 
+# Redirect clean URLs to HTML files
 [[redirects]]
   from = "/pages/products"
   to = "/pages/products.html"
-  status = 200
-
-[[redirects]]
-  from = "/pages/index"
-  to = "/pages/index.html"
   status = 200
 
 [[redirects]]
@@ -40,23 +31,6 @@
   from = "/pages/contact"
   to = "/pages/contact.html"
   status = 200
-
-[[redirects]]
-  from = "/instagram-callback"
-  to = "/instagram-callback.html"
-  status = 200
-
-[[redirects]]
-  from = "/privacy-policy"
-  to = "/privacy-policy.html"
-  status = 200
-
-# Default redirect with conditional language
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Language = ["sq"]}
 
 [dev]
   framework = "#static"
