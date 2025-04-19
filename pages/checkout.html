@@ -6,56 +6,332 @@
     <title>Shporta | Enisi Center</title>
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div id="header-container"></div>
 
     <main>
-        <section class="checkout-container">
-            <div class="cart-section">
-                <h2>Artikujt në shportën tuaj</h2>
-                <div id="cart-items" class="cart-items-container"></div>
+        <!-- Progress bar for checkout steps -->
+        <div class="checkout-progress">
+            <div class="progress-step active">
+                <div class="step-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="step-label">Shporta</div>
+            </div>
+            <div class="progress-connector"></div>
+            <div class="progress-step">
+                <div class="step-icon"><i class="fas fa-user"></i></div>
+                <div class="step-label">Të dhënat</div>
+            </div>
+            <div class="progress-connector"></div>
+            <div class="progress-step">
+                <div class="step-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="step-label">Pagesa</div>
+            </div>
+            <div class="progress-connector"></div>
+            <div class="progress-step">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <div class="step-label">Konfirmimi</div>
+            </div>
+        </div>
+
+        <!-- Cart section - Step 1 -->
+        <section id="checkout-step-1" class="checkout-step active">
+            <div class="checkout-container">
+                <div class="cart-section">
+                    <h2>Artikujt në shportën tuaj</h2>
+                    <div id="cart-items" class="cart-items-container"></div>
+                    
+                    <!-- Coupon code section -->
+                    <div class="coupon-section">
+                        <h3>Kodi promocional</h3>
+                        <div class="coupon-form">
+                            <input type="text" id="coupon-code" placeholder="Shkruani kodin promocional">
+                            <button id="apply-coupon" class="btn">Apliko</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Delivery options -->
+                    <div class="delivery-options">
+                        <h3>Metodat e dërgesës</h3>
+                        <div class="delivery-option">
+                            <input type="radio" id="delivery-standard" name="delivery" value="standard" checked>
+                            <label for="delivery-standard">
+                                <div class="option-details">
+                                    <div class="option-name">Dërgesa standarde</div>
+                                    <div class="option-description">2-3 ditë pune</div>
+                                </div>
+                                <div class="option-price">5.00 €</div>
+                            </label>
+                        </div>
+                        <div class="delivery-option">
+                            <input type="radio" id="delivery-express" name="delivery" value="express">
+                            <label for="delivery-express">
+                                <div class="option-details">
+                                    <div class="option-name">Dërgesa e shpejtë</div>
+                                    <div class="option-description">Brenda 24 orëve</div>
+                                </div>
+                                <div class="option-price">8.00 €</div>
+                            </label>
+                        </div>
+                        <div class="delivery-option">
+                            <input type="radio" id="delivery-pickup" name="delivery" value="pickup">
+                            <label for="delivery-pickup">
+                                <div class="option-details">
+                                    <div class="option-name">Marrje në dyqan</div>
+                                    <div class="option-description">Pa pagesë shtesë</div>
+                                </div>
+                                <div class="option-price">0.00 €</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="checkout-sidebar">
+                    <div id="cart-summary" class="cart-summary"></div>
+                    
+                    <!-- Cart recommendations -->
+                    <div class="cart-recommendations">
+                        <h3>Ju mund të pëlqeni edhe</h3>
+                        <div class="recommendation-items">
+                            <!-- Will be dynamically populated -->
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <div class="checkout-section">
-                <div class="customer-info">
-                    <h3>Informacioni i porosisë</h3>
+            <div class="checkout-actions">
+                <a href="products" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Vazhdoni blerjet</a>
+                <button id="next-to-step-2" class="btn">Vazhdo me të dhënat <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </section>
+
+        <!-- Customer info - Step 2 -->
+        <section id="checkout-step-2" class="checkout-step">
+            <div class="checkout-container">
+                <div class="customer-info-section">
+                    <h2>Informatat e blerësit</h2>
                     <form id="customer-info-form">
-                        <div class="form-group">
-                            <label for="fullname">Emër Mbiemër</label>
-                            <input type="text" id="fullname" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullname">Emër Mbiemër *</label>
+                                <input type="text" id="fullname" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" required>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Numër telefoni *</label>
+                                <input type="tel" id="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="city">Qyteti *</label>
+                                <select id="city" required>
+                                    <option value="">Zgjidhni qytetin</option>
+                                    <option value="Podujevë">Podujevë</option>
+                                    <option value="Prishtinë">Prishtinë</option>
+                                    <option value="Prizren">Prizren</option>
+                                    <option value="Pejë">Pejë</option>
+                                    <option value="Gjilan">Gjilan</option>
+                                    <option value="Mitrovicë">Mitrovicë</option>
+                                    <option value="Ferizaj">Ferizaj</option>
+                                    <option value="Gjakovë">Gjakovë</option>
+                                </select>
+                            </div>
                         </div>
+                        
                         <div class="form-group">
-                            <label for="phone">Numër telefoni</label>
-                            <input type="tel" id="phone" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="address">Adresa</label>
+                            <label for="address">Adresa *</label>
                             <textarea id="address" required></textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="city">Qyteti</label>
-                            <input type="text" id="city" required>
-                        </div>
+                        
                         <div class="form-group">
                             <label for="notes">Shënime shtesë</label>
                             <textarea id="notes" placeholder="Ndonjë kërkesë specifike për porosinë tuaj?"></textarea>
                         </div>
+                        
+                        <!-- Create account option -->
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="create-account">
+                            <label for="create-account">Krijo një llogari për blerje më të shpejta në të ardhmen</label>
+                        </div>
+                        
+                        <div id="account-fields" class="hidden-fields">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="password">Fjalëkalimi</label>
+                                    <input type="password" id="password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirm-password">Konfirmo fjalëkalimin</label>
+                                    <input type="password" id="confirm-password">
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 
-                <div id="cart-summary" class="cart-summary"></div>
+                <div class="checkout-sidebar">
+                    <div class="order-summary">
+                        <h3>Përmbledhje e porosisë</h3>
+                        <div id="order-items-summary"></div>
+                    </div>
+                    
+                    <!-- Delivery time estimate -->
+                    <div class="delivery-estimate">
+                        <h3>Koha e dërgesës</h3>
+                        <div class="estimate-details">
+                            <i class="fas fa-truck"></i>
+                            <div class="estimate-text">
+                                <p>Data e pritshme e dërgesës:</p>
+                                <p class="estimate-date"><strong>22 - 23 Prill, 2025</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checkout-actions">
+                <button id="back-to-step-1" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kthehu te shporta</button>
+                <button id="next-to-step-3" class="btn">Vazhdo me pagesën <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </section>
+
+        <!-- Payment - Step 3 -->
+        <section id="checkout-step-3" class="checkout-step">
+            <div class="checkout-container">
+                <div class="payment-section">
+                    <h2>Metoda e pagesës</h2>
+                    
+                    <div class="payment-methods">
+                        <div class="payment-method">
+                            <input type="radio" id="payment-cash" name="payment" value="cash" checked>
+                            <label for="payment-cash">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Para në dorë</span>
+                            </label>
+                            <div class="payment-details">
+                                <p>Paguani kur të merrni produktin.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-method">
+                            <input type="radio" id="payment-paypal" name="payment" value="paypal">
+                            <label for="payment-paypal">
+                                <i class="fab fa-paypal"></i>
+                                <span>PayPal</span>
+                            </label>
+                            <div class="payment-details">
+                                <p>Ju do të ridrejtoheni te faqja e PayPal për të përfunduar pagesën.</p>
+                                <p>PayPal: <a href="https://www.paypal.com/paypalme/shabanejupi5" target="_blank">paypal.me/shabanejupi5</a></p>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-method">
+                            <input type="radio" id="payment-bank" name="payment" value="bank">
+                            <label for="payment-bank">
+                                <i class="fas fa-university"></i>
+                                <span>Transfertë bankare</span>
+                            </label>
+                            <div class="payment-details">
+                                <p>Ju lutem transferoni shumën në llogarinë bankare të mëposhtme:</p>
+                                <p><strong>Banka:</strong> Raiffeisen Bank Kosovo</p>
+                                <p><strong>Emri:</strong> Shabane Jupi</p>
+                                <p><strong>IBAN:</strong> XK051234567890123456</p>
+                                <p><strong>Referenca:</strong> Do të dërgohet me email</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="checkout-sidebar">
+                    <div class="payment-summary">
+                        <h3>Përmbledhje e pagesës</h3>
+                        <div id="payment-summary-details"></div>
+                    </div>
+                    
+                    <!-- Security badges -->
+                    <div class="security-badges">
+                        <h3>Blerje e sigurt</h3>
+                        <div class="badges-container">
+                            <div class="security-badge">
+                                <i class="fas fa-lock"></i>
+                                <span>Pagesë e sigurt</span>
+                            </div>
+                            <div class="security-badge">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Të dhëna të mbrojtura</span>
+                            </div>
+                            <div class="security-badge">
+                                <i class="fas fa-undo-alt"></i>
+                                <span>14 ditë kthim</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checkout-actions">
+                <button id="back-to-step-2" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kthehu te të dhënat</button>
+                <button id="next-to-step-4" class="btn">Përfundo porosinë <i class="fas fa-check"></i></button>
+            </div>
+        </section>
+
+        <!-- Confirmation - Step 4 -->
+        <section id="checkout-step-4" class="checkout-step">
+            <div class="order-confirmation">
+                <div class="confirmation-header">
+                    <div class="check-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h2>Faleminderit për porosinë tuaj!</h2>
+                    <p>Porosia juaj u pranua me sukses.</p>
+                </div>
+                
+                <div class="order-details">
+                    <div class="order-info">
+                        <div class="info-item">
+                            <span>Numri i porosisë:</span>
+                            <strong id="order-number">EC12345678</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Data:</span>
+                            <strong id="order-date">19 Prill 2025</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Email:</span>
+                            <strong id="order-email">client@example.com</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Metoda e pagesës:</span>
+                            <strong id="order-payment-method">Para në dorë</strong>
+                        </div>
+                    </div>
+                    
+                    <div id="order-summary-final" class="final-summary"></div>
+                </div>
+                
+                <div class="confirmation-message">
+                    <p>Një email konfirmimi do t'ju dërgohet së shpejti në adresën e emailit tuaj.</p>
+                    <p>Ju mund të ndiqni statusin e porosisë suaj duke përdorur numrin e porosisë.</p>
+                </div>
+                
+                <div class="confirmation-actions">
+                    <a href="products" class="btn btn-secondary">Vazhdoni blerjet</a>
+                    <button id="download-invoice" class="btn"><i class="fas fa-file-invoice"></i> Shkarko faturën</button>
+                </div>
             </div>
         </section>
     </main>
 
     <div id="footer-container"></div>
 
+    <script src="../js/theme-switcher.js"></script>
     <script src="../js/components.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/products.js"></script>
