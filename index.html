@@ -3,39 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enisi Center - Duke ju ridrejtuar...</title>
-    <meta http-equiv="refresh" content="0;url=pages/index.html">
+    <title>Enisi Center - Redirecting...</title>
+    <meta http-equiv="refresh" content="0;url=/pages/index">
+    <script>
+        window.location.href = "/pages/index";
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 50px;
         }
-        .loader {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 3px solid #4a6da7;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
-    <script>
-        // Simple redirect without complex error-prone logic
-        window.onload = function() {
-            window.location.href = "pages/index.html";
-        };
-    </script>
 </head>
 <body>
-    <div class="loader"></div>
-    <h2>Duke ju ridrejtuar në faqen kryesore...</h2>
-    <p>Nëse nuk ridrejtoheni automatikisht, <a href="pages/index.html">klikoni këtu</a>.</p>
+    <h1>Duke ju ridrejtuar në faqen kryesore...</h1>
+    <p>Nëse nuk ridrejtoheni automatikisht, <a href="/pages/index">klikoni këtu</a>.</p>
 </body>
 </html>

@@ -3,43 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rreth nesh | Enisi Center</title>
+    <title>Rreth Nesh | Enisi Center</title>
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header container -->
     <div id="header-container"></div>
 
     <main>
-        <!-- Historia section -->
         <section class="about-section">
             <div class="container">
-                <h2>Historia jonë</h2>
+                <h2>Historia Jonë</h2>
                 <div class="about-content">
                     <div class="about-image">
                         <img src="../assets/images/shop.jpg" alt="Dyqani ynë" onerror="this.src='https://via.placeholder.com/600x400?text=Historia+Jonë'">
                     </div>
                     <div class="about-text">
-                        <p>Dyqani ynë u themelua në vitin 2002 me qëllimin për të sjellë produkte cilësore dhe të përzgjedhura me kujdes për klientët tanë në Kosovë.</p>
-                        <p>Që nga fillimi, ne kemi qenë të përkushtuar ndaj cilësisë dhe shërbimit të shkëlqyer ndaj klientit.</p>
+                        <p>Dyqani ynë u themelua në vitin 2020 me qëllimin për të sjellë produkte cilësore dhe të përzgjedhura me kujdes për klientët tanë në Kosovë.</p>
+                        <p>Që nga fillimi, ne kemi qenë të përkushtuar ndaj cilësisë dhe shërbimit të shkëlqyer ndaj klientit. Çdo produkt që ne ofrojmë është zgjedhur me kujdes për të siguruar që plotëson standardet tona të larta.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Misioni section -->
         <section class="about-section">
             <div class="container">
-                <h2>Misioni ynë</h2>
+                <h2>Misioni Ynë</h2>
                 <div class="about-content reverse">
                     <div class="about-text">
-                        <p>Misioni ynë është të ofrojmë produkte cilësore që përmirësojnë jetën e përditshme të klientëve tanë.</p>
+                        <p>Misioni ynë është të ofrojmë produkte cilësore që përmirësojnë jetën e përditshme të klientëve tanë, duke siguruar një përvojë blerje të thjeshtë dhe të kënaqshme.</p>
+                        <p>Ne besojmë në:</p>
                         <ul>
                             <li>Ofrimin e produkteve me cilësi të lartë</li>
                             <li>Shërbim të shkëlqyer ndaj klientit</li>
                             <li>Çmime të drejta dhe transparente</li>
+                            <li>Praktika biznesi etike dhe të qëndrueshme</li>
                         </ul>
                     </div>
                     <div class="about-image">
@@ -49,62 +48,80 @@
             </div>
         </section>
 
-        <!-- Ekipi section -->
         <section class="about-section">
             <div class="container">
-                <h2>Ekipi ynë</h2>
+                <h2>Ekipi Ynë</h2>
                 <p class="section-description">Njihuni me njerëzit që punojnë për t'ju sjellë produktet më të mira</p>
                 
                 <div class="team-grid">
                     <div class="team-member">
+
                         <h3>Drejtori</h3>
+                        
                     </div>
                     <div class="team-member">
-                        <h3>Menaxheri i dyqanit</h3>
+                       
+                        <h3>Drejtori</h3>
+                        
                     </div>
                     <div class="team-member">
+                        
                         <h3>Specialistja e shitjeve</h3>
                     </div>
+                    <!-- <div class="team-member">
+                        
+                        <h3>Anila Hoxha</h3>
+                        <p>Shërbimi i Klientit</p>
+                    </div> -->
                 </div>
             </div>
         </section>
 
-        <!-- Vlerat section -->
         <section class="about-section">
             <div class="container">
-                <h2>Vlerat tona</h2>
+                <h2>Vlerat Tona</h2>
                 <div class="values-container">
                     <div class="value-item">
                         <div class="value-icon">
                             <i class="fas fa-gem"></i>
                         </div>
                         <h3>Cilësi</h3>
-                        <p>Ne zgjedhim vetëm produktet më të mira</p>
+                        <p>Ne zgjedhim vetëm produktet më të mira për klientët tanë</p>
                     </div>
                     <div class="value-item">
                         <div class="value-icon">
                             <i class="fas fa-handshake"></i>
                         </div>
                         <h3>Besueshmëri</h3>
-                        <p>Ndërtojmë marrëdhënie të besueshme</p>
+                        <p>Ndërtojmë marrëdhënie të besueshme me klientët dhe partnerët tanë</p>
                     </div>
                     <div class="value-item">
                         <div class="value-icon">
                             <i class="fas fa-heart"></i>
                         </div>
                         <h3>Kujdes</h3>
-                        <p>Kujdesemi për nevojat e klientëve tanë</p>
+                        <p>Kujdesemi për nevojat e klientëve tanë dhe komunitetit</p>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Footer container -->
+    <section id="newsletter">
+        <div class="newsletter-container">
+            <h3>Abonohuni për të rejat më të fundit</h3>
+            <p>Merrni njoftime për produktet e reja dhe ofertat speciale</p>
+            <form id="newsletter-form">
+                <input type="email" placeholder="E-mail juaj" required>
+                <button type="submit" class="btn">Abonohu</button>
+            </form>
+        </div>
+    </section>
+
     <div id="footer-container"></div>
 
-    <!-- Load only essential scripts -->
     <script src="../js/components.js"></script>
+    <script src="../js/main.js"></script>
     <script src="../js/cart.js"></script>
 </body>
 </html>
