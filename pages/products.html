@@ -532,6 +532,276 @@
             // Save to localStorage
             localStorage.setItem('compare-products', JSON.stringify(productsToCompare));
         }
+
+        // PayPal Integration for Checkout
+        function initPayPalIntegration() {
+            const paypalPaymentMethod = document.getElementById('payment-paypal');
+            const nextToStep4 = document.getElementById('next-to-step-4');
+            const paymentContainer = document.querySelector('.payment-section');
+            
+            if (!paypalPaymentMethod || !nextToStep4) return;
+            
+            // Hide all direct PayPal links initially
+            hideDirectPayPalLinks();
+            
+            // Add PayPal SDK script dynamically
+            loadPayPalScript();
+            
+            // Create PayPal button container if not exists
+            if (!document.getElementById('paypal-button-container')) {
+                const paypalContainer = document.createElement('div');
+                paypalContainer.id = 'paypal-button-container';
+                paypalContainer.style.display = 'none';
+                paypalContainer.classList.add('paypal-buttons-wrapper');
+                paymentContainer.appendChild(paypalContainer);
+            }
+            
+            // Listen for payment method changes
+            document.querySelectorAll('input[name="payment"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'paypal') {
+                        // Update next button text for PayPal
+                        nextToStep4.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
+                        nextToStep4.classList.add('paypal-button');
+                    } else {
+                        // Reset next button text
+                        nextToStep4.innerHTML = 'Përfundo porosinë <i class="fas fa-check"></i>';
+                        nextToStep4.classList.remove('paypal-button');
+                    }
+                });
+            });
+            
+            // Modify the next button behavior
+            nextToStep4.addEventListener('click', function(e) {
+                const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+                
+                if (selectedPayment === 'paypal') {
+                    e.preventDefault(); // Prevent default navigation
+                    
+                    // Get order details
+                    const orderDetails = generateOrderSummary();
+                    
+                    // Show PayPal buttons
+                    initPayPalButtons(orderDetails);
+                }
+            });
+        }
+
+        // Load PayPal SDK
+        function loadPayPalScript() {
+            if (document.querySelector('script[data-namespace="paypal-js"]')) return;
+            
+            const script = document.createElement('script');
+            script.src = "https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=EUR";
+            script.dataset.namespace = "paypal-js";
+            script.dataset.sdkIntegrationSource = "button-factory";
+            document.body.appendChild(script);
+            
+            // When script loads, initialize the buttons container
+            script.onload = function() {
+                console.log('PayPal SDK loaded successfully');
+            };
+        }
+
+        // Initialize PayPal buttons with order details
+        function initPayPalButtons(orderDetails) {
+            const paypalContainer = document.getElementById('paypal-button-container');
+            if (!paypalContainer) return;
+            
+            // Clear previous buttons
+            paypalContainer.innerHTML = '';
+            paypalContainer.style.display = 'block';
+            
+            // Scroll to PayPal buttons
+            paypalContainer.scrollIntoView({ behavior: 'smooth' });
+            
+            // Create overlay with loading
+            showLoading('Duke përgatit pagesën me PayPal...');
+            
+            // Initialize PayPal buttons when SDK is ready
+            if (window.paypal) {
+                renderPayPalButtons(orderDetails);
+            } else {
+                // If SDK is not loaded yet, wait for it
+                const checkInterval = setInterval(() => {
+                    if (window.paypal) {
+                        clearInterval(checkInterval);
+                        renderPayPalButtons(orderDetails);
+                        hideLoading();
+                    }
+                }, 200);
+                
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    hideLoading();
+                    showNotification('Lidhja me PayPal dështoi. Ju lutemi provoni përsëri.');
+                }, 5000);
+            }
+        }
+
+        // Render PayPal buttons using SDK
+        function renderPayPalButtons(orderDetails) {
+            // Format order items for PayPal
+            const items = orderDetails.items.map(item => ({
+                name: item.name,
+                unit_amount: {
+                    currency_code: 'EUR',
+                    value: item.price.toFixed(2)
+                },
+                quantity: item.quantity
+            }));
+            
+            // Create PayPal order
+            window.paypal.Buttons({
+                style: {
+                    color: 'blue',
+                    shape: 'pill',
+                    label: 'pay',
+                    height: 45
+                },
+                
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            description: `Enisi Center - Porosia #${orderDetails.orderId}`,
+                            amount: {
+                                currency_code: 'EUR',
+                                value: orderDetails.total.toFixed(2),
+                                breakdown: {
+                                    item_total: {
+                                        currency_code: 'EUR',
+                                        value: orderDetails.subtotal.toFixed(2)
+                                    },
+                                    shipping: {
+                                        currency_code: 'EUR',
+                                        value: orderDetails.shipping.toFixed(2)
+                                    },
+                                    discount: {
+                                        currency_code: 'EUR',
+                                        value: orderDetails.discount ? orderDetails.discount.toFixed(2) : '0.00'
+                                    }
+                                }
+                            },
+                            items: items
+                        }]
+                    });
+                },
+                
+                onApprove: function(data, actions) {
+                    // Show processing message
+                    showLoading('Duke procesuar pagesën...');
+                    
+                    return actions.order.capture().then(function(details) {
+                        // Payment successful
+                        hideLoading();
+                        
+                        // Add payment details to order
+                        orderDetails.paymentDetails = {
+                            id: details.id,
+                            status: details.status,
+                            payer: details.payer.name.given_name + ' ' + details.payer.name.surname,
+                            email: details.payer.email_address,
+                            time: new Date().toISOString()
+                        };
+                        
+                        // Save order with payment details
+                        saveOrderWithPayment(orderDetails);
+                        
+                        // Complete checkout and show confirmation
+                        processOrder(orderDetails);
+                        goToStep(4);
+                    });
+                },
+                
+                onCancel: function() {
+                    // User cancelled the payment
+                    showNotification('Pagesa u anulua. Mund të provoni përsëri ose të zgjidhni një metodë tjetër pagese.');
+                    document.getElementById('paypal-button-container').style.display = 'none';
+                },
+                
+                onError: function(err) {
+                    // Error during payment
+                    console.error('PayPal Error:', err);
+                    showNotification('Ndodhi një gabim gjatë pagesës. Ju lutemi provoni përsëri.');
+                    document.getElementById('paypal-button-container').style.display = 'none';
+                }
+            }).render('#paypal-button-container');
+            
+            // Hide loading overlay
+            hideLoading();
+        }
+
+        // Hide all direct PayPal links that might distract users
+        function hideDirectPayPalLinks() {
+            const paypalLinks = document.querySelectorAll('a[href*="paypal.com"]');
+            paypalLinks.forEach(link => {
+                // Keep the link for information but disable clickability
+                link.style.pointerEvents = 'none';
+                link.style.opacity = '0.7';
+                link.setAttribute('tabindex', '-1');
+                link.setAttribute('aria-hidden', 'true');
+                link.setAttribute('title', 'PayPal pagesa do të procesohet në fund të porosisë');
+                
+                // Replace link with span for display purposes only
+                const linkText = link.textContent;
+                const span = document.createElement('span');
+                span.textContent = linkText;
+                span.className = 'paypal-info';
+                link.parentNode.insertBefore(span, link);
+                link.style.display = 'none';
+            });
+        }
+
+        // Save order with payment details and send email
+        function saveOrderWithPayment(orderDetails) {
+            // Store order in localStorage for demo purposes
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push({
+                ...orderDetails,
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            // Send order email notification
+            sendOrderEmail(orderDetails);
+        }
+
+        // Send order notification email
+        function sendOrderEmail(orderDetails) {
+            // In a real implementation, you would send this data to your server
+            // For now, we'll simulate the email sending process
+            
+            const emailData = {
+                to: 'center.enisi@gmail.com',
+                subject: `Porosi e re #${orderDetails.orderId}`,
+                customerName: document.getElementById('fullname').value,
+                customerEmail: document.getElementById('email').value,
+                customerPhone: document.getElementById('phone').value,
+                orderDetails: orderDetails
+            };
+            
+            // For demonstration, we'll use EmailJS as a service that can be called from frontend
+            // You would need to sign up at emailjs.com and configure your templates
+            if (window.emailjs) {
+                emailjs.send('your_emailjs_service_id', 'your_emailjs_template_id', emailData)
+                    .then(function(response) {
+                        console.log('Email sent:', response.status, response.text);
+                    }, function(error) {
+                        console.error('Email sending failed:', error);
+                    });
+            } else {
+                // Fallback if EmailJS is not loaded
+                console.log('Would send email with order details:', emailData);
+                
+                // Actual implementation would require a server endpoint
+                // fetch('/api/send-order-email', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(emailData)
+                // });
+            }
+        }
     </script>
     
     <style>

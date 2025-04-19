@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create label
         const label = document.createElement('span');
         label.className = 'theme-label';
-        label.textContent = 'Tema:';
+        label.textContent = 'Stili:';
         
         // Create options container
         const optionsContainer = document.createElement('div');
@@ -26,22 +26,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const lightBtn = document.createElement('div');
         lightBtn.className = 'theme-btn theme-btn-light';
         lightBtn.setAttribute('data-theme', 'light');
-        lightBtn.setAttribute('title', 'Tema e çelët');
-        lightBtn.setAttribute('aria-label', 'Aktivizo temën e çelët');
+        lightBtn.setAttribute('title', 'Stili i çiltër');
+        lightBtn.setAttribute('aria-label', 'Aktivizo stilin e çiltër');
         
         // Create dark theme button
         const darkBtn = document.createElement('div');
         darkBtn.className = 'theme-btn theme-btn-dark';
         darkBtn.setAttribute('data-theme', 'dark');
-        darkBtn.setAttribute('title', 'Tema e errët');
-        darkBtn.setAttribute('aria-label', 'Aktivizo temën e errët');
+        darkBtn.setAttribute('title', 'Stili i errët');
+        darkBtn.setAttribute('aria-label', 'Aktivizo stilin e errët');
         
         // Create blue theme button
         const blueBtn = document.createElement('div');
         blueBtn.className = 'theme-btn theme-btn-blue';
         blueBtn.setAttribute('data-theme', 'blue');
-        blueBtn.setAttribute('title', 'Tema blu special');
-        blueBtn.setAttribute('aria-label', 'Aktivizo temën speciale blu');
+        blueBtn.setAttribute('title', 'Stili blu');
+        blueBtn.setAttribute('aria-label', 'Aktivizo stilin blu');
         
         // Add them to the options container
         optionsContainer.appendChild(lightBtn);
@@ -138,7 +138,7 @@ function showThemeNotification(theme) {
     }
     
     // Set message and show
-    notification.textContent = `Tema u ndryshua në ${themeName}`;
+    notification.textContent = `Stili u ndryshua në ${themeName}`;
     notification.classList.add('show');
     
     // Hide after 2 seconds

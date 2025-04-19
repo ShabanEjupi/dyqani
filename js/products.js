@@ -312,18 +312,29 @@ async function fetchInstagramImageDirectly(instagramUrl) {
     }
 }
 
-// Show/hide loading indicator
-function hideLoading() {
-    const loadingElement = document.getElementById('loading-products');
-    if (loadingElement) {
-        loadingElement.style.display = 'none';
-    }
+// Show loading overlay with message
+function showLoading(message) {
+    // Remove any existing overlay
+    hideLoading();
+    
+    // Create new overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+        <div class="spinner"></div>
+        <p>${message || 'Duke u ngarkuar...'}</p>
+    `;
+    
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
 }
 
-function showLoading() {
-    const loadingElement = document.getElementById('loading-products');
-    if (loadingElement) {
-        loadingElement.style.display = 'block';
+// Hide loading overlay
+function hideLoading() {
+    const overlay = document.querySelector('.loading-overlay');
+    if (overlay) {
+        overlay.remove();
+        document.body.style.overflow = '';
     }
 }
 
