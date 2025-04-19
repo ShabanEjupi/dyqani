@@ -24,6 +24,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize invoice download
     initInvoiceDownload();
+    
+    // Initialize PayPal checkout
+    initPayPalCheckout();
+    
+    // Initialize email service
+    EmailService.init();
 });
 
 // Initialize multi-step checkout process
@@ -265,7 +271,7 @@ function initDeliveryOptions() {
     if (!sessionStorage.getItem('deliveryOption')) {
         sessionStorage.setItem('deliveryOption', JSON.stringify({
             type: 'standard',
-            price: 5.00,
+            price: 2.00,
             description: 'Dërgesa standarde (2-3 ditë pune)'
         }));
     }
@@ -281,7 +287,7 @@ function initDeliveryOptions() {
             
             switch (this.value) {
                 case 'standard':
-                    deliveryInfo.price = 5.00;
+                    deliveryInfo.price = 2.00;
                     deliveryInfo.description = 'Dërgesa standarde (2-3 ditë pune)';
                     break;
                 case 'express':
@@ -305,13 +311,6 @@ function initDeliveryOptions() {
             updateDeliveryEstimate(this.value);
         });
     });
-    
-    // Set initial checked state based on session storage
-    const savedDelivery = JSON.parse(sessionStorage.getItem('deliveryOption'));
-    if (savedDelivery) {
-        const option = document.getElementById(`delivery-${savedDelivery.type}`);
-        if (option) option.checked = true;
-    }
 }
 
 // Update delivery estimate based on selected option
@@ -635,6 +634,46 @@ function processOrder() {
     // Clear applied coupons and delivery options
     sessionStorage.removeItem('appliedCoupon');
     sessionStorage.removeItem('deliveryOption');
+    
+    // Send confirmation email
+    sendOrderConfirmationEmail(orderSummary);
+}
+
+// Send order confirmation email
+function sendOrderConfirmationEmail(orderDetails) {
+    // Get customer information
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.PAYPAL_CLIENT_ID}&currency=EUR`;
+    script.dataset.namespace = "paypal-js";
+    script.setAttribute('async', 'true');
+    
+    const customerInfo = {
+        name: document.getElementById('fullname').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value
+    };
+    
+    // Show sending notification
+    showNotification('Duke dërguar konfirmimin e porosisë...');
+    
+    // Send order confirmation to customer
+    EmailService.sendOrderConfirmation(orderDetails, customerInfo)
+        .then(() => {
+            console.log('Order confirmation email sent to customer');
+            
+            // Send notification to store admin
+            return EmailService.sendOrderNotification(orderDetails, customerInfo);
+        })
+        .then(() => {
+            console.log('Order notification email sent to admin');
+            showNotification('Porosia u konfirmua me sukses!');
+        })
+        .catch(error => {
+            console.error('Error sending emails:', error);
+            showNotification('Porosia u pranua, por dërgimi i emailit dështoi.');
+        });
 }
 
 // Initialize invoice download
@@ -647,4 +686,218 @@ function initInvoiceDownload() {
         // For this example, we'll just show a notification
         showNotification('Fatura u shkarkua me sukses!');
     });
+}
+
+// Initialize PayPal checkout
+function initPayPalCheckout() {
+    const paypalPaymentMethod = document.getElementById('payment-paypal');
+    const nextToStep4 = document.getElementById('next-to-step-4');
+    const paymentContainer = document.querySelector('.payment-section');
+    
+    if (!paypalPaymentMethod || !nextToStep4) return;
+    
+    // Create PayPal button container if not exists
+    if (!document.getElementById('paypal-button-container')) {
+        const paypalContainer = document.createElement('div');
+        paypalContainer.id = 'paypal-button-container';
+        paypalContainer.style.display = 'none';
+        paypalContainer.classList.add('paypal-buttons-wrapper');
+        paymentContainer.appendChild(paypalContainer);
+    }
+    
+    // Listen for payment method changes
+    document.querySelectorAll('input[name="payment"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'paypal') {
+                // Update next button text for PayPal
+                nextToStep4.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
+                nextToStep4.classList.add('paypal-button');
+            } else {
+                // Reset next button text
+                nextToStep4.innerHTML = 'Përfundo porosinë <i class="fas fa-check"></i>';
+                nextToStep4.classList.remove('paypal-button');
+            }
+        });
+    });
+    
+    // Modify the next button behavior
+    nextToStep4.addEventListener('click', function(e) {
+        const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+        
+        if (selectedPayment === 'paypal') {
+            e.preventDefault(); // Prevent default navigation
+            
+            // Get order details
+            const orderDetails = generateOrderSummary();
+            
+            // Show PayPal buttons
+            loadPayPalSDK(orderDetails);
+        } else {
+            // Process regular order
+            processOrder();
+            goToStep(4);
+            
+            // Send email notification
+            sendOrderConfirmationEmail();
+        }
+    });
+}
+
+// Load PayPal SDK and initialize buttons
+function loadPayPalSDK(orderDetails) {
+    // Show loading indicator
+    showLoadingOverlay('Duke ngarkuar PayPal...');
+    
+    // Remove existing script if any
+    const existingScript = document.querySelector('script[data-namespace="paypal-js"]');
+    if (existingScript) {
+        existingScript.remove();
+    }
+    
+    // Create the script element
+    const script = document.createElement('script');
+    script.src = "https://www.paypal.com/sdk/js?client-id=AQZ2RbZ5ZKln1RL-dG1z0IcnpdNbiB95GGHSglX9-8K3OSaHzP8bi-TfR6L9BwrZB2hb3xj8NB_mnvyv&currency=EUR";
+    script.dataset.namespace = "paypal-js";
+    script.setAttribute('async', 'true');
+    
+    // When script loads, render buttons
+    script.onload = function() {
+        hideLoadingOverlay();
+        renderPayPalButtons(orderDetails);
+    };
+    
+    // If script fails to load
+    script.onerror = function() {
+        hideLoadingOverlay();
+        showNotification('Gabim gjatë ngarkimit të PayPal. Ju lutemi provoni përsëri.');
+    };
+    
+    // Add script to document
+    document.body.appendChild(script);
+}
+
+// Render PayPal buttons
+function renderPayPalButtons(orderDetails) {
+    const paypalContainer = document.getElementById('paypal-button-container');
+    if (!paypalContainer) return;
+    
+    // Clear container
+    paypalContainer.innerHTML = '';
+    paypalContainer.style.display = 'block';
+    
+    // Format items for PayPal
+    const items = orderDetails.items.map(item => ({
+        name: item.name,
+        unit_amount: {
+            currency_code: 'EUR',
+            value: item.price.toFixed(2)
+        },
+        quantity: item.quantity
+    }));
+    
+    // Create buttons
+    paypal.Buttons({
+        style: {
+            color: 'blue',
+            shape: 'pill',
+            label: 'pay',
+            height: 45
+        },
+        
+        // Set up transaction
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    description: `Enisi Center - Porosia #${orderDetails.orderId}`,
+                    amount: {
+                        currency_code: 'EUR',
+                        value: orderDetails.total.toFixed(2),
+                        breakdown: {
+                            item_total: {
+                                currency_code: 'EUR',
+                                value: orderDetails.subtotal.toFixed(2)
+                            },
+                            shipping: {
+                                currency_code: 'EUR',
+                                value: orderDetails.shipping.toFixed(2)
+                            }
+                        }
+                    },
+                    items: items
+                }]
+            });
+        },
+        
+        // Handle approved transaction
+        onApprove: function(data, actions) {
+            // Show processing message
+            showLoadingOverlay('Duke përpunuar pagesën...');
+            
+            return actions.order.capture().then(function(details) {
+                hideLoadingOverlay();
+                
+                // Add payment details
+                orderDetails.paymentDetails = {
+                    id: details.id,
+                    status: details.status,
+                    payer: details.payer.name.given_name + ' ' + details.payer.name.surname,
+                    email: details.payer.email_address,
+                    time: new Date().toISOString()
+                };
+                
+                // Process order
+                processOrder(orderDetails);
+                
+                // Send confirmation email with PayPal details
+                sendOrderConfirmationEmail(orderDetails);
+                
+                // Go to confirmation
+                goToStep(4);
+                
+                // Hide PayPal buttons
+                paypalContainer.style.display = 'none';
+            });
+        },
+        
+        onCancel: function() {
+            showNotification('Pagesa me PayPal u anulua.');
+            paypalContainer.style.display = 'none';
+        },
+        
+        onError: function(err) {
+            console.error('PayPal Error:', err);
+            showNotification('Ndodhi një gabim gjatë pagesës. Ju lutemi provoni përsëri.');
+            paypalContainer.style.display = 'none';
+        }
+    }).render('#paypal-button-container');
+}
+
+// Show loading overlay
+function showLoadingOverlay(message) {
+    let overlay = document.querySelector('.loading-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+        
+        const messageElem = document.createElement('div');
+        messageElem.className = 'loading-message';
+        
+        overlay.appendChild(spinner);
+        overlay.appendChild(messageElem);
+        document.body.appendChild(overlay);
+    }
+    
+    overlay.querySelector('.loading-message').textContent = message || 'Duke ngarkuar...';
+    overlay.style.display = 'flex';
+}
+
+// Hide loading overlay
+function hideLoadingOverlay() {
+    const overlay = document.querySelector('.loading-overlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
 }

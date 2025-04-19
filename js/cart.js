@@ -139,10 +139,10 @@ function updateCartUI() {
         });
     });
     
-    // Update cart summary with PayPal option
+    // Update cart summary
     if (cartSummary) {
         const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-        const shipping = subtotal > 0 ? 5 : 0; // 5€ shipping
+        const shipping = subtotal > 0 ? 2.00 : 0; // 2€ shipping instead of 5€
         const total = subtotal + shipping;
         
         cartSummary.innerHTML = `
@@ -159,19 +159,6 @@ function updateCartUI() {
                 <span>${total.toFixed(2)} €</span>
             </div>
             <button id="checkout-button" class="btn btn-primary">Vazhdo me porosinë</button>
-            <div class="payment-options">
-                <p>Metodat e pagesës:</p>
-                <div class="payment-methods">
-                    <div class="payment-method">
-                        <i class="fas fa-money-bill-wave"></i> Para në dorë
-                    </div>
-                    <div class="payment-method">
-                        <a href="https://www.paypal.com/paypalme/shabanejupi5" target="_blank" class="paypal-link">
-                            <i class="fab fa-paypal"></i> Paguaj me PayPal
-                        </a>
-                    </div>
-                </div>
-            </div>
         `;
         
         // Add checkout button event
@@ -241,10 +228,10 @@ function processCheckout() {
     }
 }
 
-// Generate order summary for PayPal reference
+// Generate order summary
 function generateOrderSummary() {
     const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    const shipping = subtotal > 0 ? 5 : 0;
+    const shipping = subtotal > 0 ? 2.00 : 0; // 2€ shipping instead of 5€
     const total = subtotal + shipping;
     
     // Generate a simple order ID
