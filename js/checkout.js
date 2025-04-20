@@ -768,7 +768,7 @@ function initPayPalCheckout() {
  * @param {Object} orderDetails - Order details for PayPal transaction
  */
 function loadPayPalSDK(orderDetails) {
-    // Show loading indicator
+    // Show loading overlay
     showLoadingOverlay('Duke ngarkuar PayPal...');
     
     // Remove existing script if any
@@ -779,21 +779,39 @@ function loadPayPalSDK(orderDetails) {
     
     // Create the script element
     const script = document.createElement('script');
-    // Use the environment variable instead of hardcoded client ID
-    script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.PAYPAL_CLIENT_ID || 'AQZ2RbZ5ZKln1RL-dG1z0IcnpdNbiB95GGHSglX9-8K3OSaHzP8bi-TfR6L9BwrZB2hb3xj8NB_mnvyv'}&currency=EUR`;
+    
+    // Get client ID from environment or use fallback
+    const clientId = 'AQZ2RbZ5ZKln1RL-dG1z0IcnpdNbiB95GGHSglX9-8K3OSaHzP8bi-TfR6L9BwrZB2hb3xj8NB_mnvyv';
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
     script.dataset.namespace = "paypal-js";
     script.setAttribute('async', 'true');
     
+    // Set timeout for script loading
+    const loadTimeout = setTimeout(() => {
+        hideLoadingOverlay();
+        showNotification('Lidhja me PayPal dështoi. Ju lutemi provoni përsëri më vonë.');
+        console.error('PayPal SDK loading timeout');
+    }, 10000); // 10 second timeout
+    
     // When script loads, render buttons
     script.onload = function() {
+        clearTimeout(loadTimeout);
         hideLoadingOverlay();
-        renderPayPalButtons(orderDetails);
+        
+        if (window.paypal) {
+            renderPayPalButtons(orderDetails);
+        } else {
+            showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri.');
+            console.error('PayPal object not available after script load');
+        }
     };
     
     // If script fails to load
-    script.onerror = function() {
+    script.onerror = function(error) {
+        clearTimeout(loadTimeout);
         hideLoadingOverlay();
         showNotification('Gabim gjatë ngarkimit të PayPal. Ju lutemi provoni përsëri.');
+        console.error('PayPal SDK loading error:', error);
     };
     
     // Add script to document
@@ -803,97 +821,108 @@ function loadPayPalSDK(orderDetails) {
 // Render PayPal buttons
 function renderPayPalButtons(orderDetails) {
     const paypalContainer = document.getElementById('paypal-button-container');
-    if (!paypalContainer) return;
+    if (!paypalContainer) {
+        console.error('PayPal button container not found');
+        showNotification('Gabim teknik. Ju lutemi provoni përsëri ose zgjidhni një metodë tjetër pagese.');
+        return;
+    }
     
     // Clear container
     paypalContainer.innerHTML = '';
     paypalContainer.style.display = 'block';
     
-    // Format items for PayPal
-    const items = orderDetails.items.map(item => ({
-        name: item.name,
-        unit_amount: {
-            currency_code: 'EUR',
-            value: item.price.toFixed(2)
-        },
-        quantity: item.quantity
-    }));
-    
-    // Create buttons
-    paypal.Buttons({
-        style: {
-            color: 'blue',
-            shape: 'pill',
-            label: 'pay',
-            height: 45
-        },
+    try {
+        // Format items for PayPal
+        const items = orderDetails.items.map(item => ({
+            name: item.name,
+            unit_amount: {
+                currency_code: 'EUR',
+                value: item.price.toFixed(2)
+            },
+            quantity: item.quantity
+        }));
         
-        // Set up transaction
-        createOrder: function(data, actions) {
-            return actions.order.create({
-                purchase_units: [{
-                    description: `Enisi Center - Porosia #${orderDetails.orderId}`,
-                    amount: {
-                        currency_code: 'EUR',
-                        value: orderDetails.total.toFixed(2),
-                        breakdown: {
-                            item_total: {
-                                currency_code: 'EUR',
-                                value: orderDetails.subtotal.toFixed(2)
-                            },
-                            shipping: {
-                                currency_code: 'EUR',
-                                value: orderDetails.shipping.toFixed(2)
-                            }
-                        }
-                    },
-                    items: items
-                }]
-            });
-        },
-        
-        // Handle approved transaction
-        onApprove: function(data, actions) {
-            // Show processing message
-            showLoadingOverlay('Duke përpunuar pagesën...');
+        // Create buttons
+        window.paypal.Buttons({
+            style: {
+                color: 'blue',
+                shape: 'pill',
+                label: 'pay',
+                height: 45
+            },
             
-            return actions.order.capture().then(function(details) {
-                hideLoadingOverlay();
+            // Set up transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        description: `Enisi Center - Porosia #${orderDetails.orderId}`,
+                        amount: {
+                            currency_code: 'EUR',
+                            value: orderDetails.total.toFixed(2),
+                            breakdown: {
+                                item_total: {
+                                    currency_code: 'EUR',
+                                    value: orderDetails.subtotal.toFixed(2)
+                                },
+                                shipping: {
+                                    currency_code: 'EUR',
+                                    value: orderDetails.shipping.toFixed(2)
+                                }
+                            }
+                        },
+                        items: items
+                    }]
+                });
+            },
+            
+            onApprove: function(data, actions) {
+                showLoadingOverlay('Duke përpunuar pagesën...');
                 
-                // Add payment details
-                orderDetails.paymentDetails = {
-                    id: details.id,
-                    status: details.status,
-                    payer: details.payer.name.given_name + ' ' + details.payer.name.surname,
-                    email: details.payer.email_address,
-                    time: new Date().toISOString()
-                };
-                
-                // Process order and update UI
-                processOrder(orderDetails);
-                
-                // Send confirmation email with PayPal details
-                sendOrderConfirmationEmail(orderDetails);
-                
-                // Go to confirmation
-                goToStep(4);
-                
-                // Hide PayPal buttons
+                return actions.order.capture()
+                    .then(function(details) {
+                        hideLoadingOverlay();
+                        
+                        orderDetails.paymentDetails = {
+                            id: details.id,
+                            status: details.status,
+                            payer: details.payer.name.given_name + ' ' + details.payer.name.surname,
+                            email: details.payer.email_address,
+                            time: new Date().toISOString()
+                        };
+                        
+                        processOrder(orderDetails);
+                        sendOrderConfirmationEmail(orderDetails);
+                        goToStep(4);
+                        
+                        paypalContainer.style.display = 'none';
+                    })
+                    .catch(function(error) {
+                        hideLoadingOverlay();
+                        showNotification('Gabim gjatë procesimit të pagesës. Ju lutemi kontrolloni dhe provoni përsëri.');
+                        console.error('PayPal capture error:', error);
+                    });
+            },
+            
+            onCancel: function() {
+                showNotification('Pagesa me PayPal u anulua.');
                 paypalContainer.style.display = 'none';
-            });
-        },
-        
-        onCancel: function() {
-            showNotification('Pagesa me PayPal u anulua.');
-            paypalContainer.style.display = 'none';
-        },
-        
-        onError: function(err) {
-            console.error('PayPal Error:', err);
-            showNotification('Ndodhi një gabim gjatë pagesës. Ju lutemi provoni përsëri.');
-            paypalContainer.style.display = 'none';
-        }
-    }).render('#paypal-button-container');
+            },
+            
+            onError: function(err) {
+                console.error('PayPal Error:', err);
+                showNotification('Ndodhi një gabim gjatë pagesës. Ju lutemi provoni përsëri.');
+                paypalContainer.style.display = 'none';
+            }
+        }).render('#paypal-button-container')
+        .catch(function(error) {
+            console.error('PayPal render error:', error);
+            showNotification('Gabim gjatë shfaqjes së butonit PayPal. Provoni një metodë tjetër pagese.');
+        });
+    } catch (error) {
+        console.error('PayPal initialization error:', error);
+        showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi kontaktoni suportin.');
+        hideLoadingOverlay();
+    }
 }
 
 // Show loading overlay
@@ -924,4 +953,25 @@ function hideLoadingOverlay() {
     if (overlay) {
         overlay.style.display = 'none';
     }
+}
+
+// Show notification
+function showNotification(message) {
+    // Create notification element if it doesn't exist
+    let notification = document.querySelector('.notification');
+    
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.className = 'notification';
+        document.body.appendChild(notification);
+    }
+    
+    // Set message and show
+    notification.textContent = message;
+    notification.classList.add('show');
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
 }
