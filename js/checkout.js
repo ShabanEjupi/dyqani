@@ -781,7 +781,7 @@ function loadPayPalSDK(orderDetails) {
     const script = document.createElement('script');
     
     // Use a real PayPal client ID instead of the sandbox placeholder
-    const clientId = 'AZtrRB6jra0YEO0fUBsmT5Hpnv7BQ-wZtGpxHGgVwWE8XOcJBOV8StGCm8b1g7E4l9OSLyXYhzXpGwIy';
+    const clientId = 'PAYPAL_CLIENT_ID';
     script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
     script.dataset.namespace = "paypal-js";
     script.setAttribute('async', 'true');
