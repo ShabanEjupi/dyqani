@@ -163,3 +163,50 @@ body {
 .blue-theme .hero {
     background-image: linear-gradient(var(--hero-overlay), var(--hero-overlay)), url('../assets/images/blue-hero.jpg');
 }
+
+/* Fix for footer text visibility in dark theme */
+.dark-theme footer,
+.dark-theme .footer-content,
+.dark-theme .footer-section,
+.dark-theme .footer-column h3,
+.dark-theme .footer-column p,
+.dark-theme .footer-column a,
+.dark-theme .footer-bottom p,
+.dark-theme .footer-column .contact-info {
+    color: #ffffff !important;
+}
+
+/* Fix for footer text visibility in blue theme */
+.blue-theme footer,
+.blue-theme .footer-content,
+.blue-theme .footer-section,
+.blue-theme .footer-column h3,
+.blue-theme .footer-column p,
+.blue-theme .footer-column a,
+.blue-theme .footer-bottom p,
+.blue-theme .footer-column .contact-info {
+    color: #ffffff !important;
+}
+
+/* Enhance contrast for specific elements that might need it */
+.dark-theme .footer-column .social-links a,
+.blue-theme .footer-column .social-links a {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Make contact information more visible */
+.dark-theme .contact-info i,
+.blue-theme .contact-info i {
+    color: var(--accent-color);
+    margin-right: 10px;
+}
+
+/* Ensure copyright text is visible */
+.dark-theme .footer-bottom,
+.blue-theme .footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+    margin-top: 20px;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
