@@ -780,8 +780,8 @@ function loadPayPalSDK(orderDetails) {
     // Create the script element
     const script = document.createElement('script');
     
-    // Get client ID from environment or use fallback
-    const clientId = 'AZtrRB6jra0YEO0fUBsmT5Hpnv7BQ-wZtGpxHGgVwWE8XOcJBOV8StGCm8b1g7E4l9OSLyXYhzXpGwIy';
+    // Use a sandbox client ID that is widely accessible for testing
+    const clientId = 'sb'; // This is PayPal's universal sandbox client ID
     script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
     script.dataset.namespace = "paypal-js";
     script.setAttribute('async', 'true');
@@ -791,19 +791,23 @@ function loadPayPalSDK(orderDetails) {
         hideLoadingOverlay();
         showNotification('Lidhja me PayPal dështoi. Ju lutemi provoni përsëri më vonë.');
         console.error('PayPal SDK loading timeout');
-    }, 10000); // 10 second timeout
+    }, 15000); // 15 second timeout (increased from 10)
     
     // When script loads, render buttons
     script.onload = function() {
         clearTimeout(loadTimeout);
-        hideLoadingOverlay();
         
-        if (window.paypal) {
-            renderPayPalButtons(orderDetails);
-        } else {
-            showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri.');
-            console.error('PayPal object not available after script load');
-        }
+        // Give PayPal SDK a moment to initialize
+        setTimeout(() => {
+            hideLoadingOverlay();
+            
+            if (window.paypal) {
+                renderPayPalButtons(orderDetails);
+            } else {
+                showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri.');
+                console.error('PayPal object not available after script load');
+            }
+        }, 1000);
     };
     
     // If script fails to load
@@ -841,6 +845,11 @@ function renderPayPalButtons(orderDetails) {
             },
             quantity: item.quantity
         }));
+        
+        // Check if window.paypal is properly initialized
+        if (!window.paypal || !window.paypal.Buttons) {
+            throw new Error('PayPal SDK not properly initialized');
+        }
         
         // Create buttons
         window.paypal.Buttons({
@@ -917,6 +926,7 @@ function renderPayPalButtons(orderDetails) {
         .catch(function(error) {
             console.error('PayPal render error:', error);
             showNotification('Gabim gjatë shfaqjes së butonit PayPal. Provoni një metodë tjetër pagese.');
+            hideLoadingOverlay();
         });
     } catch (error) {
         console.error('PayPal initialization error:', error);
