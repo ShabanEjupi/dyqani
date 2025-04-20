@@ -91,10 +91,25 @@ function initCheckoutSteps() {
     }
     
     if (nextToStep4) {
-        nextToStep4.addEventListener('click', function() {
-            // Process the order and go to confirmation
-            processOrder();
-            goToStep(4);
+        nextToStep4.addEventListener('click', function(e) {
+            const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+            
+            if (selectedPayment === 'paypal') {
+                e.preventDefault(); // Prevent default navigation
+                
+                // Get order details
+                const orderDetails = generateOrderSummary();
+                
+                // Show PayPal buttons
+                loadPayPalSDK(orderDetails);
+            } else {
+                // Process regular order with customer details
+                const orderDetails = processOrder();
+                goToStep(4);
+                
+                // Send email notification with order details
+                sendOrderConfirmationEmail(orderDetails);
+            }
         });
     }
     
@@ -395,9 +410,6 @@ function updateOrderSummaries() {
     
     // Update payment summary for step 3
     updatePaymentSummary();
-    
-    // Update final order summary for step 4
-    updateFinalSummary();
 }
 
 // Update the order items summary for step 2
@@ -560,7 +572,56 @@ function updateFinalSummary() {
     // Will be filled during order processing
 }
 
-// Process the order
+/**
+ * Update the final order summary display
+ * @param {Object} orderSummary - Order summary object
+ */
+function updateFinalOrderSummary(orderSummary) {
+    const finalSummary = document.getElementById('order-summary-final');
+    if (!finalSummary) return;
+    
+    finalSummary.innerHTML = `
+        <h3>Detajet e porosisë</h3>
+        
+        <div class="final-items">
+            ${orderSummary.items.map(item => `
+                <div class="final-item">
+                    <span>${item.name} × ${item.quantity}</span>
+                    <span>${(item.price * item.quantity).toFixed(2)} €</span>
+                </div>
+            `).join('')}
+        </div>
+        
+        <div class="final-summary-totals">
+            <div class="summary-item">
+                <span>Nëntotali:</span>
+                <span>${orderSummary.subtotal.toFixed(2)} €</span>
+            </div>
+            
+            ${orderSummary.discount > 0 ? `
+            <div class="summary-item">
+                <span>Zbritje:</span>
+                <span>-${orderSummary.discount.toFixed(2)} €</span>
+            </div>
+            ` : ''}
+            
+            <div class="summary-item">
+                <span>Transport:</span>
+                <span>${orderSummary.shipping.toFixed(2)} €</span>
+            </div>
+            
+            <div class="summary-item total">
+                <span>Totali i paguar:</span>
+                <span>${orderSummary.total.toFixed(2)} €</span>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Process the order
+ * @returns {Object} Generated order summary object
+ */
 function processOrder() {
     // Get customer info
     const fullname = document.getElementById('fullname')?.value || 'Emër Mbiemër';
@@ -586,45 +647,7 @@ function processOrder() {
     document.getElementById('order-payment-method').textContent = paymentMethodText;
     
     // Update final summary
-    const finalSummary = document.getElementById('order-summary-final');
-    if (finalSummary) {
-        finalSummary.innerHTML = `
-            <h3>Detajet e porosisë</h3>
-            
-            <div class="final-items">
-                ${orderSummary.items.map(item => `
-                    <div class="final-item">
-                        <span>${item.name} × ${item.quantity}</span>
-                        <span>${(item.price * item.quantity).toFixed(2)} €</span>
-                    </div>
-                `).join('')}
-            </div>
-            
-            <div class="final-summary-totals">
-                <div class="summary-item">
-                    <span>Nëntotali:</span>
-                    <span>${orderSummary.subtotal.toFixed(2)} €</span>
-                </div>
-                
-                ${orderSummary.discount > 0 ? `
-                <div class="summary-item">
-                    <span>Zbritje:</span>
-                    <span>-${orderSummary.discount.toFixed(2)} €</span>
-                </div>
-                ` : ''}
-                
-                <div class="summary-item">
-                    <span>Transport:</span>
-                    <span>${orderSummary.shipping.toFixed(2)} €</span>
-                </div>
-                
-                <div class="summary-item total">
-                    <span>Totali i paguar:</span>
-                    <span>${orderSummary.total.toFixed(2)} €</span>
-                </div>
-            </div>
-        `;
-    }
+    updateFinalOrderSummary(orderSummary);
     
     // Clear cart after successful order
     cart = [];
@@ -635,18 +658,15 @@ function processOrder() {
     sessionStorage.removeItem('appliedCoupon');
     sessionStorage.removeItem('deliveryOption');
     
-    // Send confirmation email
-    sendOrderConfirmationEmail(orderSummary);
+    return orderSummary;
 }
 
-// Send order confirmation email
+/**
+ * Send order confirmation email
+ * @param {Object} orderDetails - Order details object
+ */
 function sendOrderConfirmationEmail(orderDetails) {
     // Get customer information
-    const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.PAYPAL_CLIENT_ID}&currency=EUR`;
-    script.dataset.namespace = "paypal-js";
-    script.setAttribute('async', 'true');
-    
     const customerInfo = {
         name: document.getElementById('fullname').value,
         email: document.getElementById('email').value,
@@ -743,7 +763,10 @@ function initPayPalCheckout() {
     });
 }
 
-// Load PayPal SDK and initialize buttons
+/**
+ * Load PayPal SDK and initialize buttons
+ * @param {Object} orderDetails - Order details for PayPal transaction
+ */
 function loadPayPalSDK(orderDetails) {
     // Show loading indicator
     showLoadingOverlay('Duke ngarkuar PayPal...');
@@ -756,7 +779,8 @@ function loadPayPalSDK(orderDetails) {
     
     // Create the script element
     const script = document.createElement('script');
-    script.src = "https://www.paypal.com/sdk/js?client-id=AQZ2RbZ5ZKln1RL-dG1z0IcnpdNbiB95GGHSglX9-8K3OSaHzP8bi-TfR6L9BwrZB2hb3xj8NB_mnvyv&currency=EUR";
+    // Use the environment variable instead of hardcoded client ID
+    script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.PAYPAL_CLIENT_ID || 'AQZ2RbZ5ZKln1RL-dG1z0IcnpdNbiB95GGHSglX9-8K3OSaHzP8bi-TfR6L9BwrZB2hb3xj8NB_mnvyv'}&currency=EUR`;
     script.dataset.namespace = "paypal-js";
     script.setAttribute('async', 'true');
     
@@ -845,7 +869,7 @@ function renderPayPalButtons(orderDetails) {
                     time: new Date().toISOString()
                 };
                 
-                // Process order
+                // Process order and update UI
                 processOrder(orderDetails);
                 
                 // Send confirmation email with PayPal details
