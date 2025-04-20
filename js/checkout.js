@@ -92,12 +92,28 @@ function initCheckoutSteps() {
     
     if (nextToStep4) {
         nextToStep4.addEventListener('click', function(e) {
-            const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+            // Get payment method
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
             
-            if (selectedPayment === 'paypal') {
+            if (!selectedPayment) {
+                showNotification('Ju lutemi zgjidhni një metodë pagese.');
+                return;
+            }
+            
+            const paymentMethod = selectedPayment.value;
+            
+            if (paymentMethod === 'paypal') {
                 e.preventDefault(); // Prevent default navigation
                 
-                // Get order details
+                // Validate customer info form
+                const customerForm = document.getElementById('customer-info-form');
+                if (customerForm && !customerForm.checkValidity()) {
+                    // Trigger HTML5 validation
+                    customerForm.reportValidity();
+                    return;
+                }
+                
+                // Get full order details
                 const orderDetails = generateOrderSummary();
                 
                 // Show PayPal buttons
@@ -109,6 +125,9 @@ function initCheckoutSteps() {
                 
                 // Send email notification with order details
                 sendOrderConfirmationEmail(orderDetails);
+                
+                // Save order to localStorage
+                saveOrderToStorage(orderDetails);
             }
         });
     }
@@ -662,6 +681,44 @@ function processOrder() {
 }
 
 /**
+ * Save completed order to localStorage for admin panel
+ * @param {Object} orderDetails - Completed order details with payment info
+ */
+function saveOrderToStorage(orderDetails) {
+    // Get existing orders
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    
+    // Add customer details from form
+    const customerDetails = {
+        name: document.getElementById('fullname')?.value || '',
+        email: document.getElementById('email')?.value || '',
+        phone: document.getElementById('phone')?.value || '',
+        address: document.getElementById('address')?.value || '',
+        city: document.getElementById('city')?.value || ''
+    };
+    
+    // Create complete order record
+    const completeOrder = {
+        ...orderDetails,
+        customerName: customerDetails.name,
+        customerEmail: customerDetails.email,
+        customerPhone: customerDetails.phone,
+        customerAddress: customerDetails.address,
+        customerCity: customerDetails.city,
+        orderDate: new Date().toISOString(),
+        status: 'pending'
+    };
+    
+    // Add to orders array
+    orders.push(completeOrder);
+    
+    // Save back to localStorage
+    localStorage.setItem('orders', JSON.stringify(orders));
+    
+    console.log('Order saved with payment details', completeOrder);
+}
+
+/**
  * Send order confirmation email
  * @param {Object} orderDetails - Order details object
  */
@@ -777,12 +834,12 @@ function loadPayPalSDK(orderDetails) {
         existingScript.remove();
     }
     
-    // Create the script element
-    const script = document.createElement('script');
+    // Get PayPal client ID from environment variables
+    const clientId = window.ENV?.PAYPAL?.CLIENT_ID || 'AUlpyjRm4L4cm8Vj3oi9n-kZJxWAKz-vircJRReAXEONIHjy1ksLnzaoMqT0nQ9hxBCNDbwiuw51F9fw';
     
-    // Use your actual PayPal client ID from your .env file
-    const clientId = 'AZtrRB6jra0YEO0fUBsmT5Hpnv7BQ-wZtGpxHGgVwWE8XOcJBOV8StGCm8b1g7E4l9OSLyXYhzXpGwIy';
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture`;
+    // Create the script element with required parameters
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture&disable-funding=credit,card`;
     script.dataset.namespace = "paypal-js";
     script.setAttribute('async', 'true');
     
@@ -793,10 +850,12 @@ function loadPayPalSDK(orderDetails) {
         console.error('PayPal SDK loading timeout');
     }, 10000);
     
-    // When script loads, render buttons
+    // When script loads successfully
     script.onload = function() {
         clearTimeout(loadTimeout);
-        // Add small delay to ensure SDK is fully initialized
+        console.log('PayPal SDK loaded successfully');
+        
+        // Give SDK time to initialize fully
         setTimeout(() => {
             hideLoadingOverlay();
             
@@ -809,7 +868,7 @@ function loadPayPalSDK(orderDetails) {
         }, 500);
     };
     
-    // If script fails to load
+    // Handle script loading errors
     script.onerror = function(error) {
         clearTimeout(loadTimeout);
         hideLoadingOverlay();
@@ -839,12 +898,12 @@ function renderPayPalButtons(orderDetails) {
         paymentContainer.appendChild(paypalContainer);
     }
     
-    // Clear container
+    // Clear container and display
     paypalContainer.innerHTML = '';
     paypalContainer.style.display = 'block';
     
     try {
-        // Check if window.paypal is properly initialized
+        // Check if PayPal SDK is loaded
         if (!window.paypal || !window.paypal.Buttons) {
             throw new Error('PayPal SDK not properly initialized');
         }
@@ -859,7 +918,7 @@ function renderPayPalButtons(orderDetails) {
             quantity: item.quantity
         }));
         
-        // Create PayPal order object with detailed breakdown
+        // Create a purchase unit with detailed breakdown
         const purchaseUnit = {
             description: `Enisi Center - Porosia #${orderDetails.orderId}`,
             amount: {
@@ -878,7 +937,7 @@ function renderPayPalButtons(orderDetails) {
             },
             items: items
         };
-
+        
         // Add discount if present
         if (orderDetails.discount && orderDetails.discount > 0) {
             purchaseUnit.amount.breakdown.discount = {
@@ -888,7 +947,7 @@ function renderPayPalButtons(orderDetails) {
         }
         
         // Create buttons with modern configuration
-        window.paypal.Buttons({
+        const buttons = window.paypal.Buttons({
             style: {
                 color: 'blue',
                 shape: 'pill',
@@ -896,21 +955,26 @@ function renderPayPalButtons(orderDetails) {
                 height: 45
             },
             
-            // Set up transaction
+            // Create order when button is clicked
             createOrder: function(data, actions) {
                 return actions.order.create({
-                    intent: 'CAPTURE',
-                    purchase_units: [purchaseUnit]
+                    purchase_units: [purchaseUnit],
+                    application_context: {
+                        shipping_preference: 'NO_SHIPPING'
+                    }
                 });
             },
             
+            // Handle approval
             onApprove: function(data, actions) {
                 showLoadingOverlay('Duke përpunuar pagesën...');
                 
                 return actions.order.capture()
                     .then(function(details) {
+                        console.log('PayPal payment completed', details);
                         hideLoadingOverlay();
                         
+                        // Add payment details to order
                         orderDetails.paymentDetails = {
                             id: details.id,
                             status: details.status,
@@ -919,38 +983,55 @@ function renderPayPalButtons(orderDetails) {
                             time: new Date().toISOString()
                         };
                         
+                        // Complete order processing and advance to confirmation step
                         processOrder(orderDetails);
                         sendOrderConfirmationEmail(orderDetails);
                         goToStep(4);
                         
+                        // Hide PayPal container
                         paypalContainer.style.display = 'none';
+                        
+                        // Save order to localStorage for admin panel
+                        saveOrderToStorage(orderDetails);
                     })
                     .catch(function(error) {
                         hideLoadingOverlay();
+                        logPayPalError('capture', error);
                         showNotification('Gabim gjatë procesimit të pagesës. Ju lutemi kontrolloni dhe provoni përsëri.');
-                        console.error('PayPal capture error:', error);
                     });
             },
             
+            // Handle cancellation
             onCancel: function() {
                 showNotification('Pagesa me PayPal u anulua.');
                 paypalContainer.style.display = 'none';
             },
             
+            // Handle errors
             onError: function(err) {
-                console.error('PayPal Error:', err);
+                logPayPalError('render', err);
                 showNotification('Ndodhi një gabim gjatë pagesës. Ju lutemi provoni përsëri.');
                 paypalContainer.style.display = 'none';
             }
-        }).render('#paypal-button-container')
-        .catch(function(error) {
-            console.error('PayPal render error:', error);
-            showNotification('Gabim gjatë shfaqjes së butonit PayPal. Provoni një metodë tjetër pagese.');
-            hideLoadingOverlay();
         });
+        
+        // Check if the buttons can be rendered
+        if (buttons.isEligible()) {
+            buttons.render('#paypal-button-container')
+                .catch(function(error) {
+                    logPayPalError('render', error);
+                    showNotification('Gabim gjatë shfaqjes së butonit PayPal. Provoni një metodë tjetër pagese.');
+                    hideLoadingOverlay();
+                });
+        } else {
+            console.warn('PayPal buttons are not eligible for rendering');
+            showNotification('PayPal nuk është i disponueshëm për këtë transaksion. Ju lutemi zgjidhni një metodë tjetër pagese.');
+            hideLoadingOverlay();
+        }
+        
     } catch (error) {
-        console.error('PayPal initialization error:', error);
-        showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi kontaktoni suportin.');
+        logPayPalError('initialization', error);
+        showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri më vonë.');
         hideLoadingOverlay();
     }
 }
@@ -1004,4 +1085,16 @@ function showNotification(message) {
     setTimeout(() => {
         notification.classList.remove('show');
     }, 3000);
+}
+
+// Add this utility function
+function logPayPalError(phase, error) {
+    console.error(`PayPal error during ${phase}:`, error);
+    
+    // In production you might want to send this to your server
+    // fetch('/api/log-error', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ phase, error: error.toString(), timestamp: new Date().toISOString() })
+    // }).catch(err => console.error('Failed to log error:', err));
 }
