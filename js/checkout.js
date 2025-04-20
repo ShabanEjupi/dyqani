@@ -780,8 +780,8 @@ function loadPayPalSDK(orderDetails) {
     // Create the script element
     const script = document.createElement('script');
     
-    // Use a sandbox client ID that is widely accessible for testing
-    const clientId = 'sb'; // This is PayPal's universal sandbox client ID
+    // Use a real PayPal client ID instead of the sandbox placeholder
+    const clientId = 'AZtrRB6jra0YEO0fUBsmT5Hpnv7BQ-wZtGpxHGgVwWE8XOcJBOV8StGCm8b1g7E4l9OSLyXYhzXpGwIy';
     script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
     script.dataset.namespace = "paypal-js";
     script.setAttribute('async', 'true');
@@ -791,23 +791,19 @@ function loadPayPalSDK(orderDetails) {
         hideLoadingOverlay();
         showNotification('Lidhja me PayPal dështoi. Ju lutemi provoni përsëri më vonë.');
         console.error('PayPal SDK loading timeout');
-    }, 15000); // 15 second timeout (increased from 10)
+    }, 10000);
     
     // When script loads, render buttons
     script.onload = function() {
         clearTimeout(loadTimeout);
+        hideLoadingOverlay();
         
-        // Give PayPal SDK a moment to initialize
-        setTimeout(() => {
-            hideLoadingOverlay();
-            
-            if (window.paypal) {
-                renderPayPalButtons(orderDetails);
-            } else {
-                showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri.');
-                console.error('PayPal object not available after script load');
-            }
-        }, 1000);
+        if (window.paypal) {
+            renderPayPalButtons(orderDetails);
+        } else {
+            showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri.');
+            console.error('PayPal object not available after script load');
+        }
     };
     
     // If script fails to load
@@ -824,11 +820,20 @@ function loadPayPalSDK(orderDetails) {
 
 // Render PayPal buttons
 function renderPayPalButtons(orderDetails) {
-    const paypalContainer = document.getElementById('paypal-button-container');
+    // First, ensure we have a proper container
+    let paypalContainer = document.getElementById('paypal-button-container');
     if (!paypalContainer) {
-        console.error('PayPal button container not found');
-        showNotification('Gabim teknik. Ju lutemi provoni përsëri ose zgjidhni një metodë tjetër pagese.');
-        return;
+        const paymentContainer = document.querySelector('.payment-section');
+        if (!paymentContainer) {
+            console.error('Payment container not found');
+            showNotification('Gabim teknik. Ju lutemi rifreskoni faqen dhe provoni përsëri.');
+            return;
+        }
+        
+        paypalContainer = document.createElement('div');
+        paypalContainer.id = 'paypal-button-container';
+        paypalContainer.className = 'paypal-buttons-wrapper';
+        paymentContainer.appendChild(paypalContainer);
     }
     
     // Clear container
@@ -836,6 +841,11 @@ function renderPayPalButtons(orderDetails) {
     paypalContainer.style.display = 'block';
     
     try {
+        // Check if window.paypal is properly initialized
+        if (!window.paypal || !window.paypal.Buttons) {
+            throw new Error('PayPal SDK not properly initialized');
+        }
+        
         // Format items for PayPal
         const items = orderDetails.items.map(item => ({
             name: item.name,
@@ -845,11 +855,6 @@ function renderPayPalButtons(orderDetails) {
             },
             quantity: item.quantity
         }));
-        
-        // Check if window.paypal is properly initialized
-        if (!window.paypal || !window.paypal.Buttons) {
-            throw new Error('PayPal SDK not properly initialized');
-        }
         
         // Create buttons
         window.paypal.Buttons({
