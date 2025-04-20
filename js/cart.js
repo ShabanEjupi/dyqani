@@ -139,7 +139,7 @@ function updateCartUI() {
         });
     });
     
-    // Update cart summary
+    // Update cart summary without the checkout button
     if (cartSummary) {
         const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
         const shipping = subtotal > 0 ? 2.00 : 0; // 2€ shipping instead of 5€
@@ -158,14 +158,8 @@ function updateCartUI() {
                 <span>Totali:</span>
                 <span>${total.toFixed(2)} €</span>
             </div>
-            <button id="checkout-button" class="btn btn-primary">Vazhdo me porosinë</button>
         `;
-        
-        // Add checkout button event
-        const checkoutButton = document.getElementById('checkout-button');
-        if (checkoutButton) {
-            checkoutButton.addEventListener('click', processCheckout);
-        }
+        // Checkout button removed
     }
 }
 
