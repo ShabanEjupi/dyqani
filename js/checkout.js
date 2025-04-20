@@ -780,9 +780,9 @@ function loadPayPalSDK(orderDetails) {
     // Create the script element
     const script = document.createElement('script');
     
-    // Use a real PayPal client ID instead of the sandbox placeholder
-    const clientId = 'PAYPAL_CLIENT_ID';
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
+    // Use your actual PayPal client ID from your .env file
+    const clientId = 'AZtrRB6jra0YEO0fUBsmT5Hpnv7BQ-wZtGpxHGgVwWE8XOcJBOV8StGCm8b1g7E4l9OSLyXYhzXpGwIy';
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture`;
     script.dataset.namespace = "paypal-js";
     script.setAttribute('async', 'true');
     
@@ -796,14 +796,17 @@ function loadPayPalSDK(orderDetails) {
     // When script loads, render buttons
     script.onload = function() {
         clearTimeout(loadTimeout);
-        hideLoadingOverlay();
-        
-        if (window.paypal) {
-            renderPayPalButtons(orderDetails);
-        } else {
-            showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri.');
-            console.error('PayPal object not available after script load');
-        }
+        // Add small delay to ensure SDK is fully initialized
+        setTimeout(() => {
+            hideLoadingOverlay();
+            
+            if (window.paypal) {
+                renderPayPalButtons(orderDetails);
+            } else {
+                showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri.');
+                console.error('PayPal object not available after script load');
+            }
+        }, 500);
     };
     
     // If script fails to load
@@ -856,7 +859,35 @@ function renderPayPalButtons(orderDetails) {
             quantity: item.quantity
         }));
         
-        // Create buttons
+        // Create PayPal order object with detailed breakdown
+        const purchaseUnit = {
+            description: `Enisi Center - Porosia #${orderDetails.orderId}`,
+            amount: {
+                currency_code: 'EUR',
+                value: orderDetails.total.toFixed(2),
+                breakdown: {
+                    item_total: {
+                        currency_code: 'EUR',
+                        value: orderDetails.subtotal.toFixed(2)
+                    },
+                    shipping: {
+                        currency_code: 'EUR',
+                        value: orderDetails.shipping.toFixed(2)
+                    }
+                }
+            },
+            items: items
+        };
+
+        // Add discount if present
+        if (orderDetails.discount && orderDetails.discount > 0) {
+            purchaseUnit.amount.breakdown.discount = {
+                currency_code: 'EUR',
+                value: orderDetails.discount.toFixed(2)
+            };
+        }
+        
+        // Create buttons with modern configuration
         window.paypal.Buttons({
             style: {
                 color: 'blue',
@@ -868,24 +899,8 @@ function renderPayPalButtons(orderDetails) {
             // Set up transaction
             createOrder: function(data, actions) {
                 return actions.order.create({
-                    purchase_units: [{
-                        description: `Enisi Center - Porosia #${orderDetails.orderId}`,
-                        amount: {
-                            currency_code: 'EUR',
-                            value: orderDetails.total.toFixed(2),
-                            breakdown: {
-                                item_total: {
-                                    currency_code: 'EUR',
-                                    value: orderDetails.subtotal.toFixed(2)
-                                },
-                                shipping: {
-                                    currency_code: 'EUR',
-                                    value: orderDetails.shipping.toFixed(2)
-                                }
-                            }
-                        },
-                        items: items
-                    }]
+                    intent: 'CAPTURE',
+                    purchase_units: [purchaseUnit]
                 });
             },
             
