@@ -106,9 +106,10 @@ header {
 }
 
 .header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
 }
 
 .header-container h1 {
@@ -713,6 +714,66 @@ social-icons a:hover {
 .btn-launch:hover {
   background-color: #f8b400;
   color: #333;
+}
+
+/* Logo styling */
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+.site-logo {
+  height: 45px;
+  width: auto;
+  margin-right: 10px;
+}
+
+/* Adjust header layout */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+@media (max-width: 768px) {
+  .site-logo {
+    height: 35px;
+  }
+  
+  .header-container {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .logo {
+    margin-bottom: 10px;
+    order: 1;
+  }
+  
+  .theme-toggle-container {
+    order: 3;
+    margin: 10px 0;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .cart-icon {
+    order: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-logo {
+    height: 30px;
+  }
 }
 
 /* Responsive */
