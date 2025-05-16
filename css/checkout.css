@@ -643,9 +643,9 @@
             "image details"
             "image quantity"
             "price price"
-            "remove remove";
-        gap: 10px;
-        padding: 15px;
+            "actions actions";
+        padding: 10px;
+        gap: 8px;
     }
     
     .cart-item-image {
@@ -658,113 +658,74 @@
     
     .cart-item-quantity {
         grid-area: quantity;
-        justify-content: start;
+        display: flex;
+        align-items: center;
     }
     
     .cart-item-total {
         grid-area: price;
-        justify-content: center;
-        font-size: 18px;
+        text-align: right;
         font-weight: bold;
-        margin-top: 10px;
     }
     
-    .remove-item {
-        grid-area: remove;
+    .cart-item .remove-item {
+        grid-area: actions;
         width: 100%;
-        height: 40px;
-        border-radius: 4px;
+        margin-top: 5px;
     }
     
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 15px;
+    /* Make buttons more tappable */
+    .quantity-btn {
+        min-width: 36px;
+        min-height: 36px;
     }
     
+    /* Fix coupon section */
+    .coupon-form {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .coupon-form button {
+        width: 100%;
+    }
+    
+    /* Fix checkout actions */
     .checkout-actions {
         flex-direction: column;
-        gap: 15px;
+        gap: 10px;
     }
     
     .checkout-actions button,
     .checkout-actions a {
         width: 100%;
     }
-    
-    .checkout-progress {
-        padding: 0 10px;
-        margin: 20px 0;
-    }
-    
-    .step-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-    }
-    
-    .step-label {
-        font-size: 12px;
-    }
-    
-    .quick-view-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .payment-method label {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
-    }
-    
-    .payment-method label i {
-        font-size: 24px;
-    }
-    
-    .badges-container {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .paypal-buttons-wrapper {
-        padding: 10px;
-    }
 }
 
-/* Small mobile devices */
-@media (max-width: 480px) {
-    .step-icon {
-        width: 35px;
-        height: 35px;
-        font-size: 14px;
-    }
-    
-    .progress-step {
-        padding: 0;
-    }
-    
-    .step-label {
-        font-size: 10px;
-    }
-    
-    .cart-item {
-        padding: 10px;
-    }
-    
-    .cart-items-container {
-        margin-bottom: 15px;
-    }
-    
-    .order-confirmation {
-        padding: 15px;
-    }
-    
-    .check-icon {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .confirmation-header h2 {
-        font-size: 20px;
-    }
+/* Ultra small screens */
+@media (max-width: 375px) {
+  .step-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+  
+  .step-label {
+    font-size: 9px;
+  }
+  
+  .summary-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .delivery-option label {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  .option-price {
+    margin-top: 5px;
+  }
 }

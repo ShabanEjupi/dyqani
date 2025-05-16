@@ -1,9 +1,47 @@
+console.log("Checkout.js loading...");
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM fully loaded");
+    
+    // Check if styles are loaded
+    const styles = document.styleSheets;
+    console.log("Loaded stylesheets:", styles.length);
+    for(let i = 0; i < styles.length; i++) {
+        try {
+            console.log(`Style ${i}:`, styles[i].href);
+        } catch (e) {
+            console.log(`Style ${i}: [Cannot access href]`);
+        }
+    }
+    
+    // Check cart contents
+    console.log("Cart contents:", JSON.parse(localStorage.getItem('cart') || '[]'));
+});
+
 /**
  * Checkout Page Functionality
  * Manages the multi-step checkout process, order submission, and payment options
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for components to load before initializing
+    let componentsLoaded = 0;
+    
+    document.addEventListener('component-loaded', function(e) {
+        componentsLoaded++;
+        // Once both header and footer are loaded
+        if (componentsLoaded >= 2) {
+            initCheckoutPage();
+        }
+    });
+    
+    // Fallback if components don't load within 1 second
+    setTimeout(() => {
+        initCheckoutPage();
+    }, 1000);
+});
+
+function initCheckoutPage() {
     // Initialize checkout step functionality
     initCheckoutSteps();
     
@@ -28,9 +66,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize PayPal checkout
     initPayPalCheckout();
     
-    // Initialize email service
-    EmailService.init();
-});
+    // Update cart count
+    if (typeof updateCartCount === 'function') {
+        updateCartCount();
+    }
+}
 
 // Initialize multi-step checkout process
 function initCheckoutSteps() {
