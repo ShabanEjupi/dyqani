@@ -93,7 +93,7 @@ function initCheckoutSteps() {
     // Forward navigation
     if (nextToStep2) {
         nextToStep2.addEventListener('click', function() {
-            // Only proceed if cart is not empty
+            // Verify there are items in the cart
             if (cart.length === 0) {
                 showNotification('Shporta është bosh! Ju lutemi shtoni produkte para se të vazhdoni.');
                 return;
@@ -131,7 +131,7 @@ function initCheckoutSteps() {
     }
     
     if (nextToStep4) {
-        nextToStep4.addEventListener('click', function(e) {
+        nextToStep4.addEventListener('click', function() {
             // Get payment method
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
             
@@ -143,21 +143,9 @@ function initCheckoutSteps() {
             const paymentMethod = selectedPayment.value;
             
             if (paymentMethod === 'paypal') {
-                e.preventDefault(); // Prevent default navigation
-                
-                // Validate customer info form
-                const customerForm = document.getElementById('customer-info-form');
-                if (customerForm && !customerForm.checkValidity()) {
-                    // Trigger HTML5 validation
-                    customerForm.reportValidity();
-                    return;
-                }
-                
-                // Get full order details
-                const orderDetails = generateOrderSummary();
-                
-                // Show PayPal buttons
-                loadPayPalSDK(orderDetails);
+                // Handle PayPal payment
+                const orderSummary = generateOrderSummary();
+                redirectToPayPal(orderSummary);
             } else {
                 // Standard checkout flow - update confirmation page
                 // Generate order summary
@@ -236,6 +224,8 @@ function initCheckoutSteps() {
                 break;
             case 3:
                 if (step3) step3.classList.add('active');
+                updatePaymentSummary();
+                updatePaymentMethodTotals();
                 break;
             case 4:
                 if (step4) step4.classList.add('active');
@@ -247,6 +237,46 @@ function initCheckoutSteps() {
             top: document.querySelector('.checkout-progress').offsetTop - 100,
             behavior: 'smooth'
         });
+    }
+    
+    // Make goToStep available outside this function
+    window.goToStep = goToStep;
+}
+
+// Redirect to PayPal for payment
+function redirectToPayPal(orderDetails) {
+    const total = orderDetails.total.toFixed(2);
+    const orderId = orderDetails.orderId;
+    
+    // Save order details to session storage for retrieval after payment
+    sessionStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
+    
+    // Create PayPal URL with order details
+    const paypalUrl = `https://www.paypal.com/paypalme/shabanejupi5/${total}?description=Order%20${orderId}%20-%20Enisi%20Center`;
+    
+    // Show confirmation before redirect
+    if (confirm(`Do të ridrejtoheni tek PayPal për të përfunduar pagesën prej ${total} €. Dëshironi të vazhdoni?`)) {
+        // Open PayPal in a new window
+        window.open(paypalUrl, '_blank');
+        
+        // Show the final confirmation page
+        const orderSummary = generateOrderSummary();
+        document.getElementById('order-number').textContent = orderSummary.orderId;
+                
+        // Format current date
+        const today = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = today.toLocaleDateString('sq-AL', options);
+        document.getElementById('order-date').textContent = formattedDate;
+        
+        document.getElementById('order-email').textContent = document.getElementById('email').value || 'N/A';
+        document.getElementById('order-payment-method').textContent = 'PayPal (Në pritje)';
+        
+        // Update final summary
+        updateFinalOrderSummary(orderSummary);
+        
+        // Go to confirmation page
+        goToStep(4);
     }
 }
 
@@ -706,185 +736,71 @@ function redirectToPayPal(orderDetails) {
     const total = orderDetails.total.toFixed(2);
     const orderId = orderDetails.orderId;
     
-    // Store the order in localStorage before redirecting
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders.push({
-        ...orderDetails,
-        status: 'pending',
-        paymentMethod: 'PayPal',
-        date: new Date().toISOString()
-    });
-    localStorage.setItem('orders', JSON.stringify(orders));
+    // Save order details to session storage for retrieval after payment
+    sessionStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
     
-    // Clear cart
-    localStorage.setItem('cart', JSON.stringify([]));
+    // Create PayPal URL with order details
+    const paypalUrl = `https://www.paypal.com/paypalme/shabanejupi5/${total}?description=Order%20${orderId}%20-%20Enisi%20Center`;
     
-    // Create a dialog explaining next steps
-    showConfirmationDialog(
-        'Pagesa me PayPal',
-        `
-        <p>Do të ridrejtoheni tek PayPal për të përfunduar pagesën prej <strong>${total} €</strong></p>
-        <p>Numri i porosisë suaj është: <strong>${orderId}</strong></p>
-        <p>Ju lutemi përdorni këtë numër si referencë në pagesën tuaj.</p>
-        `
-    );
-    
-    // Option to redirect automatically
-    setTimeout(() => {
-        openPayPalPayment(total, orderId);
-    }, 2000);
-}
-
-// Open PayPal directly with parameters
-function openPayPalPayment(amount, orderId) {
-    const paypalUrl = `https://www.paypal.com/paypalme/shabanejupi5/${amount}?description=Order%20${orderId}%20-%20Enisi%20Center`;
-    window.open(paypalUrl, '_blank');
-    
-    // Show final confirmation
-    goToStep(4);
-    
-    // Update the order confirmation page
-    document.getElementById('order-number').textContent = orderId;
-    document.getElementById('order-date').textContent = new Date().toLocaleDateString('sq-AL');
-    document.getElementById('order-email').textContent = document.getElementById('email')?.value || 'N/A';
-    document.getElementById('order-payment-method').textContent = 'PayPal (Në pritje)';
-    
-    // Update final order summary
-    updateFinalOrderSummary(generateOrderSummary());
-}
-
-// Show confirmation dialog
-function showConfirmationDialog(title, message) {
-    // Create dialog
-    const dialogOverlay = document.createElement('div');
-    dialogOverlay.className = 'dialog-overlay';
-    
-    const dialog = document.createElement('div');
-    dialog.className = 'dialog-box';
-    
-    dialog.innerHTML = `
-        <div class="dialog-header">
-            <h3>${title}</h3>
-        </div>
-        <div class="dialog-content">
-            ${message}
-        </div>
-        <div class="dialog-footer">
-            <button class="btn continue-btn">Vazhdo</button>
-            <button class="btn cancel-btn">Anullo</button>
-        </div>
-    `;
-    
-    dialogOverlay.appendChild(dialog);
-    document.body.appendChild(dialogOverlay);
-    
-    // Handle buttons
-    const cancelBtn = dialog.querySelector('.cancel-btn');
-    const continueBtn = dialog.querySelector('.continue-btn');
-    
-    cancelBtn.addEventListener('click', function() {
-        document.body.removeChild(dialogOverlay);
-    });
-    
-    continueBtn.addEventListener('click', function() {
-        document.body.removeChild(dialogOverlay);
-        openPayPalPayment(total, orderId);
-    });
-    
-    return dialogOverlay;
-}
-
-// Update the final order summary on the confirmation page
-function updateFinalOrderSummary(orderSummary) {
-    const finalSummaryContainer = document.getElementById('order-summary-final');
-    if (!finalSummaryContainer) return;
-    
-    // Build HTML for items
-    let itemsHTML = '';
-    orderSummary.items.forEach(item => {
-        itemsHTML += `
-            <div class="final-item">
-                <span>${item.name} x ${item.quantity}</span>
-                <span>${(item.price * item.quantity).toFixed(2)} €</span>
-            </div>
-        `;
-    });
-    
-    // Get coupon data if applied
-    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
-    let discountHTML = '';
-    
-    if (appliedCoupon) {
-        const discountAmount = appliedCoupon.type === 'percent' 
-            ? (orderSummary.subtotal * appliedCoupon.discount)
-            : appliedCoupon.discount;
+    // Show confirmation before redirect
+    if (confirm(`Do të ridrejtoheni tek PayPal për të përfunduar pagesën prej ${total} €. Dëshironi të vazhdoni?`)) {
+        // Open PayPal in a new window
+        window.open(paypalUrl, '_blank');
         
-        discountHTML = `
-            <div class="final-item">
-                <span>Zbritje (${appliedCoupon.code}):</span>
-                <span>-${discountAmount.toFixed(2)} €</span>
-            </div>
-        `;
+        // Show the final confirmation page
+        const orderSummary = generateOrderSummary();
+        document.getElementById('order-number').textContent = orderSummary.orderId;
+                
+        // Format current date
+        const today = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = today.toLocaleDateString('sq-AL', options);
+        document.getElementById('order-date').textContent = formattedDate;
+        
+        document.getElementById('order-email').textContent = document.getElementById('email').value || 'N/A';
+        document.getElementById('order-payment-method').textContent = 'PayPal (Në pritje)';
+        
+        // Update final summary
+        updateFinalOrderSummary(orderSummary);
+        
+        // Go to confirmation page
+        goToStep(4);
     }
+}
+
+// Update the generateOrderSummary function to correctly include the coupon discount
+function generateOrderSummary() {
+    const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const deliveryInfo = JSON.parse(sessionStorage.getItem('deliveryOption')) || { price: 2.00 };
+    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
     
-    // Build the complete summary HTML
-    finalSummaryContainer.innerHTML = `
-        <div class="final-items">
-            ${itemsHTML}
-        </div>
-        <div class="final-summary-totals">
-            <div class="final-item">
-                <span>Nëntotali:</span>
-                <span>${orderSummary.subtotal.toFixed(2)} €</span>
-            </div>
-            ${discountHTML}
-            <div class="final-item">
-                <span>Transporti:</span>
-                <span>${orderSummary.shipping.toFixed(2)} €</span>
-            </div>
-            <div class="final-item" style="font-weight: bold; color: var(--primary-color); font-size: 1.2em; margin-top: 10px;">
-                <span>Totali:</span>
-                <span>${orderSummary.total.toFixed(2)} €</span>
-            </div>
-        </div>
-    `;
-    
-    // Clear the cart after successful order
-    localStorage.setItem('cart', JSON.stringify([]));
-    
-    // Store the order in the orders history
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders.push({
-        ...orderSummary,
-        status: 'pending',
-        paymentMethod: document.querySelector('input[name="payment"]:checked').value,
-        date: new Date().toISOString(),
-        customer: {
-            name: document.getElementById('fullname').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            address: document.getElementById('address').value,
-            city: document.getElementById('city').value
+    let discount = 0;
+    if (appliedCoupon) {
+        if (appliedCoupon.type === 'percent') {
+            discount = subtotal * appliedCoupon.discount;
+        } else {
+            discount = appliedCoupon.discount;
         }
-    });
-    localStorage.setItem('orders', JSON.stringify(orders));
-}
-
-// Format date in Albanian
-function formatDate(date) {
-    if (!date || !(date instanceof Date)) {
-        return 'Datë e pavlefshme';
     }
     
-    const day = date.getDate();
-    const monthNames = [
-        'Janar', 'Shkurt', 'Mars', 'Prill', 'Maj', 'Qershor',
-        'Korrik', 'Gusht', 'Shtator', 'Tetor', 'Nëntor', 'Dhjetor'
-    ];
-    const month = monthNames[date.getMonth()];
-    const year = date.getFullYear();
+    const total = subtotal - discount + deliveryInfo.price;
     
-    return `${day} ${month}, ${year}`;
+    // Generate a simple order ID with EC prefix
+    const orderId = 'EC' + Date.now().toString().slice(-8);
+    
+    return {
+        items: cart.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity
+        })),
+        subtotal: subtotal,
+        discount: discount,
+        coupon: appliedCoupon,
+        shipping: deliveryInfo.price,
+        total: total,
+        orderId: orderId,
+        date: new Date().toISOString()
+    };
 }
-
-//# sourceMappingURL=Checkout.js.map
