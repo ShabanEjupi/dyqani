@@ -159,15 +159,35 @@ function initCheckoutSteps() {
                 // Show PayPal buttons
                 loadPayPalSDK(orderDetails);
             } else {
-                // Process regular order with customer details
-                const orderDetails = processOrder();
+                // Standard checkout flow - update confirmation page
+                // Generate order summary
+                const orderSummary = generateOrderSummary();
+                
+                // Update order info in confirmation page
+                document.getElementById('order-number').textContent = orderSummary.orderId;
+                
+                // Format current date in Albanian
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedDate = today.toLocaleDateString('sq-AL', options);
+                document.getElementById('order-date').textContent = formattedDate;
+                
+                document.getElementById('order-email').textContent = document.getElementById('email').value || 'N/A';
+                
+                // Set payment method text
+                let paymentMethodText = 'Para në dorë';
+                if (paymentMethod === 'bank') {
+                    paymentMethodText = 'Transfertë bankare';
+                } else if (paymentMethod === 'paypal') {
+                    paymentMethodText = 'PayPal';
+                }
+                document.getElementById('order-payment-method').textContent = paymentMethodText;
+                
+                // Update final summary
+                updateFinalOrderSummary(orderSummary);
+                
+                // Go to step 4 (confirmation)
                 goToStep(4);
-                
-                // Send email notification with order details
-                sendOrderConfirmationEmail(orderDetails);
-                
-                // Save order to localStorage
-                saveOrderToStorage(orderDetails);
             }
         });
     }
@@ -294,7 +314,7 @@ function initCouponCode() {
     // Available coupon codes
     const coupons = {
         'ENISI10': { discount: 0.10, type: 'percent', description: '10% zbritje' },
-        'FREEDELIVERY': { discount: 5, type: 'fixed', description: 'Transport falas' },
+        'FREEDELIVERY': { discount: 2.00, type: 'fixed', description: 'Transport falas' },
         'WELCOME15': { discount: 0.15, type: 'percent', description: '15% zbritje' }
     };
     
@@ -331,6 +351,11 @@ function initCouponCode() {
             
             // Show error notification
             showNotification('Kodi promocional i pavlefshëm!');
+            
+            // Update all summaries after removing coupon
+            updateCartSummary();
+            updateOrderSummaries();
+            updatePaymentMethodTotals();
         }
     });
 }
@@ -439,41 +464,34 @@ function updateDeliveryEstimate(deliveryType) {
     
     switch (deliveryType) {
         case 'express':
-            // Add 1 day
+            // Add 1 day for express delivery
             deliveryDate = new Date(now);
             deliveryDate.setDate(now.getDate() + 1);
             break;
         case 'pickup':
-            // Same day to next day
-            const today = new Date(now);
-            const tomorrow = new Date(now);
-            tomorrow.setDate(now.getDate() + 1);
-            
-            estimateDate.innerHTML = `<strong>${formatDate(today)} - ${formatDate(tomorrow)}</strong>`;
-            // Store delivery info
-            sessionStorage.setItem('deliveryOption', JSON.stringify({
-                type: 'pickup',
-                description: 'Marrje në dyqan',
-                price: 0,
-                date: formatDate(tomorrow)
-            }));
-            return;
+            // Same day for pickup
+            deliveryDate = new Date(now);
+            break;
+        case 'standard':
         default:
-            // Standard - Add 2-3 days
+            // Add 2-3 days for standard
             const minDate = new Date(now);
             minDate.setDate(now.getDate() + 2);
             
             const maxDate = new Date(now);
             maxDate.setDate(now.getDate() + 3);
             
+            // Return range for standard delivery
             estimateDate.innerHTML = `<strong>${formatDate(minDate)} - ${formatDate(maxDate)}</strong>`;
-            // Store delivery info
+            
+            // Store delivery info in session storage
             sessionStorage.setItem('deliveryOption', JSON.stringify({
-                type: 'standard',
+                type: deliveryType,
                 description: 'Dërgesa standarde (2-3 ditë pune)',
                 price: 2.00,
                 date: `${formatDate(minDate)} - ${formatDate(maxDate)}`
             }));
+            
             return;
     }
     
@@ -482,8 +500,8 @@ function updateDeliveryEstimate(deliveryType) {
     // Store delivery info in session storage
     sessionStorage.setItem('deliveryOption', JSON.stringify({
         type: deliveryType,
-        description: deliveryType === 'express' ? 'Dërgesa e shpejtë (24 orë)' : 'Dërgesa standarde',
-        price: deliveryType === 'express' ? 8.00 : 2.00,
+        description: deliveryType === 'express' ? 'Dërgesa e shpejtë (brenda 24 orëve)' : 'Marrje në dyqan',
+        price: deliveryType === 'express' ? 8.00 : 0.00,
         date: formatDate(deliveryDate)
     }));
 }
@@ -774,6 +792,99 @@ function showConfirmationDialog(title, message) {
     });
     
     return dialogOverlay;
+}
+
+// Update the final order summary on the confirmation page
+function updateFinalOrderSummary(orderSummary) {
+    const finalSummaryContainer = document.getElementById('order-summary-final');
+    if (!finalSummaryContainer) return;
+    
+    // Build HTML for items
+    let itemsHTML = '';
+    orderSummary.items.forEach(item => {
+        itemsHTML += `
+            <div class="final-item">
+                <span>${item.name} x ${item.quantity}</span>
+                <span>${(item.price * item.quantity).toFixed(2)} €</span>
+            </div>
+        `;
+    });
+    
+    // Get coupon data if applied
+    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+    let discountHTML = '';
+    
+    if (appliedCoupon) {
+        const discountAmount = appliedCoupon.type === 'percent' 
+            ? (orderSummary.subtotal * appliedCoupon.discount)
+            : appliedCoupon.discount;
+        
+        discountHTML = `
+            <div class="final-item">
+                <span>Zbritje (${appliedCoupon.code}):</span>
+                <span>-${discountAmount.toFixed(2)} €</span>
+            </div>
+        `;
+    }
+    
+    // Build the complete summary HTML
+    finalSummaryContainer.innerHTML = `
+        <div class="final-items">
+            ${itemsHTML}
+        </div>
+        <div class="final-summary-totals">
+            <div class="final-item">
+                <span>Nëntotali:</span>
+                <span>${orderSummary.subtotal.toFixed(2)} €</span>
+            </div>
+            ${discountHTML}
+            <div class="final-item">
+                <span>Transporti:</span>
+                <span>${orderSummary.shipping.toFixed(2)} €</span>
+            </div>
+            <div class="final-item" style="font-weight: bold; color: var(--primary-color); font-size: 1.2em; margin-top: 10px;">
+                <span>Totali:</span>
+                <span>${orderSummary.total.toFixed(2)} €</span>
+            </div>
+        </div>
+    `;
+    
+    // Clear the cart after successful order
+    localStorage.setItem('cart', JSON.stringify([]));
+    
+    // Store the order in the orders history
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders.push({
+        ...orderSummary,
+        status: 'pending',
+        paymentMethod: document.querySelector('input[name="payment"]:checked').value,
+        date: new Date().toISOString(),
+        customer: {
+            name: document.getElementById('fullname').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+            city: document.getElementById('city').value
+        }
+    });
+    localStorage.setItem('orders', JSON.stringify(orders));
+}
+
+// Format date in Albanian
+function formatDate(date) {
+    if (!date || !(date instanceof Date)) {
+        return 'Datë e pavlefshme';
+    }
+    
+    const day = date.getDate();
+    const monthNames = [
+        'Janar', 'Shkurt', 'Mars', 'Prill', 'Maj', 'Qershor',
+        'Korrik', 'Gusht', 'Shtator', 'Tetor', 'Nëntor', 'Dhjetor'
+    ];
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    
+    return `${day} ${month}, ${year}`;
 }
 
 //# sourceMappingURL=Checkout.js.map
