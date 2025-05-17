@@ -684,123 +684,231 @@ document.addEventListener('DOMContentLoaded', function() {
 // Simplified PayPal integration without client-side SDK loading
 function initPayPalCheckout() {
     const paymentMethods = document.querySelectorAll('.payment-method');
-    
-    if (paymentMethods.length > 0) {
-        // Set data attributes
-        paymentMethods.forEach(method => {
-            const radioInput = method.querySelector('input[type="radio"]');
-            if (radioInput) {
-                method.dataset.method = radioInput.value;
-            }
-        });
-    }
-    
-    const paypalPaymentMethod = document.getElementById('payment-paypal');
     const nextToStep4 = document.getElementById('next-to-step-4');
     
-    if (!paypalPaymentMethod || !nextToStep4) return;
+    if (!paymentMethods.length || !nextToStep4) return;
+    
+    // Store original button text and function
+    const originalButtonText = nextToStep4.innerHTML;
+    let isPayPalSelected = false;
     
     // Listen for payment method changes
     document.querySelectorAll('input[name="payment"]').forEach(radio => {
         radio.addEventListener('change', function() {
-            if (this.value === 'paypal') {
-                // Update next button text for PayPal
+            const selectedMethod = this.value;
+            
+            if (selectedMethod === 'paypal') {
+                // PayPal selected
                 nextToStep4.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
                 nextToStep4.classList.add('paypal-button');
+                isPayPalSelected = true;
             } else {
-                // Reset next button text
-                nextToStep4.innerHTML = 'Përfundo porosinë <i class="fas fa-check"></i>';
+                // Bank transfer or cash selected
+                nextToStep4.innerHTML = originalButtonText;
                 nextToStep4.classList.remove('paypal-button');
+                isPayPalSelected = false;
             }
+            
+            // Update payment method totals
+            updatePaymentMethodTotals();
         });
     });
     
-    // Handle button click for PayPal redirects
-    nextToStep4.addEventListener('click', function(e) {
-        const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
-        
-        if (selectedPayment === 'paypal') {
-            e.preventDefault(); // Prevent default navigation
-            
-            // Generate order summary for PayPal reference
-            const orderDetails = generateOrderSummary();
-            
-            // Show PayPal instructions directly
-            redirectToPayPal(orderDetails);
-        }
-    });
+    // Remove any existing click handlers first to avoid duplication
+    nextToStep4.removeEventListener('click', handleCheckoutCompletion);
+    
+    // Add the main click handler for all payment methods
+    nextToStep4.addEventListener('click', handleCheckoutCompletion);
 }
 
-// Simplified PayPal redirect
-function redirectToPayPal(orderDetails) {
-    const total = orderDetails.total.toFixed(2);
-    const orderId = orderDetails.orderId;
+// Separate function for handling checkout completion
+function handleCheckoutCompletion(e) {
+    // Get selected payment method
+    const selectedPayment = document.querySelector('input[name="payment"]:checked');
     
-    // Save order details to session storage for retrieval after payment
-    sessionStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
+    if (!selectedPayment) {
+        showNotification('Ju lutemi zgjidhni një metodë pagese.');
+        return;
+    }
     
-    // Create PayPal URL with order details
-    const paypalUrl = `https://www.paypal.com/paypalme/shabanejupi5/${total}?description=Order%20${orderId}%20-%20Enisi%20Center`;
+    const paymentMethod = selectedPayment.value;
     
-    // Show confirmation before redirect
-    if (confirm(`Do të ridrejtoheni tek PayPal për të përfunduar pagesën prej ${total} €. Dëshironi të vazhdoni?`)) {
-        // Open PayPal in a new window
-        window.open(paypalUrl, '_blank');
+    // Generate order summary
+    const orderSummary = generateOrderSummary();
+    
+    if (paymentMethod === 'paypal') {
+        // Handle PayPal payment
+        e.preventDefault(); // Prevent default step navigation
+        redirectToPayPal(orderSummary);
+    } else {
+        // Handle other payment methods (cash, bank transfer)
         
-        // Show the final confirmation page
-        const orderSummary = generateOrderSummary();
+        // Update order info in confirmation page
         document.getElementById('order-number').textContent = orderSummary.orderId;
-                
-        // Format current date
+        
+        // Format current date in Albanian
         const today = new Date();
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         const formattedDate = today.toLocaleDateString('sq-AL', options);
         document.getElementById('order-date').textContent = formattedDate;
         
         document.getElementById('order-email').textContent = document.getElementById('email').value || 'N/A';
-        document.getElementById('order-payment-method').textContent = 'PayPal (Në pritje)';
         
-        // Update final summary
+        // Set payment method text
+        let paymentMethodText = 'Para në dorë';
+        if (paymentMethod === 'bank') {
+            paymentMethodText = 'Transfertë bankare';
+        }
+        document.getElementById('order-payment-method').textContent = paymentMethodText;
+        
+        // Update final order summary
         updateFinalOrderSummary(orderSummary);
         
-        // Go to confirmation page
+        // Go to confirmation step
         goToStep(4);
+        
+        // Clear cart
+        localStorage.setItem('cart', JSON.stringify([]));
+        
+        // Show success notification
+        showNotification('Porosia u krye me sukses!');
     }
 }
 
-// Update the generateOrderSummary function to correctly include the coupon discount
-function generateOrderSummary() {
-    const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    const deliveryInfo = JSON.parse(sessionStorage.getItem('deliveryOption')) || { price: 2.00 };
-    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+// Initialize invoice download functionality
+function initInvoiceDownload() {
+    const downloadButton = document.getElementById('download-invoice');
+    if (!downloadButton) return;
     
-    let discount = 0;
-    if (appliedCoupon) {
-        if (appliedCoupon.type === 'percent') {
-            discount = subtotal * appliedCoupon.discount;
-        } else {
-            discount = appliedCoupon.discount;
-        }
-    }
-    
-    const total = subtotal - discount + deliveryInfo.price;
-    
-    // Generate a simple order ID with EC prefix
-    const orderId = 'EC' + Date.now().toString().slice(-8);
-    
-    return {
-        items: cart.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity
-        })),
-        subtotal: subtotal,
-        discount: discount,
-        coupon: appliedCoupon,
-        shipping: deliveryInfo.price,
-        total: total,
-        orderId: orderId,
-        date: new Date().toISOString()
-    };
+    downloadButton.addEventListener('click', function() {
+        console.log("Download invoice button clicked");
+        
+        // Get order information
+        const orderNumber = document.getElementById('order-number').textContent;
+        const orderDate = document.getElementById('order-date').textContent;
+        const customerEmail = document.getElementById('order-email').textContent;
+        const paymentMethod = document.getElementById('order-payment-method').textContent;
+        
+        // Get order items
+        const orderSummary = document.getElementById('order-summary-final');
+        
+        // Generate PDF for printing
+        const printWindow = window.open('', '_blank');
+        
+        // Create invoice HTML
+        const invoiceHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Faturë ${orderNumber}</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 20px;
+                    }
+                    .invoice-header {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 40px;
+                    }
+                    .company-info {
+                        text-align: left;
+                    }
+                    .invoice-info {
+                        text-align: right;
+                    }
+                    .invoice-title {
+                        font-size: 24px;
+                        font-weight: bold;
+                        margin-bottom: 20px;
+                        text-align: center;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 20px 0;
+                    }
+                    th, td {
+                        border: 1px solid #ddd;
+                        padding: 12px;
+                        text-align: left;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    .footer {
+                        margin-top: 40px;
+                        text-align: center;
+                    }
+                    @media print {
+                        .no-print {
+                            display: none;
+                        }
+                        body {
+                            padding: 0;
+                            margin: 30px;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="invoice-title">FATURË</div>
+                
+                <div class="invoice-header">
+                    <div class="company-info">
+                        <h2>ENISI CENTER</h2>
+                        <p>Rr. Bedri Bajrami, nr. 15<br>
+                        Podujevë, Kosovë<br>
+                        Tel: +383 45 594 549<br>
+                        Email: center.enisi@gmail.com</p>
+                    </div>
+                    
+                    <div class="invoice-info">
+                        <h3>Nr. Faturës: ${orderNumber}</h3>
+                        <p>Data: ${orderDate}</p>
+                        <p>Email: ${customerEmail}</p>
+                        <p>Metoda e pagesës: ${paymentMethod}</p>
+                    </div>
+                </div>
+                
+                <div class="invoice-items">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Artikulli</th>
+                                <th>Çmimi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orderSummary.innerHTML}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="footer">
+                    <p>Faleminderit për blerjen tuaj!</p>
+                    <p>Enisi Center SHPK | NUIS: K12345678A</p>
+                </div>
+                
+                <div class="no-print" style="text-align: center; margin-top: 30px;">
+                    <button onclick="window.print()">Printo Faturën</button>
+                </div>
+                
+                <script>
+                    // Automatically open print dialog when the page loads
+                    window.onload = function() {
+                        setTimeout(() => {
+                            window.print();
+                        }, 500);
+                    }
+                </script>
+            </body>
+            </html>
+        `;
+        
+        // Write to the new window
+        printWindow.document.write(invoiceHTML);
+        printWindow.document.close();
+    });
 }
