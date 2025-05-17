@@ -397,167 +397,56 @@ function updateDeliveryEstimate(deliveryType) {
     
     switch (deliveryType) {
         case 'express':
-            // Next day delivery
+            // Add 1 day
             deliveryDate = new Date(now);
             deliveryDate.setDate(now.getDate() + 1);
-            // Skip weekends
-            if (deliveryDate.getDay() === 0) deliveryDate.setDate(deliveryDate.getDate() + 1); // If Sunday
-            if (now.getHours() >= 16) deliveryDate.setDate(deliveryDate.getDate() + 1); // If after 4pm
-            
-            estimateDate.innerHTML = `<strong>${formatDate(deliveryDate)}</strong>`;
             break;
-            
-        case 'standard':
-            // 2-3 days delivery
-            const startDate = new Date(now);
-            startDate.setDate(now.getDate() + 2);
-            const endDate = new Date(now);
-            endDate.setDate(now.getDate() + 3);
-            
-            // Skip weekends
-            if (startDate.getDay() === 0) startDate.setDate(startDate.getDate() + 1);
-            if (endDate.getDay() === 0) endDate.setDate(endDate.getDate() + 1);
-            
-            estimateDate.innerHTML = `<strong>${formatDate(startDate)} - ${formatDate(endDate)}</strong>`;
-            break;
-            
         case 'pickup':
-            // Same day pickup if before 4pm
-            if (now.getHours() < 16) {
-                estimateDate.innerHTML = `<strong>Sot (${formatDate(now)})</strong>`;
-            } else {
-                deliveryDate = new Date(now);
-                deliveryDate.setDate(now.getDate() + 1);
-                // Skip Sunday
-                if (deliveryDate.getDay() === 0) deliveryDate.setDate(deliveryDate.getDate() + 1);
-                estimateDate.innerHTML = `<strong>Nesër (${formatDate(deliveryDate)})</strong>`;
-            }
-            break;
-    }
-}
-
-// Format date as DD Month YYYY
-function formatDate(date) {
-    const months = ['Janar', 'Shkurt', 'Mars', 'Prill', 'Maj', 'Qershor', 'Korrik', 'Gusht', 'Shtator', 'Tetor', 'Nëntor', 'Dhjetor'];
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-// Initialize account creation toggle
-function initAccountCreation() {
-    const createAccountCheckbox = document.getElementById('create-account');
-    const accountFields = document.getElementById('account-fields');
-    
-    if (!createAccountCheckbox || !accountFields) return;
-    
-    createAccountCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            accountFields.classList.remove('hidden-fields');
-            document.getElementById('password').required = true;
-            document.getElementById('confirm-password').required = true;
-        } else {
-            accountFields.classList.add('hidden-fields');
-            document.getElementById('password').required = false;
-            document.getElementById('confirm-password').required = false;
-        }
-    });
-}
-
-// Update all order summaries throughout the checkout process
-function updateOrderSummaries() {
-    // Update the order items summary for step 2
-    updateOrderItemsSummary();
-    
-    // Update payment summary for step 3
-    updatePaymentSummary();
-}
-
-// Update the order items summary for step 2
-function updateOrderItemsSummary() {
-    const summaryContainer = document.getElementById('order-items-summary');
-    if (!summaryContainer) return;
-    
-    // Clear container
-    summaryContainer.innerHTML = '';
-    
-    // Add summary header
-    const summaryHeader = document.createElement('div');
-    summaryHeader.className = 'summary-header';
-    summaryHeader.innerHTML = `
-        <span>Produkti</span>
-        <span>Totali</span>
-    `;
-    summaryContainer.appendChild(summaryHeader);
-    
-    // Add cart items summary
-    let subtotal = 0;
-    
-    cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        subtotal += itemTotal;
-        
-        const summaryItem = document.createElement('div');
-        summaryItem.className = 'summary-item';
-        summaryItem.innerHTML = `
-            <span>${item.name} <strong>×${item.quantity}</strong></span>
-            <span>${itemTotal.toFixed(2)} €</span>
-        `;
-        summaryContainer.appendChild(summaryItem);
-    });
-    
-    // Get delivery option
-    const deliveryInfo = JSON.parse(sessionStorage.getItem('deliveryOption')) || { price: 5.00 };
-    const shippingCost = deliveryInfo.price;
-    
-    // Get applied coupon if any
-    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
-    let discount = 0;
-    
-    if (appliedCoupon) {
-        if (appliedCoupon.type === 'percent') {
-            discount = subtotal * appliedCoupon.discount;
-        } else if (appliedCoupon.type === 'fixed') {
-            discount = appliedCoupon.discount;
-        }
+            // Same day to next day
+            const today = new Date(now);
+            const tomorrow = new Date(now);
+            tomorrow.setDate(now.getDate() + 1);
+            
+            estimateDate.innerHTML = `<strong>${formatDate(today)} - ${formatDate(tomorrow)}</strong>`;
+            // Store delivery info
+            sessionStorage.setItem('deliveryOption', JSON.stringify({
+                type: 'pickup',
+                description: 'Marrje në dyqan',
+                price: 0,
+                date: formatDate(tomorrow)
+            }));
+            return;
+        default:
+            // Standard - Add 2-3 days
+            const minDate = new Date(now);
+            minDate.setDate(now.getDate() + 2);
+            
+            const maxDate = new Date(now);
+            maxDate.setDate(now.getDate() + 3);
+            
+            estimateDate.innerHTML = `<strong>${formatDate(minDate)} - ${formatDate(maxDate)}</strong>`;
+            // Store delivery info
+            sessionStorage.setItem('deliveryOption', JSON.stringify({
+                type: 'standard',
+                description: 'Dërgesa standarde (2-3 ditë pune)',
+                price: 2.00,
+                date: `${formatDate(minDate)} - ${formatDate(maxDate)}`
+            }));
+            return;
     }
     
-    // Add subtotal, shipping, discount and total
-    const subtotalElem = document.createElement('div');
-    subtotalElem.className = 'summary-item subtotal';
-    subtotalElem.innerHTML = `
-        <span>Nëntotali:</span>
-        <span>${subtotal.toFixed(2)} €</span>
-    `;
-    summaryContainer.appendChild(subtotalElem);
+    estimateDate.innerHTML = `<strong>${formatDate(deliveryDate)}</strong>`;
     
-    if (discount > 0) {
-        const discountElem = document.createElement('div');
-        discountElem.className = 'summary-item discount';
-        discountElem.innerHTML = `
-            <span>Zbritje (${appliedCoupon.code}):</span>
-            <span>-${discount.toFixed(2)} €</span>
-        `;
-        summaryContainer.appendChild(discountElem);
-    }
-    
-    const shippingElem = document.createElement('div');
-    shippingElem.className = 'summary-item shipping';
-    shippingElem.innerHTML = `
-        <span>Transport:</span>
-        <span>${shippingCost.toFixed(2)} €</span>
-    `;
-    summaryContainer.appendChild(shippingElem);
-    
-    const total = subtotal - discount + shippingCost;
-    const totalElem = document.createElement('div');
-    totalElem.className = 'summary-item total';
-    totalElem.innerHTML = `
-        <span>Totali:</span>
-        <span>${total.toFixed(2)} €</span>
-    `;
-    summaryContainer.appendChild(totalElem);
+    // Store delivery info in session storage
+    sessionStorage.setItem('deliveryOption', JSON.stringify({
+        type: deliveryType,
+        description: deliveryType === 'express' ? 'Dërgesa e shpejtë (24 orë)' : 'Dërgesa standarde',
+        price: deliveryType === 'express' ? 8.00 : 2.00,
+        date: formatDate(deliveryDate)
+    }));
 }
 
-// Update payment summary for step 3
+// Fix payment total calculation
 function updatePaymentSummary() {
     const paymentSummary = document.getElementById('payment-summary-details');
     if (!paymentSummary) return;
@@ -571,14 +460,14 @@ function updatePaymentSummary() {
     
     // Get order total
     let subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    const deliveryInfo = JSON.parse(sessionStorage.getItem('deliveryOption')) || { price: 5.00, description: 'Dërgesa standarde (2-3 ditë pune)' };
+    const deliveryInfo = JSON.parse(sessionStorage.getItem('deliveryOption')) || { price: 2.00, description: 'Dërgesa standarde (2-3 ditë pune)' };
     const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
     
     let discount = 0;
     if (appliedCoupon) {
         if (appliedCoupon.type === 'percent') {
             discount = subtotal * appliedCoupon.discount;
-        } else if (appliedCoupon.type === 'fixed') {
+        } else {
             discount = appliedCoupon.discount;
         }
     }
@@ -598,6 +487,7 @@ function updatePaymentSummary() {
         <div class="payment-delivery-info">
             <h4>Metoda e dërgesës</h4>
             <p>${deliveryInfo.description}</p>
+            <p><strong>Data e pritshme:</strong> ${deliveryInfo.date || 'Brenda 2-3 ditëve'}</p>
         </div>
         
         <div class="payment-price-summary">
@@ -626,201 +516,99 @@ function updatePaymentSummary() {
     `;
 }
 
-// Update final order summary for step 4
-function updateFinalSummary() {
-    // Will be filled during order processing
-}
-
-/**
- * Update the final order summary display
- * @param {Object} orderSummary - Order summary object
- */
-function updateFinalOrderSummary(orderSummary) {
-    const finalSummary = document.getElementById('order-summary-final');
-    if (!finalSummary) return;
+// Update payment method totals
+function updatePaymentMethodTotals() {
+    // Get current total
+    let subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const deliveryInfo = JSON.parse(sessionStorage.getItem('deliveryOption')) || { price: 2.00 };
+    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
     
-    finalSummary.innerHTML = `
-        <h3>Detajet e porosisë</h3>
-        
-        <div class="final-items">
-            ${orderSummary.items.map(item => `
-                <div class="final-item">
-                    <span>${item.name} × ${item.quantity}</span>
-                    <span>${(item.price * item.quantity).toFixed(2)} €</span>
-                </div>
-            `).join('')}
-        </div>
-        
-        <div class="final-summary-totals">
-            <div class="summary-item">
-                <span>Nëntotali:</span>
-                <span>${orderSummary.subtotal.toFixed(2)} €</span>
-            </div>
-            
-            ${orderSummary.discount > 0 ? `
-            <div class="summary-item">
-                <span>Zbritje:</span>
-                <span>-${orderSummary.discount.toFixed(2)} €</span>
-            </div>
-            ` : ''}
-            
-            <div class="summary-item">
-                <span>Transport:</span>
-                <span>${orderSummary.shipping.toFixed(2)} €</span>
-            </div>
-            
-            <div class="summary-item total">
-                <span>Totali i paguar:</span>
-                <span>${orderSummary.total.toFixed(2)} €</span>
-            </div>
-        </div>
-    `;
-}
-
-/**
- * Process the order
- * @returns {Object} Generated order summary object
- */
-function processOrder() {
-    // Get customer info
-    const fullname = document.getElementById('fullname')?.value || 'Emër Mbiemër';
-    const email = document.getElementById('email')?.value || 'email@example.com';
-    
-    // Generate order details
-    const orderSummary = generateOrderSummary();
-    
-    // Get selected payment method
-    const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'cash';
-    let paymentMethodText = 'Para në dorë';
-    
-    if (paymentMethod === 'paypal') {
-        paymentMethodText = 'PayPal';
-    } else if (paymentMethod === 'bank') {
-        paymentMethodText = 'Transfertë bankare';
+    let discount = 0;
+    if (appliedCoupon) {
+        if (appliedCoupon.type === 'percent') {
+            discount = subtotal * appliedCoupon.discount;
+        } else {
+            discount = appliedCoupon.discount;
+        }
     }
     
-    // Update order confirmation page
-    document.getElementById('order-number').textContent = orderSummary.orderId;
-    document.getElementById('order-date').textContent = new Date().toLocaleDateString('sq-AL');
-    document.getElementById('order-email').textContent = email;
-    document.getElementById('order-payment-method').textContent = paymentMethodText;
+    const total = subtotal - discount + deliveryInfo.price;
     
-    // Update final summary
-    updateFinalOrderSummary(orderSummary);
+    // Update all payment method totals
+    const cashTotal = document.getElementById('cash-payment-total');
+    const paypalTotal = document.getElementById('paypal-payment-total');
+    const bankTotal = document.getElementById('bank-payment-total');
     
-    // Clear cart after successful order
-    cart = [];
-    saveCart();
-    updateCartCount();
-    
-    // Clear applied coupons and delivery options
-    sessionStorage.removeItem('appliedCoupon');
-    sessionStorage.removeItem('deliveryOption');
-    
-    return orderSummary;
+    if (cashTotal) cashTotal.textContent = total.toFixed(2);
+    if (paypalTotal) paypalTotal.textContent = total.toFixed(2);
+    if (bankTotal) bankTotal.textContent = total.toFixed(2);
 }
 
-/**
- * Save completed order to localStorage for admin panel
- * @param {Object} orderDetails - Completed order details with payment info
- */
-function saveOrderToStorage(orderDetails) {
-    // Get existing orders
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+// Call this in several places
+document.addEventListener('DOMContentLoaded', function() {
+    // Call after cart is loaded
+    setTimeout(updatePaymentMethodTotals, 500);
     
-    // Add customer details from form
-    const customerDetails = {
-        name: document.getElementById('fullname')?.value || '',
-        email: document.getElementById('email')?.value || '',
-        phone: document.getElementById('phone')?.value || '',
-        address: document.getElementById('address')?.value || '',
-        city: document.getElementById('city')?.value || ''
-    };
-    
-    // Create complete order record
-    const completeOrder = {
-        ...orderDetails,
-        customerName: customerDetails.name,
-        customerEmail: customerDetails.email,
-        customerPhone: customerDetails.phone,
-        customerAddress: customerDetails.address,
-        customerCity: customerDetails.city,
-        orderDate: new Date().toISOString(),
-        status: 'pending'
-    };
-    
-    // Add to orders array
-    orders.push(completeOrder);
-    
-    // Save back to localStorage
-    localStorage.setItem('orders', JSON.stringify(orders));
-    
-    console.log('Order saved with payment details', completeOrder);
-}
-
-/**
- * Send order confirmation email
- * @param {Object} orderDetails - Order details object
- */
-function sendOrderConfirmationEmail(orderDetails) {
-    // Get customer information
-    const customerInfo = {
-        name: document.getElementById('fullname').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value
-    };
-    
-    // Show sending notification
-    showNotification('Duke dërguar konfirmimin e porosisë...');
-    
-    // Send order confirmation to customer
-    EmailService.sendOrderConfirmation(orderDetails, customerInfo)
-        .then(() => {
-            console.log('Order confirmation email sent to customer');
-            
-            // Send notification to store admin
-            return EmailService.sendOrderNotification(orderDetails, customerInfo);
-        })
-        .then(() => {
-            console.log('Order notification email sent to admin');
-            showNotification('Porosia u konfirmua me sukses!');
-        })
-        .catch(error => {
-            console.error('Error sending emails:', error);
-            showNotification('Porosia u pranua, por dërgimi i emailit dështoi.');
+    // Listen for delivery option changes to update totals
+    const deliveryOptions = document.querySelectorAll('input[name="delivery"]');
+    if (deliveryOptions.length > 0) {
+        deliveryOptions.forEach(option => {
+            option.addEventListener('change', function() {
+                setTimeout(updatePaymentMethodTotals, 100);
+            });
         });
-}
-
-// Initialize invoice download
-function initInvoiceDownload() {
-    const downloadButton = document.getElementById('download-invoice');
-    if (!downloadButton) return;
+    }
     
-    downloadButton.addEventListener('click', function() {
-        // In a real application, this would generate a PDF
-        // For this example, we'll just show a notification
-        showNotification('Fatura u shkarkua me sukses!');
-    });
-}
+    // Listen for coupon application
+    const applyButton = document.getElementById('apply-coupon');
+    if (applyButton) {
+        applyButton.addEventListener('click', function() {
+            setTimeout(updatePaymentMethodTotals, 100);
+        });
+    }
+});
 
-// Initialize PayPal checkout
+// Update bank transfer payment method details
+document.addEventListener('DOMContentLoaded', function() {
+    // Other initialization code...
+    
+    // Update bank transfer details
+    const bankDetails = document.querySelector('#payment-bank + label + .payment-details');
+    if (bankDetails) {
+        bankDetails.innerHTML = `
+            <p>Ju lutem transferoni shumën në llogarinë bankare të mëposhtme:</p>
+            <p><strong>Banka:</strong> Raiffeisen Bank Kosovo</p>
+            <p><strong>Emri:</strong> ENISI CENTER SHPK</p>
+            <p><strong>IBAN:</strong> XK052035000179951494</p>
+            <p><strong>Referenca:</strong> Do të dërgohet me email</p>
+        `;
+    }
+    
+    // Init delivery estimate on page load
+    if (document.querySelector('input[name="delivery"]:checked')) {
+        const defaultDelivery = document.querySelector('input[name="delivery"]:checked').value;
+        updateDeliveryEstimate(defaultDelivery);
+    }
+});
+
+// Simplified PayPal integration without client-side SDK loading
 function initPayPalCheckout() {
+    const paymentMethods = document.querySelectorAll('.payment-method');
+    
+    if (paymentMethods.length > 0) {
+        // Set data attributes
+        paymentMethods.forEach(method => {
+            const radioInput = method.querySelector('input[type="radio"]');
+            if (radioInput) {
+                method.dataset.method = radioInput.value;
+            }
+        });
+    }
+    
     const paypalPaymentMethod = document.getElementById('payment-paypal');
     const nextToStep4 = document.getElementById('next-to-step-4');
-    const paymentContainer = document.querySelector('.payment-section');
     
     if (!paypalPaymentMethod || !nextToStep4) return;
-    
-    // Create PayPal button container if not exists
-    if (!document.getElementById('paypal-button-container')) {
-        const paypalContainer = document.createElement('div');
-        paypalContainer.id = 'paypal-button-container';
-        paypalContainer.style.display = 'none';
-        paypalContainer.classList.add('paypal-buttons-wrapper');
-        paymentContainer.appendChild(paypalContainer);
-    }
     
     // Listen for payment method changes
     document.querySelectorAll('input[name="payment"]').forEach(radio => {
@@ -837,304 +625,113 @@ function initPayPalCheckout() {
         });
     });
     
-    // Modify the next button behavior
+    // Handle button click for PayPal redirects
     nextToStep4.addEventListener('click', function(e) {
         const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
         
         if (selectedPayment === 'paypal') {
             e.preventDefault(); // Prevent default navigation
             
-            // Get order details
+            // Generate order summary for PayPal reference
             const orderDetails = generateOrderSummary();
             
-            // Show PayPal buttons
-            loadPayPalSDK(orderDetails);
-        } else {
-            // Process regular order
-            processOrder();
-            goToStep(4);
-            
-            // Send email notification
-            sendOrderConfirmationEmail();
+            // Show PayPal instructions directly
+            redirectToPayPal(orderDetails);
         }
     });
 }
 
-/**
- * Load PayPal SDK and initialize buttons
- * @param {Object} orderDetails - Order details for PayPal transaction
- */
-function loadPayPalSDK(orderDetails) {
-    // Show loading overlay
-    showLoadingOverlay('Duke ngarkuar PayPal...');
+// Simplified PayPal redirect
+function redirectToPayPal(orderDetails) {
+    const total = orderDetails.total.toFixed(2);
+    const orderId = orderDetails.orderId;
     
-    // Remove existing script if any
-    const existingScript = document.querySelector('script[data-namespace="paypal-js"]');
-    if (existingScript) {
-        existingScript.remove();
-    }
+    // Store the order in localStorage before redirecting
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders.push({
+        ...orderDetails,
+        status: 'pending',
+        paymentMethod: 'PayPal',
+        date: new Date().toISOString()
+    });
+    localStorage.setItem('orders', JSON.stringify(orders));
     
-    // Get PayPal client ID from environment variables
-    const clientId = window.ENV?.PAYPAL?.CLIENT_ID || 'AUlpyjRm4L4cm8Vj3oi9n-kZJxWAKz-vircJRReAXEONIHjy1ksLnzaoMqT0nQ9hxBCNDbwiuw51F9fw';
+    // Clear cart
+    localStorage.setItem('cart', JSON.stringify([]));
     
-    // Create the script element with required parameters
-    const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture&disable-funding=credit,card`;
-    script.dataset.namespace = "paypal-js";
-    script.setAttribute('async', 'true');
+    // Create a dialog explaining next steps
+    showConfirmationDialog(
+        'Pagesa me PayPal',
+        `
+        <p>Do të ridrejtoheni tek PayPal për të përfunduar pagesën prej <strong>${total} €</strong></p>
+        <p>Numri i porosisë suaj është: <strong>${orderId}</strong></p>
+        <p>Ju lutemi përdorni këtë numër si referencë në pagesën tuaj.</p>
+        `
+    );
     
-    // Set timeout for script loading
-    const loadTimeout = setTimeout(() => {
-        hideLoadingOverlay();
-        showNotification('Lidhja me PayPal dështoi. Ju lutemi provoni përsëri më vonë.');
-        console.error('PayPal SDK loading timeout');
-    }, 10000);
-    
-    // When script loads successfully
-    script.onload = function() {
-        clearTimeout(loadTimeout);
-        console.log('PayPal SDK loaded successfully');
-        
-        // Give SDK time to initialize fully
-        setTimeout(() => {
-            hideLoadingOverlay();
-            
-            if (window.paypal) {
-                renderPayPalButtons(orderDetails);
-            } else {
-                showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri.');
-                console.error('PayPal object not available after script load');
-            }
-        }, 500);
-    };
-    
-    // Handle script loading errors
-    script.onerror = function(error) {
-        clearTimeout(loadTimeout);
-        hideLoadingOverlay();
-        showNotification('Gabim gjatë ngarkimit të PayPal. Ju lutemi provoni përsëri.');
-        console.error('PayPal SDK loading error:', error);
-    };
-    
-    // Add script to document
-    document.body.appendChild(script);
-}
-
-// Render PayPal buttons
-function renderPayPalButtons(orderDetails) {
-    // First, ensure we have a proper container
-    let paypalContainer = document.getElementById('paypal-button-container');
-    if (!paypalContainer) {
-        const paymentContainer = document.querySelector('.payment-section');
-        if (!paymentContainer) {
-            console.error('Payment container not found');
-            showNotification('Gabim teknik. Ju lutemi rifreskoni faqen dhe provoni përsëri.');
-            return;
-        }
-        
-        paypalContainer = document.createElement('div');
-        paypalContainer.id = 'paypal-button-container';
-        paypalContainer.className = 'paypal-buttons-wrapper';
-        paymentContainer.appendChild(paypalContainer);
-    }
-    
-    // Clear container and display
-    paypalContainer.innerHTML = '';
-    paypalContainer.style.display = 'block';
-    
-    try {
-        // Check if PayPal SDK is loaded
-        if (!window.paypal || !window.paypal.Buttons) {
-            throw new Error('PayPal SDK not properly initialized');
-        }
-        
-        // Format items for PayPal
-        const items = orderDetails.items.map(item => ({
-            name: item.name,
-            unit_amount: {
-                currency_code: 'EUR',
-                value: item.price.toFixed(2)
-            },
-            quantity: item.quantity
-        }));
-        
-        // Create a purchase unit with detailed breakdown
-        const purchaseUnit = {
-            description: `Enisi Center - Porosia #${orderDetails.orderId}`,
-            amount: {
-                currency_code: 'EUR',
-                value: orderDetails.total.toFixed(2),
-                breakdown: {
-                    item_total: {
-                        currency_code: 'EUR',
-                        value: orderDetails.subtotal.toFixed(2)
-                    },
-                    shipping: {
-                        currency_code: 'EUR',
-                        value: orderDetails.shipping.toFixed(2)
-                    }
-                }
-            },
-            items: items
-        };
-        
-        // Add discount if present
-        if (orderDetails.discount && orderDetails.discount > 0) {
-            purchaseUnit.amount.breakdown.discount = {
-                currency_code: 'EUR',
-                value: orderDetails.discount.toFixed(2)
-            };
-        }
-        
-        // Create buttons with modern configuration
-        const buttons = window.paypal.Buttons({
-            style: {
-                color: 'blue',
-                shape: 'pill',
-                label: 'pay',
-                height: 45
-            },
-            
-            // Create order when button is clicked
-            createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [purchaseUnit],
-                    application_context: {
-                        shipping_preference: 'NO_SHIPPING'
-                    }
-                });
-            },
-            
-            // Handle approval
-            onApprove: function(data, actions) {
-                showLoadingOverlay('Duke përpunuar pagesën...');
-                
-                return actions.order.capture()
-                    .then(function(details) {
-                        console.log('PayPal payment completed', details);
-                        hideLoadingOverlay();
-                        
-                        // Add payment details to order
-                        orderDetails.paymentDetails = {
-                            id: details.id,
-                            status: details.status,
-                            payer: details.payer.name.given_name + ' ' + details.payer.name.surname,
-                            email: details.payer.email_address,
-                            time: new Date().toISOString()
-                        };
-                        
-                        // Complete order processing and advance to confirmation step
-                        processOrder(orderDetails);
-                        sendOrderConfirmationEmail(orderDetails);
-                        goToStep(4);
-                        
-                        // Hide PayPal container
-                        paypalContainer.style.display = 'none';
-                        
-                        // Save order to localStorage for admin panel
-                        saveOrderToStorage(orderDetails);
-                    })
-                    .catch(function(error) {
-                        hideLoadingOverlay();
-                        logPayPalError('capture', error);
-                        showNotification('Gabim gjatë procesimit të pagesës. Ju lutemi kontrolloni dhe provoni përsëri.');
-                    });
-            },
-            
-            // Handle cancellation
-            onCancel: function() {
-                showNotification('Pagesa me PayPal u anulua.');
-                paypalContainer.style.display = 'none';
-            },
-            
-            // Handle errors
-            onError: function(err) {
-                logPayPalError('render', err);
-                showNotification('Ndodhi një gabim gjatë pagesës. Ju lutemi provoni përsëri.');
-                paypalContainer.style.display = 'none';
-            }
-        });
-        
-        // Check if the buttons can be rendered
-        if (buttons.isEligible()) {
-            buttons.render('#paypal-button-container')
-                .catch(function(error) {
-                    logPayPalError('render', error);
-                    showNotification('Gabim gjatë shfaqjes së butonit PayPal. Provoni një metodë tjetër pagese.');
-                    hideLoadingOverlay();
-                });
-        } else {
-            console.warn('PayPal buttons are not eligible for rendering');
-            showNotification('PayPal nuk është i disponueshëm për këtë transaksion. Ju lutemi zgjidhni një metodë tjetër pagese.');
-            hideLoadingOverlay();
-        }
-        
-    } catch (error) {
-        logPayPalError('initialization', error);
-        showNotification('Gabim gjatë inicializimit të PayPal. Ju lutemi provoni përsëri më vonë.');
-        hideLoadingOverlay();
-    }
-}
-
-// Show loading overlay
-function showLoadingOverlay(message) {
-    let overlay = document.querySelector('.loading-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'loading-overlay';
-        
-        const spinner = document.createElement('div');
-        spinner.className = 'loading-spinner';
-        
-        const messageElem = document.createElement('div');
-        messageElem.className = 'loading-message';
-        
-        overlay.appendChild(spinner);
-        overlay.appendChild(messageElem);
-        document.body.appendChild(overlay);
-    }
-    
-    overlay.querySelector('.loading-message').textContent = message || 'Duke ngarkuar...';
-    overlay.style.display = 'flex';
-}
-
-// Hide loading overlay
-function hideLoadingOverlay() {
-    const overlay = document.querySelector('.loading-overlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
-}
-
-// Show notification
-function showNotification(message) {
-    // Create notification element if it doesn't exist
-    let notification = document.querySelector('.notification');
-    
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.className = 'notification';
-        document.body.appendChild(notification);
-    }
-    
-    // Set message and show
-    notification.textContent = message;
-    notification.classList.add('show');
-    
-    // Hide after 3 seconds
+    // Option to redirect automatically
     setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
+        openPayPalPayment(total, orderId);
+    }, 2000);
 }
 
-// Add this utility function
-function logPayPalError(phase, error) {
-    console.error(`PayPal error during ${phase}:`, error);
+// Open PayPal directly with parameters
+function openPayPalPayment(amount, orderId) {
+    const paypalUrl = `https://www.paypal.com/paypalme/shabanejupi5/${amount}?description=Order%20${orderId}%20-%20Enisi%20Center`;
+    window.open(paypalUrl, '_blank');
     
-    // In production you might want to send this to your server
-    // fetch('/api/log-error', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ phase, error: error.toString(), timestamp: new Date().toISOString() })
-    // }).catch(err => console.error('Failed to log error:', err));
+    // Show final confirmation
+    goToStep(4);
+    
+    // Update the order confirmation page
+    document.getElementById('order-number').textContent = orderId;
+    document.getElementById('order-date').textContent = new Date().toLocaleDateString('sq-AL');
+    document.getElementById('order-email').textContent = document.getElementById('email')?.value || 'N/A';
+    document.getElementById('order-payment-method').textContent = 'PayPal (Në pritje)';
+    
+    // Update final order summary
+    updateFinalOrderSummary(generateOrderSummary());
 }
+
+// Show confirmation dialog
+function showConfirmationDialog(title, message) {
+    // Create dialog
+    const dialogOverlay = document.createElement('div');
+    dialogOverlay.className = 'dialog-overlay';
+    
+    const dialog = document.createElement('div');
+    dialog.className = 'dialog-box';
+    
+    dialog.innerHTML = `
+        <div class="dialog-header">
+            <h3>${title}</h3>
+        </div>
+        <div class="dialog-content">
+            ${message}
+        </div>
+        <div class="dialog-footer">
+            <button class="btn continue-btn">Vazhdo</button>
+            <button class="btn cancel-btn">Anullo</button>
+        </div>
+    `;
+    
+    dialogOverlay.appendChild(dialog);
+    document.body.appendChild(dialogOverlay);
+    
+    // Handle buttons
+    const cancelBtn = dialog.querySelector('.cancel-btn');
+    const continueBtn = dialog.querySelector('.continue-btn');
+    
+    cancelBtn.addEventListener('click', function() {
+        document.body.removeChild(dialogOverlay);
+    });
+    
+    continueBtn.addEventListener('click', function() {
+        document.body.removeChild(dialogOverlay);
+        openPayPalPayment(total, orderId);
+    });
+    
+    return dialogOverlay;
+}
+
+//# sourceMappingURL=Checkout.js.map

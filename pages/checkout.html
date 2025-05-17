@@ -4,11 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shporta | Enisi Center</title>
+    <meta name="description" content="Bëni porosinë tuaj online në Enisi Center - Dyqani më i madh online i veshjeve për fëmijë në Kosovë.">
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/dark-mode.css">
     <link rel="stylesheet" href="../css/checkout.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="../favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+    <link rel="manifest" href="../site.webmanifest">
 </head>
 <body>
     <div id="header-container"></div>
@@ -210,39 +218,40 @@
                     <h2>Metoda e pagesës</h2>
                     
                     <div class="payment-methods">
-                        <div class="payment-method">
+                        <div class="payment-method" data-method="cash">
                             <input type="radio" id="payment-cash" name="payment" value="cash" checked>
                             <label for="payment-cash">
                                 <i class="fas fa-money-bill-wave"></i>
                                 <span>Para në dorë</span>
                             </label>
                             <div class="payment-details">
-                                <p>Paguani kur të merrni produktin.</p>
+                                <p>Paguani kur të merrni produktin. Totali i pagesës tuaj do të jetë <span id="cash-payment-total">0.00</span> €.</p>
                             </div>
                         </div>
                         
-                        <div class="payment-method">
+                        <div class="payment-method" data-method="paypal">
                             <input type="radio" id="payment-paypal" name="payment" value="paypal">
                             <label for="payment-paypal">
                                 <i class="fab fa-paypal"></i>
                                 <span>PayPal</span>
                             </label>
                             <div class="payment-details">
-                                <p>Ju do të ridrejtoheni te faqja e PayPal për të përfunduar pagesën.</p>
+                                <p>Ju do të ridrejtoheni tek PayPal për të përfunduar pagesën prej <span id="paypal-payment-total">0.00</span> €.</p>
+                                <p>Pasi të përfundoni pagesën, ju do të merrni një konfirmim me email.</p>
                             </div>
                         </div>
                         
-                        <div class="payment-method">
+                        <div class="payment-method" data-method="bank">
                             <input type="radio" id="payment-bank" name="payment" value="bank">
                             <label for="payment-bank">
                                 <i class="fas fa-university"></i>
                                 <span>Transfertë bankare</span>
                             </label>
                             <div class="payment-details">
-                                <p>Ju lutem transferoni shumën në llogarinë bankare të mëposhtme:</p>
+                                <p>Ju lutem transferoni shumën prej <span id="bank-payment-total">0.00</span> € në llogarinë bankare:</p>
                                 <p><strong>Banka:</strong> Raiffeisen Bank Kosovo</p>
-                                <p><strong>Emri:</strong> Shabane Jupi</p>
-                                <p><strong>IBAN:</strong> XK051234567890123456</p>
+                                <p><strong>Emri:</strong> ENISI CENTER SHPK</p>
+                                <p><strong>IBAN:</strong> XK052035000179951494</p>
                                 <p><strong>Referenca:</strong> Do të dërgohet me email</p>
                             </div>
                         </div>
@@ -338,6 +347,6 @@
     <script src="../js/cart.js"></script>
     <script src="../js/env.js"></script>
     <script src="../js/checkout.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="../js/favicon-setup.js"></script>
 </body>
 </html>

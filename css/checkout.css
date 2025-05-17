@@ -405,6 +405,10 @@
     background: linear-gradient(to bottom, rgba(0, 112, 186, 0.1) 0%, rgba(0, 48, 135, 0.05) 100%);
 }
 
+.payment-method[data-method="bank"] input:checked + label {
+    background: linear-gradient(to bottom, rgba(0, 128, 0, 0.1) 0%, rgba(0, 128, 0, 0.05) 100%);
+}
+
 .payment-details {
     padding: 0 15px 15px;
     border-top: 1px solid var(--medium-gray);
@@ -728,4 +732,89 @@
   .option-price {
     margin-top: 5px;
   }
+}
+
+/* Dialog styling */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.dialog-box {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.dialog-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.dialog-header h3 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.dialog-content {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.dialog-footer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--medium-gray);
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.dialog-footer .btn {
+    min-width: 100px;
+}
+
+.dialog-footer .cancel-btn {
+    background-color: var(--medium-gray);
+    color: var(--text-color);
+}
+
+/* PayPal button styling */
+.paypal-button {
+    background-color: #0070BA !important;
+    transition: all 0.3s;
+}
+
+.paypal-button:hover {
+    background-color: #003087 !important;
+}
+
+/* Enhanced payment section styling */
+.payment-method[data-method="bank"] input:checked + label {
+    background: linear-gradient(to bottom, rgba(0, 128, 0, 0.1) 0%, rgba(0, 128, 0, 0.05) 100%);
+}
+
+.payment-method[data-method="bank"] .payment-details {
+    background-color: rgba(0, 128, 0, 0.05);
+}
+
+/* Add bank logo */
+.payment-method[data-method="bank"] label i {
+    color: #1f9d55;
 }
