@@ -299,40 +299,82 @@ function initCouponCode() {
     };
     
     applyButton.addEventListener('click', function() {
-        const code = couponInput.value.trim().toUpperCase();
+        const couponCode = couponInput.value.trim().toUpperCase();
+        const couponInfo = coupons[couponCode];
         
-        if (!code) {
-            showNotification('Ju lutemi shkruani një kod promocional.');
-            return;
-        }
-        
-        const coupon = coupons[code];
-        
-        if (coupon) {
-            // Apply discount and save to session
+        if (couponInfo) {
+            // Valid coupon
+            couponInput.classList.add('coupon-valid');
+            couponInput.classList.remove('coupon-invalid');
+            
+            // Store coupon in session storage
             sessionStorage.setItem('appliedCoupon', JSON.stringify({
-                code: code,
-                ...coupon
+                code: couponCode,
+                ...couponInfo
             }));
             
-            showNotification(`Kodi promocional "${code}" u aplikua me sukses: ${coupon.description}!`);
+            // Show notification
+            showNotification(`Kodi "${couponCode}" u aplikua me sukses! ${couponInfo.description}`);
             
-            // Update cart display with discount
-            updateCartUI();
+            // Update all summaries to reflect the discount
+            updateCartSummary();
             updateOrderSummaries();
-            
-            // Style the input as success
-            couponInput.classList.add('coupon-valid');
-            setTimeout(() => couponInput.classList.remove('coupon-valid'), 2000);
+            updatePaymentMethodTotals();
             
         } else {
-            showNotification('Kodi promocional është i pavlefshëm ose ka skaduar.');
-            
-            // Style the input as error
+            // Invalid coupon
             couponInput.classList.add('coupon-invalid');
-            setTimeout(() => couponInput.classList.remove('coupon-invalid'), 2000);
+            couponInput.classList.remove('coupon-valid');
+            
+            // Remove any previously applied coupon
+            sessionStorage.removeItem('appliedCoupon');
+            
+            // Show error notification
+            showNotification('Kodi promocional i pavlefshëm!');
         }
     });
+}
+
+// Add/update this function to recalculate all cart summaries when a coupon is applied
+function updateCartSummary() {
+    const cartSummary = document.getElementById('cart-summary');
+    if (!cartSummary) return;
+    
+    const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const deliveryInfo = JSON.parse(sessionStorage.getItem('deliveryOption')) || { price: 2.00 };
+    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+    
+    let discount = 0;
+    if (appliedCoupon) {
+        if (appliedCoupon.type === 'percent') {
+            discount = subtotal * appliedCoupon.discount;
+        } else {
+            discount = appliedCoupon.discount;
+        }
+    }
+    
+    const total = subtotal - discount + deliveryInfo.price;
+    
+    cartSummary.innerHTML = `
+        <div class="summary-item">
+            <span>Nëntotali:</span>
+            <span>${subtotal.toFixed(2)} €</span>
+        </div>
+        ${appliedCoupon ? `
+        <div class="summary-item">
+            <span>Zbritje (${appliedCoupon.code}):</span>
+            <span>-${discount.toFixed(2)} €</span>
+        </div>
+        ` : ''}
+        <div class="summary-item">
+            <span>Transporti:</span>
+            <span>${deliveryInfo.price.toFixed(2)} €</span>
+        </div>
+        <div class="summary-item total">
+            <span>Totali:</span>
+            <span>${total.toFixed(2)} €</span>
+        </div>
+    `;
 }
 
 // Initialize delivery option handlers
