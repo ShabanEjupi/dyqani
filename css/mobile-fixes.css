@@ -1,0 +1,170 @@
+/* Mobile-specific fixes for Enisi Center */
+
+/* Fix for header on mobile */
+@media (max-width: 767px) {
+    /* Header improvements */
+    .header-container {
+        padding: 10px 15px;
+        margin: 0;
+        width: 100%;
+        box-sizing: border-box;
+        border-bottom: 1px solid var(--medium-gray);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .logo {
+        margin: 0;
+        padding: 0;
+        max-width: 70%;
+    }
+    
+    .logo img {
+        max-height: 40px;
+    }
+    
+    .cart-icon {
+        margin-left: auto;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background-color: var(--light-gray);
+    }
+    
+    /* Navigation fixes */
+    nav {
+        margin-top: 10px;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    nav::-webkit-scrollbar {
+        display: none; /* Chrome, Safari and Opera */
+    }
+    
+    nav ul {
+        display: inline-flex;
+        width: 100%;
+        justify-content: space-between;
+        padding: 0 15px;
+    }
+    
+    nav ul li {
+        flex: 1;
+        text-align: center;
+    }
+    
+    nav ul li a {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    /* Contact section improvements */
+    .contact-hero {
+        padding: 40px 15px;
+    }
+    
+    .quick-contact {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 0;
+        gap: 10px;
+    }
+    
+    .quick-contact-item {
+        width: 100%;
+        margin: 0;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .quick-contact-item:hover {
+        transform: translateY(-2px);
+    }
+    
+    .quick-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .quick-info h3 {
+        font-size: 16px;
+    }
+    
+    .quick-info p {
+        font-size: 14px;
+    }
+    
+    /* Home page hero section */
+    .products-hero {
+        padding: 30px 15px;
+    }
+    
+    .products-hero h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+    
+    .products-hero p {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    
+    /* Newsletter section */
+    #newsletter {
+        padding: 30px 15px;
+        margin: 30px 10px;
+    }
+    
+    #newsletter h3 {
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+    
+    #newsletter p {
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+}
+
+/* Extra small devices (phones less than 375px) */
+@media (max-width: 375px) {
+    .header-container {
+        padding: 8px 10px;
+    }
+    
+    .logo img {
+        max-height: 30px;
+    }
+    
+    nav ul li a {
+        padding: 8px 5px;
+        font-size: 0.8rem;
+    }
+    
+    .quick-contact-item {
+        padding: 10px;
+    }
+    
+    .quick-icon {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 14px;
+    }
+    
+    .quick-info h3 {
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+    
+    .quick-info p {
+        font-size: 12px;
+    }
+}
