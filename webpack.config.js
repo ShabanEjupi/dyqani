@@ -7,14 +7,13 @@ const CopyPlugin = require('copy-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    main: './src/js/main.js',
-    cart: './src/js/cart.js',
-    checkout: './src/js/checkout.js',
-    products: './src/js/products.js',
-    admin: './src/js/admin.js',
-    components: './src/js/components.js',
-    'theme-switcher': './src/js/theme-switcher.js',
-    'email-service': './src/js/email-service.js',
+    main: './js/main.js',
+    'shopping-cart': './js/shopping-cart.js', // Zëvendëso cart dhe checkout
+    products: './js/products.js',
+    admin: './js/admin.js',
+    components: './js/components.js',
+    'theme-switcher': './js/theme-switcher.js',
+    'email-service': './js/email-service.js',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
