@@ -44,7 +44,7 @@ function initializeShoppingFeatures() {
         // Inicializimi i hapave të checkout
         initCheckoutSteps();
         
-        // Inicializimi i rekomandimeve
+        // Ngarkimi i produkteve të rekomanduara
         loadRecommendedProducts();
         
         // Inicializimi i kodit promocional
@@ -362,7 +362,297 @@ function initCheckoutSteps() {
     window.goToStep = goToStep;
 }
 
-// Përditësimi i detajeve të konfirmimit
+// Inicializimi i funksionalitetit të kodit promocional
+function initCouponCode() {
+    const couponInput = document.getElementById('coupon-code');
+    const applyButton = document.getElementById('apply-coupon');
+    
+    if (!couponInput || !applyButton) return;
+    
+    // Dëgjuesi i ngjarjeve për butonin "Apliko"
+    applyButton.addEventListener('click', function() {
+        applyCouponCode(couponInput.value);
+    });
+    
+    // Gjithashtu apliko kodin kur shtypet Enter
+    couponInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            applyCouponCode(couponInput.value);
+        }
+    });
+    
+    // Kontrollo nëse ekziston ndonjë kupon i aplikuar nga localStorage
+    const existingCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+    if (existingCoupon) {
+        couponInput.value = existingCoupon.code;
+        couponInput.classList.add('coupon-valid');
+        couponInput.disabled = true;
+        applyButton.textContent = 'Hiq';
+    }
+}
+
+// Funksioni për aplikimin e kodit promocional
+function applyCouponCode(code) {
+    const couponInput = document.getElementById('coupon-code');
+    const applyButton = document.getElementById('apply-coupon');
+    
+    if (!couponInput || !applyButton) return;
+    
+    // Kontrollo nëse ka kupon të aplikuar tashmë
+    const existingCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+    if (existingCoupon && applyButton.textContent === 'Hiq') {
+        // Hiq kuponin
+        sessionStorage.removeItem('appliedCoupon');
+        couponInput.value = '';
+        couponInput.classList.remove('coupon-valid');
+        couponInput.classList.remove('coupon-invalid');
+        couponInput.disabled = false;
+        applyButton.textContent = 'Apliko';
+        updateOrderSummaries();
+        showNotification('Kodi promocional u hoq me sukses.');
+        return;
+    }
+    
+    // Lista e kuponëve të vlefshëm
+    const validCoupons = {
+        'WELCOME15': {
+            type: 'percent',
+            discount: 0.15,
+            description: '15% zbritje'
+        },
+        'ENISI10': {
+            type: 'percent',
+            discount: 0.10,
+            description: '10% zbritje'
+        },
+        'FREEDELIVERY': {
+            type: 'shipping',
+            discount: 'free',
+            description: 'Dërgesa falas'
+        }
+    };
+    
+    // Kontrollo nëse kodi është i vlefshëm
+    const normalizedCode = code.trim().toUpperCase();
+    
+    if (normalizedCode === '') {
+        showNotification('Ju lutemi shkruani një kod promocional.');
+        return;
+    }
+    
+    if (validCoupons[normalizedCode]) {
+        // Kodi është i vlefshëm
+        const coupon = {
+            code: normalizedCode,
+            ...validCoupons[normalizedCode]
+        };
+        
+        // Ruaj kuponin
+        sessionStorage.setItem('appliedCoupon', JSON.stringify(coupon));
+        
+        // Përcakto mesazhin e suksesit
+        let successMessage = '';
+        if (coupon.type === 'percent') {
+            successMessage = `Kodi promocional ${normalizedCode} u aplikua me sukses. ${coupon.description}.`;
+        } else if (coupon.type === 'shipping') {
+            successMessage = 'Kodi promocional u aplikua. Dërgesa juaj është falas!';
+        }
+        
+        // Përditëso UI
+        couponInput.classList.add('coupon-valid');
+        couponInput.classList.remove('coupon-invalid');
+        couponInput.disabled = true;
+        applyButton.textContent = 'Hiq';
+        
+        // Përditëso përmbledhjet e porosisë
+        updateOrderSummaries();
+        
+        showNotification(successMessage, 'success');
+    } else {
+        // Kodi nuk është i vlefshëm
+        couponInput.classList.add('coupon-invalid');
+        couponInput.classList.remove('coupon-valid');
+        showNotification('Kodi promocional nuk është i vlefshëm.', 'error');
+    }
+}
+
+// Ngarkimi i produkteve të rekomanduara
+function loadRecommendedProducts() {
+    const recommendationsContainer = document.querySelector('.recommendation-items');
+    if (!recommendationsContainer) return;
+    
+    // Sigurohu që kemi produkte dhe shportë
+    if (!window.products || !Array.isArray(window.products) || window.products.length === 0) {
+        console.warn('Nuk janë gjetur produkte për rekomandimet.');
+        
+        // Nëse nuk kemi produkte, përdor ato që kemi definuar në products.js 
+        if (typeof enisiProducts !== 'undefined' && enisiProducts.length > 0) {
+            window.products = enisiProducts;
+        } else {
+            recommendationsContainer.innerHTML = '<p>Nuk ka produkte të rekomanduara për momentin.</p>';
+            return;
+        }
+    }
+    
+    // Merr IDs e produkteve në shportë
+    const cartProductIds = cart.map(item => item.id);
+    
+    // Filtro produktet që nuk janë në shportë
+    const availableProducts = window.products.filter(product => !cartProductIds.includes(product.id));
+    
+    // Nëse nuk kemi produkte të disponueshme
+    if (availableProducts.length === 0) {
+        recommendationsContainer.innerHTML = '<p>Nuk ka produkte të rekomanduara për momentin.</p>';
+        return;
+    }
+    
+    // Zgjidh 3 produkte të rastësishme
+    const recommendations = getRandomProducts(availableProducts, 3);
+    
+    // Pastro kontejnerin
+    recommendationsContainer.innerHTML = '';
+    
+    // Shto produktet e rekomanduara në UI
+    recommendations.forEach(product => {
+        const recommendationItem = document.createElement('div');
+        recommendationItem.className = 'recommendation-item';
+        
+        recommendationItem.innerHTML = `
+            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/80x80?text=Pa+Foto'">
+            <div class="rec-details">
+                <h4>${product.name}</h4>
+                <p>${product.price.toFixed(2)} €</p>
+            </div>
+            <button class="btn-add-recommendation" title="Shto në shportë" data-product-id="${product.id}">+</button>
+        `;
+        
+        recommendationsContainer.appendChild(recommendationItem);
+        
+        // Shto event listener për butonin e shtimit
+        const addButton = recommendationItem.querySelector('.btn-add-recommendation');
+        addButton.addEventListener('click', function() {
+            const productToAdd = window.products.find(p => p.id === product.id);
+            if (productToAdd) {
+                addToCart(productToAdd);
+                
+                // Përditëso rekomandimet pas shtimit të produktit
+                setTimeout(() => {
+                    loadRecommendedProducts();
+                }, 500);
+            }
+        });
+    });
+}
+
+// Zgjedhja e produkteve të rastësishme
+function getRandomProducts(productsArray, count) {
+    // Kopjo arrayn që të mos ndryshojmë origjinalin
+    const productsCopy = [...productsArray];
+    
+    // Përzij arrayn
+    for (let i = productsCopy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [productsCopy[i], productsCopy[j]] = [productsCopy[j], productsCopy[i]];
+    }
+    
+    // Kthe numrin e kërkuar të produkteve
+    return productsCopy.slice(0, count);
+}
+
+// Inicializimi i opsioneve të transportit
+function initDeliveryOptions() {
+    const deliveryOptions = document.querySelectorAll('.delivery-option input');
+    if (!deliveryOptions || deliveryOptions.length === 0) return;
+    
+    // Shto event listeners për të gjitha radiobutton-at e transportit
+    deliveryOptions.forEach(option => {
+        option.addEventListener('change', function() {
+            const deliveryValue = this.value;
+            
+            // Krijo objektin e transportit bazuar në vlerën e zgjedhur
+            let deliveryOption = {
+                name: deliveryValue,
+                price: 2.00,
+                description: 'Dërgesa standarde (2-3 ditë pune)'
+            };
+            
+            if (deliveryValue === 'express') {
+                deliveryOption = {
+                    name: 'express',
+                    price: 8.00,
+                    description: 'Dërgesa e shpejtë (24 orë)'
+                };
+            } else if (deliveryValue === 'pickup') {
+                deliveryOption = {
+                    name: 'pickup',
+                    price: 0.00,
+                    description: 'Marrje në dyqan (Falas)'
+                };
+            }
+            
+            // Ruaj opsionin e transportit në sessionStorage
+            sessionStorage.setItem('deliveryOption', JSON.stringify(deliveryOption));
+            
+            // Përditëso përmbledhjet e porosisë
+            updateOrderSummaries();
+            
+            // Përditëso kohën e parashikuar të transportit
+            updateDeliveryEstimate(deliveryValue);
+        });
+    });
+    
+    // Kontrollo nëse ka opsion transporti të ruajtur në sessionStorage
+    const savedDeliveryOption = JSON.parse(sessionStorage.getItem('deliveryOption'));
+    if (savedDeliveryOption) {
+        // Zgjidh radiobutton-in e duhur
+        const radioToSelect = document.querySelector(`input[name="delivery"][value="${savedDeliveryOption.name}"]`);
+        if (radioToSelect) {
+            radioToSelect.checked = true;
+        }
+    }
+    
+    // Përditëso kohën e parashikuar të transportit për opsionin aktual
+    const checkedOption = document.querySelector('input[name="delivery"]:checked');
+    if (checkedOption) {
+        updateDeliveryEstimate(checkedOption.value);
+    }
+}
+
+// Përditësimi i parashikimit të transportit
+function updateDeliveryEstimate(deliveryType) {
+    const estimateText = document.querySelector('.estimate-text p.estimate-date strong');
+    if (!estimateText) return;
+    
+    estimateText.textContent = getDeliveryEstimate(deliveryType);
+}
+
+// Funksioni ndihmës për të marrë parashikimin e transportit
+function getDeliveryEstimate(deliveryType) {
+    const today = new Date();
+    let daysToAdd = 2;
+    
+    if (deliveryType === 'standard') {
+        daysToAdd = 2;
+    } else if (deliveryType === 'express') {
+        daysToAdd = 1;
+    } else if (deliveryType === 'pickup') {
+        return 'Sot, nëse vini para orës 18:00';
+    }
+    
+    const futureDate = new Date(today);
+    futureDate.setDate(today.getDate() + daysToAdd);
+    
+    // Shto ditë shtesë nëse është fundjavë
+    if (futureDate.getDay() === 0) { // E diel
+        futureDate.setDate(futureDate.getDate() + 1);
+    }
+    
+    const options = { day: 'numeric', month: 'long' };
+    return `Brenda ${daysToAdd} ditëve`;
+}
+
+// Përditësimi i detajet e konfirmimit
 function updateConfirmationDetails(orderSummary, paymentMethodValue) {
     const orderNumberEl = document.getElementById('order-number');
     if (orderNumberEl) orderNumberEl.textContent = orderSummary.orderId;
