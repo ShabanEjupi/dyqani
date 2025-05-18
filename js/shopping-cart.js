@@ -33,6 +33,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('cart-items')) {
         updateCartUI();
     }
+    
+    // Inicializo kuponin manualisht nëse është në faqen e checkout
+    if (document.querySelector('.checkout-progress')) {
+        initCouponCode();
+    }
 });
 
 // Funksioni kryesor i inicializimit
@@ -211,10 +216,11 @@ function updateCartUI() {
     // Përditëso përmbledhjen e shportës
     if (cartSummary) {
         const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-        const shipping = subtotal > 0 ? 2.00 : 0;
+        const shipping = subtotal > 0 ? 2.00 : 0; // Transporti standard
         const total = subtotal + shipping;
         
         cartSummary.innerHTML = `
+            <h3>Përmbledhje e porosisë</h3>
             <div class="summary-item">
                 <span>Nëntotali:</span>
                 <span>${subtotal.toFixed(2)} €</span>
@@ -411,6 +417,10 @@ function initCouponCode() {
             applyCouponCode(couponInput.value);
         }
     });
+    
+    // Reset state to ensure it starts in "apply" mode
+    couponInput.disabled = false;
+    applyButton.textContent = 'Apliko';
     
     // Check for existing coupon in session storage
     const existingCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
