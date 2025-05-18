@@ -1312,7 +1312,7 @@ function generateOrderSummary() {
     };
 }
 
-// Përditëso të dhënat e konfirmimit
+// Riparimi në funksionin updateConfirmationDetails()
 function updateConfirmationDetails(orderSummary) {
     console.log("Updating confirmation details with:", orderSummary);
     
@@ -1370,7 +1370,7 @@ function updateConfirmationDetails(orderSummary) {
             finalSummaryHTML += `
                 <div class="summary-item">
                     <span>Zbritja (${orderSummary.coupon.code}):</span>
-                    <span>${orderSummary.coupon.discountAmount.toFixed(2)} €</span>
+                    <span>${orderSummary.discount.toFixed(2)} €</span>
                 </div>
             `;
         }
