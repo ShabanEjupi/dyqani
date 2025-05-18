@@ -149,8 +149,30 @@ function initCheckoutSteps() {
     
     if (nextToStep4) {
         nextToStep4.addEventListener('click', function() {
-            // LOGGING: Check cart content from localStorage at the moment of click
-            console.log('[DEBUG] nextToStep4 clicked. Cart from localStorage:', localStorage.getItem('cart'));
+            const rawCartFromLocalStorage = localStorage.getItem('cart');
+            console.log('[DEBUG] nextToStep4 clicked. Shporta e papërpunuar nga localStorage:', rawCartFromLocalStorage);
+            
+            let parsedCartForSummary;
+            try {
+                parsedCartForSummary = JSON.parse(rawCartFromLocalStorage || '[]');
+                console.log('[DEBUG] Artikujt e shportës së përpunuar që do të përdoren për përmbledhje:', JSON.stringify(parsedCartForSummary, null, 2));
+                if (parsedCartForSummary.length > 0) {
+                    parsedCartForSummary.forEach((item, index) => {
+                        console.log(`[DEBUG] Artikulli ${index} për përmbledhje: emri=${item.name}, çmimi=${item.price}, sasia=${item.quantity}`);
+                        if (item.price === undefined || typeof item.price !== 'number' || isNaN(item.price)) {
+                            console.warn(`[DEBUG] Artikulli ${index} ('${item.name}') ka një çmim të pavlefshëm: ${item.price}`);
+                        }
+                        if (item.quantity === undefined || typeof item.quantity !== 'number' || isNaN(item.quantity)) {
+                            console.warn(`[DEBUG] Artikulli ${index} ('${item.name}') ka një sasi të pavlefshme: ${item.quantity}`);
+                        }
+                    });
+                } else {
+                    console.warn('[DEBUG] Shporta është bosh sipas të dhënave të përpunuara për përmbledhje.');
+                }
+            } catch (e) {
+                console.error('[DEBUG] Gabim gjatë përpunimit të shportës nga localStorage për përmbledhje:', e);
+                parsedCartForSummary = [];
+            }
             
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
             if (!selectedPayment) {
@@ -158,22 +180,19 @@ function initCheckoutSteps() {
                 return;
             }
             const paymentMethodValue = selectedPayment.value;
-            console.log('Proceeding to confirmation with payment method:', paymentMethodValue);
+            console.log('Duke vazhduar në konfirmim me metodën e pagesës:', paymentMethodValue);
 
             const orderSummary = generateOrderSummary(); 
             if (!orderSummary) {
                 showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
                 return;
             }
-            // LOGGING: Check the generated order summary
-            console.log('[DEBUG] Order summary generated in nextToStep4:', JSON.stringify(orderSummary, null, 2));
+            console.log('[DEBUG] Përmbledhja e porosisë e gjeneruar në nextToStep4:', JSON.stringify(orderSummary, null, 2));
             
             orderSummary.paymentMethod = paymentMethodValue; 
 
-            // Store the generated summary in sessionStorage for the invoice download function
             sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
 
-            // Update common confirmation page details
             const orderNumberEl = document.getElementById('order-number');
             if (orderNumberEl) orderNumberEl.textContent = orderSummary.orderId;
 
@@ -204,12 +223,11 @@ function initCheckoutSteps() {
                 redirectToPayPal(orderSummary); 
             } else {
                 goToStep(4);
-                // Clear cart ONLY for non-PayPal orders AFTER everything is processed for step 4
                 localStorage.setItem('cart', JSON.stringify([]));
                 if (typeof updateCartCount === 'function') {
                     updateCartCount();
                 }
-                console.log('Order submitted for cash/bank:', orderSummary);
+                console.log('Porosia u dërgua për pagesë cash/bank:', orderSummary);
             }
         });
     }
@@ -811,8 +829,30 @@ function initCheckoutSteps() {
     
     if (nextToStep4) {
         nextToStep4.addEventListener('click', function() {
-            // LOGGING: Check cart content from localStorage at the moment of click
-            console.log('[DEBUG] nextToStep4 clicked. Cart from localStorage:', localStorage.getItem('cart'));
+            const rawCartFromLocalStorage = localStorage.getItem('cart');
+            console.log('[DEBUG] nextToStep4 clicked. Shporta e papërpunuar nga localStorage:', rawCartFromLocalStorage);
+            
+            let parsedCartForSummary;
+            try {
+                parsedCartForSummary = JSON.parse(rawCartFromLocalStorage || '[]');
+                console.log('[DEBUG] Artikujt e shportës së përpunuar që do të përdoren për përmbledhje:', JSON.stringify(parsedCartForSummary, null, 2));
+                if (parsedCartForSummary.length > 0) {
+                    parsedCartForSummary.forEach((item, index) => {
+                        console.log(`[DEBUG] Artikulli ${index} për përmbledhje: emri=${item.name}, çmimi=${item.price}, sasia=${item.quantity}`);
+                        if (item.price === undefined || typeof item.price !== 'number' || isNaN(item.price)) {
+                            console.warn(`[DEBUG] Artikulli ${index} ('${item.name}') ka një çmim të pavlefshëm: ${item.price}`);
+                        }
+                        if (item.quantity === undefined || typeof item.quantity !== 'number' || isNaN(item.quantity)) {
+                            console.warn(`[DEBUG] Artikulli ${index} ('${item.name}') ka një sasi të pavlefshme: ${item.quantity}`);
+                        }
+                    });
+                } else {
+                    console.warn('[DEBUG] Shporta është bosh sipas të dhënave të përpunuara për përmbledhje.');
+                }
+            } catch (e) {
+                console.error('[DEBUG] Gabim gjatë përpunimit të shportës nga localStorage për përmbledhje:', e);
+                parsedCartForSummary = [];
+            }
             
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
             if (!selectedPayment) {
@@ -820,22 +860,19 @@ function initCheckoutSteps() {
                 return;
             }
             const paymentMethodValue = selectedPayment.value;
-            console.log('Proceeding to confirmation with payment method:', paymentMethodValue);
+            console.log('Duke vazhduar në konfirmim me metodën e pagesës:', paymentMethodValue);
 
             const orderSummary = generateOrderSummary(); 
             if (!orderSummary) {
                 showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
                 return;
             }
-            // LOGGING: Check the generated order summary
-            console.log('[DEBUG] Order summary generated in nextToStep4:', JSON.stringify(orderSummary, null, 2));
+            console.log('[DEBUG] Përmbledhja e porosisë e gjeneruar në nextToStep4:', JSON.stringify(orderSummary, null, 2));
             
             orderSummary.paymentMethod = paymentMethodValue; 
 
-            // Store the generated summary in sessionStorage for the invoice download function
             sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
 
-            // Update common confirmation page details
             const orderNumberEl = document.getElementById('order-number');
             if (orderNumberEl) orderNumberEl.textContent = orderSummary.orderId;
 
@@ -871,7 +908,7 @@ function initCheckoutSteps() {
                 if (typeof updateCartCount === 'function') {
                     updateCartCount();
                 }
-                console.log('Order submitted for cash/bank:', orderSummary);
+                console.log('Porosia u dërgua për pagesë cash/bank:', orderSummary);
             }
         });
     }
@@ -1079,8 +1116,6 @@ function redirectToPayPal(orderDetails) {
     // if (typeof updateCartCount === 'function') updateCartCount();
 }
 
-// ...existing code...
-
 function initInvoiceDownload() {
     const downloadButton = document.getElementById('download-invoice');
     if (!downloadButton) {
@@ -1112,13 +1147,16 @@ function initInvoiceDownload() {
 }
 
 function generateAndDownloadInvoice(orderSummary) {
+    console.log('[DEBUG] Funksioni generateAndDownloadInvoice u thirr me përmbledhjen:', JSON.stringify(orderSummary, null, 2));
+
     if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
         showNotification('Libraria jsPDF nuk është ngarkuar. Fatura nuk mund të gjenerohet.', 'error');
-        console.error('jsPDF is not defined. Please include the jsPDF library in your HTML.');
+        console.error('[DEBUG] Libraria jsPDF NUK është e ngarkuar. window.jspdf është:', window.jspdf);
         return;
     }
+    console.log('[DEBUG] Libraria jsPDF ËSHTË e ngarkuar. window.jspdf është:', window.jspdf);
 
-    const { jsPDF } = jspdf; // Correct way to access jsPDF constructor from the UMD global
+    const { jsPDF } = jspdf; 
     const doc = new jsPDF();
 
     let yPos = 20;
@@ -1182,22 +1220,27 @@ function generateAndDownloadInvoice(orderSummary) {
 
     // Items
     doc.setFontSize(10);
-    orderSummary.items.forEach(item => {
-        const itemPrice = parseFloat(item.price) || 0;
-        const itemQuantity = parseInt(item.quantity) || 0;
-        const itemTotal = itemPrice * itemQuantity;
+    if (orderSummary.items && Array.isArray(orderSummary.items)) {
+        orderSummary.items.forEach(item => {
+            const itemPrice = parseFloat(item.price) || 0;
+            const itemQuantity = parseInt(item.quantity) || 0;
+            const itemTotal = itemPrice * itemQuantity;
 
-        // Handle multi-line item name
-        const itemNameLines = doc.splitTextToSize(item.name || 'Artikull i panjohur', contentWidth * 0.55);
-        let currentYForItem = yPos;
-        doc.text(itemNameLines, leftMargin, currentYForItem);
-        
-        doc.text(itemQuantity.toString(), leftMargin + contentWidth * 0.6, currentYForItem, { align: 'right' });
-        doc.text(`${itemPrice.toFixed(2)} €`, leftMargin + contentWidth * 0.75, currentYForItem, { align: 'right' });
-        doc.text(`${itemTotal.toFixed(2)} €`, leftMargin + contentWidth * 0.95, currentYForItem, { align: 'right' });
-        yPos += (itemNameLines.length * (lineSpacing * 0.8)); // Adjust yPos based on number of lines for item name
-        yPos = Math.max(yPos, currentYForItem + lineSpacing); // Ensure yPos advances at least one line
-    });
+            const itemNameLines = doc.splitTextToSize(item.name || 'Artikull i panjohur', contentWidth * 0.55);
+            let currentYForItem = yPos;
+            doc.text(itemNameLines, leftMargin, currentYForItem);
+            
+            doc.text(itemQuantity.toString(), leftMargin + contentWidth * 0.6, currentYForItem, { align: 'right' });
+            doc.text(`${itemPrice.toFixed(2)} €`, leftMargin + contentWidth * 0.75, currentYForItem, { align: 'right' });
+            doc.text(`${itemTotal.toFixed(2)} €`, leftMargin + contentWidth * 0.95, currentYForItem, { align: 'right' });
+            yPos += (itemNameLines.length * (lineSpacing * 0.8)); // Adjust yPos based on number of lines for item name
+            yPos = Math.max(yPos, currentYForItem + lineSpacing); // Ensure yPos advances at least one line
+        });
+    } else {
+        console.warn("[DEBUG] Nuk ka artikuj në përmbledhjen e porosisë për faturë ose formati është i pasaktë.");
+        addText("Nuk ka artikuj në porosi.", leftMargin);
+        yPos += lineSpacing;
+    }
     doc.line(leftMargin, yPos - (lineSpacing * 0.7) , leftMargin + contentWidth, yPos - (lineSpacing*0.7));
     yPos += sectionSpacing * 0.5;
 
@@ -1211,7 +1254,7 @@ function generateAndDownloadInvoice(orderSummary) {
     yPos += lineSpacing;
 
     doc.text("Transporti:", totalsXLabel, yPos, { align: 'right' });
-    doc.text(`${(parseFloat(orderSummary.shipping.price) || 0).toFixed(2)} €`, totalsXValue, yPos, { align: 'right' });
+    doc.text(`${(parseFloat(orderSummary.shipping?.price) || 0).toFixed(2)} €`, totalsXValue, yPos, { align: 'right' });
     yPos += lineSpacing;
 
     if (orderSummary.coupon && orderSummary.coupon.discountAmount) {
@@ -1282,4 +1325,4 @@ function initCheckoutPage() {
     console.log('Checkout page fully initialized');
 }
 
-// ... (rest of your checkout.js code) ...
+//# sourceMappingURL=checkout.js.map
