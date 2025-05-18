@@ -628,9 +628,9 @@ function generateInvoicePDF() {
         
         // Add discount if applicable
         let currentYPos = summaryYPos + 7;
-        if (orderSummary.coupon) {
+        if (orderSummary.coupon && orderSummary.discount > 0) {
             doc.text(`Zbritja (${orderSummary.coupon.code}):`, 130, currentYPos);
-            doc.text(`-${orderSummary.coupon.discountAmount.toFixed(2)} €`, 170, currentYPos, { align: 'right' });
+            doc.text(`-${orderSummary.discount.toFixed(2)} €`, 170, currentYPos, { align: 'right' });
             currentYPos += 7;
         }
         
