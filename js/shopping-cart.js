@@ -459,10 +459,15 @@ function initCheckoutSteps() {
     }
 }
 
-// Inicializimi i funksionalitetit të kodit promocional - zëvendësim i plotë
+// Inicializimi i funksionalitetit të kodit promocional - përmirësim
 function initCouponCode() {
     console.log("Initializing coupon code functionality");
     
+    // Create a standalone form wrapper to completely isolate the coupon functionality
+    const couponForm = document.createElement('form');
+    couponForm.id = 'coupon-form-wrapper';
+    
+    // Find the original elements
     const couponInput = document.getElementById('coupon-code');
     const applyButton = document.getElementById('apply-coupon');
     
@@ -471,106 +476,62 @@ function initCouponCode() {
         return;
     }
     
-    // Rregullimi kryesor: Përdor preventDefault dhe bind për event handler-in
-    applyButton.addEventListener('click', function(e) {
-        e.preventDefault(); // Parandalon refreshimin e faqes
-        const code = couponInput.value.trim();
+    // Get the coupon section
+    const couponSection = couponInput.closest('.coupon-form');
+    
+    if (couponSection) {
+        // Replace the original elements with our isolated form
+        const clonedInput = couponInput.cloneNode(true);
+        const clonedButton = applyButton.cloneNode(true);
         
-        // Kontrollojmë nëse po heqim apo aplikojmë
-        if (this.textContent.trim() === 'Hiq') {
-            // Hiq kuponin nga sessionStorage
-            sessionStorage.removeItem('appliedCoupon');
-            
-            // Reset UI
-            couponInput.value = '';
-            couponInput.disabled = false;
-            couponInput.classList.remove('coupon-valid', 'coupon-invalid');
-            this.textContent = 'Apliko';
-            
-            // Përditëso përmbledhjen
-            updateFullCheckoutUI();
-            showNotification('Kodi promocional u hoq me sukses.', 'info');
-        } else {
-            // Aplikojmë kuponin
-            if (!code) {
-                showNotification('Ju lutemi shkruani një kod promocional.');
-                return;
+        couponForm.appendChild(clonedInput);
+        couponForm.appendChild(clonedButton);
+        couponSection.innerHTML = '';
+        couponSection.appendChild(couponForm);
+        
+        // Completely prevent form submission
+        couponForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+        
+        // Re-attach the event listeners to the new elements
+        const newCouponInput = document.getElementById('coupon-code');
+        const newApplyButton = document.getElementById('apply-coupon');
+        
+        // Apply coupon when button is clicked
+        newApplyButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            applyCouponCode(newCouponInput.value.trim());
+            return false;
+        });
+        
+        // Apply coupon when Enter is pressed
+        newCouponInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                applyCouponCode(this.value.trim());
+                return false;
             }
-            
-            // Lista e kuponëve të vlefshëm
-            const validCoupons = {
-                'WELCOME15': {
-                    type: 'percent',
-                    discount: 0.15,
-                    description: '15% zbritje'
-                },
-                'ENISI10': {
-                    type: 'percent',
-                    discount: 0.10,
-                    description: '10% zbritje'
-                },
-                'FREEDELIVERY': {
-                    type: 'shipping',
-                    discount: 'free',
-                    description: 'Dërgesa falas'
-                }
-            };
-            
-            const normalizedCode = code.toUpperCase();
-            
-            // Kontrollo nëse kuponi është i vlefshëm
-            if (validCoupons[normalizedCode]) {
-                // Kuponi është i vlefshëm
-                const coupon = {
-                    code: normalizedCode,
-                    ...validCoupons[normalizedCode]
-                };
-                
-                // Ruaj kuponin në sessionStorage
-                sessionStorage.setItem('appliedCoupon', JSON.stringify(coupon));
-                
-                // Update UI
-                couponInput.classList.add('coupon-valid');
-                couponInput.classList.remove('coupon-invalid');
-                couponInput.disabled = true;
-                this.textContent = 'Hiq';
-                
-                // Create success message
-                let successMessage = '';
-                if (coupon.type === 'percent') {
-                    successMessage = `Kodi promocional ${normalizedCode} u aplikua me sukses. ${coupon.description}.`;
-                } else if (coupon.type === 'shipping') {
-                    successMessage = 'Kodi promocional u aplikua. Dërgesa juaj është falas!';
-                }
-                
-                // Përditëso përmbledhjen e porosisë
-                updateFullCheckoutUI();
-                showNotification(successMessage, 'success');
-            } else {
-                // Kuponi nuk është i vlefshëm
-                couponInput.classList.add('coupon-invalid');
-                couponInput.classList.remove('coupon-valid');
-                showNotification('Kodi promocional nuk është i vlefshëm.', 'error');
-            }
-        }
-    });
+        });
+    }
     
-    // Apply coupon when Enter is pressed
-    couponInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Parandalon refreshimin e faqes
-            applyButton.click(); // Thërret click event në buton
-        }
-    });
-    
-    // Kontrollo për kupon ekzistues në session storage
+    // Check for existing coupon
     const existingCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
     if (existingCoupon) {
-        console.log("Found existing coupon:", existingCoupon);
-        couponInput.value = existingCoupon.code;
-        couponInput.classList.add('coupon-valid');
-        couponInput.disabled = true;
-        applyButton.textContent = 'Hiq';
+        // Update UI for existing coupon
+        const input = document.getElementById('coupon-code');
+        const button = document.getElementById('apply-coupon');
+        
+        if (input && button) {
+            input.value = existingCoupon.code;
+            input.classList.add('coupon-valid');
+            input.disabled = true;
+            button.textContent = 'Hiq';
+        }
     }
 }
 
@@ -1432,7 +1393,7 @@ function loadRecommendedProducts() {
                 const productToAdd = {...product, quantity: 1};
                 addToCart(productToAdd);
                 
-                // NDRYSHIMI KRYESOR: Përditëso të gjithë UI-n pas shtimit
+                // NDRYSHIMI KRYSOR: Përditëso të gjithë UI-n pas shtimit
                 updateFullCheckoutUI();
                 
                 // Trego njoftim të suksesshëm
