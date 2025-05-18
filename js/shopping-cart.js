@@ -1171,6 +1171,7 @@ function applyCouponCode(code) {
     
     // Po aplikojmë një kupon - kodi është marrë nga input-i tashmë
     const normalizedCode = code.toUpperCase();
+    console.log("Attempting to apply coupon code:", normalizedCode);
     
     // Lista e kuponëve të vlefshëm
     const validCoupons = {
@@ -1190,6 +1191,8 @@ function applyCouponCode(code) {
             description: 'Dërgesa falas'
         }
     };
+    
+    console.log("Checking if coupon is valid. Available coupons:", Object.keys(validCoupons));
     
     // Kontrollo nëse kuponi është i vlefshëm
     if (validCoupons[normalizedCode]) {
@@ -1224,6 +1227,7 @@ function applyCouponCode(code) {
         showNotification(successMessage, 'success');
     } else {
         // Kuponi nuk është i vlefshëm
+        console.error("Invalid coupon code:", normalizedCode);
         couponInput.classList.add('coupon-invalid');
         couponInput.classList.remove('coupon-valid');
         showNotification('Kodi promocional nuk është i vlefshëm.', 'error');
@@ -1442,6 +1446,8 @@ function loadRecommendedProducts() {
 
 // Funksion i ri për përditësimin e plotë të UI
 function updateFullCheckoutUI() {
+    console.log("Updating full checkout UI");
+    
     // Përditëso shportën
     updateCartUI();
     
@@ -1454,4 +1460,7 @@ function updateFullCheckoutUI() {
     if (document.getElementById('payment-summary-details')) {
         updatePaymentSummary();
     }
+    
+    // Përditëso numëruesin e artikujve
+    updateCartCount();
 }
