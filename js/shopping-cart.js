@@ -728,21 +728,6 @@ function initPayPalCheckout() {
         return;
     }
     
-    // Krijojmë një kontejner për butonin PayPal nëse nuk ekziston
-    let paypalButtonContainer = document.getElementById('paypal-button-container');
-    if (!paypalButtonContainer) {
-        paypalButtonContainer = document.createElement('div');
-        paypalButtonContainer.id = 'paypal-button-container';
-        paypalButtonContainer.className = 'paypal-buttons-wrapper';
-        paypalButtonContainer.style.display = 'none';
-        
-        // Vendosim kontejnerin poshtë metodave të pagesës
-        const paymentSection = document.querySelector('.payment-section');
-        if (paymentSection) {
-            paymentSection.appendChild(paypalButtonContainer);
-        }
-    }
-    
     // Ndryshojmë stilin e butonit kur përdoruesi zgjedh PayPal
     for (let i = 0; i < paymentMethods.length; i++) {
         paymentMethods[i].addEventListener('change', function() {
@@ -774,66 +759,7 @@ function initPayPalCheckout() {
             const paymentMethod = selectedPayment.value;
             console.log("Selected payment method:", paymentMethod);
             
-            // If PayPal is selected, handle differently
-            if (paymentMethod === 'paypal') {
-                e.preventDefault(); // Prevent default navigation
-                
-                // Generate order summary
-                const orderSummary = generateOrderSummary();
-                if (!orderSummary) {
-                    showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
-                    return;
-                }
-                
-                // Save payment method to order summary
-                orderSummary.paymentMethod = paymentMethod;
-                
-                // Show PayPal button container
-                paypalButtonContainer.innerHTML = '<div class="loading-text">Duke ngarkuar PayPal...</div>';
-                paypalButtonContainer.style.display = 'block';
-                
-                // Scroll to PayPal button container
-                paypalButtonContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Simulate loading PayPal button (in a real app, you would integrate with PayPal SDK here)
-                setTimeout(() => {
-                    paypalButtonContainer.innerHTML = `
-                        <div class="paypal-message">
-                            <h3>PayPal Demo Mode</h3>
-                            <p>Në një implementim të vërtetë, këtu do të shfaqej butoni i PayPal.</p>
-                            <button class="btn paypal-button" id="simulate-paypal-success">
-                                Simuloni Pagesë të Suksesshme 
-                                <i class="fab fa-paypal"></i>
-                            </button>
-                        </div>
-                    `;
-                    
-                    // Simulate successful PayPal payment
-                    document.getElementById('simulate-paypal-success').addEventListener('click', function() {
-                        // Save order with payment details
-                        sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
-                        
-                        // Update confirmation page with order details
-                        updateConfirmationDetails(orderSummary);
-                        
-                        // Navigate to confirmation step
-                        goToStep(4);
-                        
-                        // Clear cart after successful order
-                        cart = [];
-                        localStorage.setItem('cart', JSON.stringify([]));
-                        updateCartCount();
-                        
-                        // Show success notification
-                        showNotification('Pagesa me PayPal u krye me sukses!', 'success');
-                    });
-                }, 1500);
-                
-                return; // Stop here for PayPal
-            }
-            
-            // For other payment methods, proceed with standard checkout
-            // (existing code for non-PayPal payment methods)
+            // Generate order summary for any payment method
             const orderSummary = generateOrderSummary();
             if (!orderSummary) {
                 showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
@@ -843,6 +769,32 @@ function initPayPalCheckout() {
             // Save payment method to order summary
             orderSummary.paymentMethod = paymentMethod;
             
+            // If PayPal is selected, redirect to PayPal.me
+            if (paymentMethod === 'paypal') {
+                e.preventDefault(); // Prevent default navigation
+                
+                // Generate PayPal.me URL with the proper username and amount
+                const paypalUsername = 'shabanejupi5'; // Username-i juaj i PayPal.me
+                const amount = orderSummary.total.toFixed(2);
+                const description = `Order ${orderSummary.orderId} - Enisi Center`;
+                
+                const paypalUrl = `https://www.paypal.com/paypalme/${paypalUsername}/${amount}?description=${encodeURIComponent(description)}`;
+                
+                // Save order data before redirect
+                sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+                
+                // Show notification before redirect
+                showNotification('Duke ju ridrejtuar në PayPal për pagesë...', 'info');
+                
+                // Redirect to PayPal.me after a short delay
+                setTimeout(() => {
+                    window.location.href = paypalUrl;
+                }, 1500);
+                
+                return; // Stop here for PayPal
+            }
+            
+            // For other payment methods, proceed with standard checkout
             // Save order summary for invoice generation
             sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
             
@@ -1173,7 +1125,7 @@ function updatePaymentSummary() {
     if (bankTotal) bankTotal.textContent = orderSummary.total.toFixed(2);
 }
 
-// Funkioni i rregulluar për kodin promocional
+// Funksioni i rregulluar për kodin promocional
 function applyCouponCode(code) {
     console.log("Handling coupon code:", code);
     
@@ -1288,6 +1240,9 @@ function generateOrderSummary() {
         return null;
     }
     
+    // Gjenero një ID unike të porositë
+    const orderId = 'EC' + Date.now().toString().slice(-8);
+    
     // Mbledh të dhënat e artikujve
     let subtotal = 0;
     const itemsForSummary = cart.map(item => {
@@ -1301,13 +1256,14 @@ function generateOrderSummary() {
         };
     });
     
-    // Merr të dhënat e transportit dhe kuponit
+    // Merr opsionin e transportit
     const deliveryOption = JSON.parse(sessionStorage.getItem('deliveryOption')) || 
-                          { name: 'standard', price: 2.00, description: 'Dërgesa standarde' };
+                         { name: 'standard', price: 2.00, description: 'Dërgesa standarde (2-3 ditë pune)' };
     
-    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon')) || null;
+    // Merr kuponin e aplikuar
+    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
     
-    // Llogarit zbritjet dhe totalin
+    // Llogarit zbritjen
     let discountAmount = 0;
     let shippingPrice = deliveryOption.price;
     
@@ -1321,18 +1277,18 @@ function generateOrderSummary() {
         }
     }
     
+    // Llogarit totalin
     const total = subtotal - discountAmount + shippingPrice;
     
-    // Gjenero ID unike të porosisë
-    const orderId = 'EC' + Date.now().toString().slice(-8);
-    
-    // Merr informacionin e klientit nga forma
-    const fullname = document.getElementById('fullname')?.value || '';
-    const email = document.getElementById('email')?.value || '';
-    const phone = document.getElementById('phone')?.value || '';
-    const address = document.getElementById('address')?.value || '';
-    const city = document.getElementById('city')?.value || '';
-    const notes = document.getElementById('notes')?.value || '';
+    // Merr të dhënat e blerësit
+    const customerInfo = {
+        fullname: document.getElementById('fullname')?.value || 'N/A',
+        email: document.getElementById('email')?.value || 'N/A',
+        phone: document.getElementById('phone')?.value || 'N/A',
+        address: document.getElementById('address')?.value || 'N/A',
+        city: document.getElementById('city')?.value || 'N/A',
+        notes: document.getElementById('notes')?.value || ''
+    };
     
     // Krijo objektin e përmbledhjes së porosisë
     return {
@@ -1340,24 +1296,15 @@ function generateOrderSummary() {
         date: new Date().toISOString(),
         items: itemsForSummary,
         subtotal: parseFloat(subtotal.toFixed(2)),
+        discount: parseFloat(discountAmount.toFixed(2)),
         shipping: {
-            name: deliveryOption.name || deliveryOption.description,
-            price: parseFloat(shippingPrice.toFixed(2))
+            price: parseFloat(shippingPrice.toFixed(2)),
+            method: deliveryOption
         },
-        coupon: appliedCoupon ? {
-            code: appliedCoupon.code,
-            discountAmount: parseFloat(discountAmount.toFixed(2))
-        } : null,
         total: parseFloat(total.toFixed(2)),
-        customerInfo: {
-            fullname,
-            email,
-            phone,
-            address,
-            city,
-            notes
-        },
-        paymentMethod: ''
+        coupon: appliedCoupon,
+        customerInfo: customerInfo,
+        paymentMethod: null // Will be set later
     };
 }
 
@@ -1499,15 +1446,12 @@ function updateFullCheckoutUI() {
     updateCartUI();
     
     // Përditëso përmbledhjen e porosisë
-    updateOrderSummaries();
-    
-    // Përditëso përmbledhjen e pagesës
-    if (window.currentOrderSummary) {
-        updatePaymentSummary();
+    if (document.getElementById('order-items-summary')) {
+        updateOrderSummaries();
     }
     
-    // Përditëso numëruesin e artikujve
-    updateCartCount();
-    
-    console.log("Full checkout UI updated");
+    // Përditëso përmbledhjen e pagesës
+    if (document.getElementById('payment-summary-details')) {
+        updatePaymentSummary();
+    }
 }
