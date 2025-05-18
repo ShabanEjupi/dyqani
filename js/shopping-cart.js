@@ -276,9 +276,9 @@ function initCheckoutSteps() {
         });
     }
 
-    // Përmirësimi i event listener për butonin Përfundo porosinë
     if (nextToStep4) {
         nextToStep4.addEventListener('click', function() {
+            console.log("Completing order button clicked");
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
             if (!selectedPayment) {
                 showNotification('Ju lutemi zgjidhni një metodë pagese.');
@@ -286,37 +286,34 @@ function initCheckoutSteps() {
             }
             
             const paymentMethodValue = selectedPayment.value;
-            console.log('Duke vazhduar në konfirmim me metodën e pagesës:', paymentMethodValue);
-
-            // NDRYSHIMI KRYESOR: Mos gjenero përmbledhjen e porosisë nëse e kemi tashmë
-            let orderSummary = window.currentOrderSummary;
+            console.log('Metoda e pagesës:', paymentMethodValue);
             
-            // Nëse nuk ekziston, gjenero një të re
+            const orderSummary = generateOrderSummary();
+            console.log("Generated order summary:", orderSummary);
+            
             if (!orderSummary) {
-                orderSummary = generateOrderSummary();
-                if (!orderSummary) {
-                    showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
-                    return;
-                }
+                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+                return;
             }
             
-            window.currentOrderSummary = orderSummary;
             orderSummary.paymentMethod = paymentMethodValue;
 
+            // Ruaj përmbledhjen për faturën
             sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+            console.log("Stored order summary in sessionStorage");
 
-            // Përditëso detajet në konfirmim
+            // Përditëso të dhënat e konfirmimit
             updateConfirmationDetails(orderSummary, paymentMethodValue);
-
-            if (paymentMethodValue === 'paypal') {
-                redirectToPayPal(orderSummary);
-            } else {
-                goToStep(4);
-                // Pastro shportën vetëm PASI përmbledhja është ruajtur
-                cart = [];
-                localStorage.setItem('cart', JSON.stringify([]));
-                updateCartCount();
-            }
+            
+            // Aktivizo hapin 4
+            goToStep(4);
+            
+            // Pastro shportën vetëm pasi të kemi kaluar në hapin 4
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify([]));
+            updateCartCount();
+            
+            console.log("Order completed successfully");
         });
     }
 
@@ -335,6 +332,8 @@ function initCheckoutSteps() {
 
     // Funksioni i navigimit
     function goToStep(step) {
+        console.log("Navigating to step:", step);
+        
         [step1, step2, step3, step4].forEach(s => {
             if (s) s.classList.remove('active');
         });
@@ -398,31 +397,15 @@ function initCouponCode() {
     }
 }
 
+// ===== KODI I RI PËR TË RREGULLUAR APLIKIMET E KUPONAVE =====
+
 // Funksioni për aplikimin e kodit promocional
 function applyCouponCode(code) {
+    console.log("Applying coupon code:", code);
     const couponInput = document.getElementById('coupon-code');
     const applyButton = document.getElementById('apply-coupon');
     
     if (!couponInput || !applyButton) return;
-    
-    // Kontrollo nëse ka kupon tashmë dhe nëse butoni është "Hiq"
-    const existingCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
-    // NDRYSHIMI KRITIK: Mos kontrollo vetëm ekzistencën e kuponit, por edhe nëse butoni është "Hiq"
-    if (existingCoupon && applyButton.textContent === 'Hiq') {
-        // Hiq kuponin
-        sessionStorage.removeItem('appliedCoupon');
-        couponInput.value = '';
-        couponInput.classList.remove('coupon-valid');
-        couponInput.classList.remove('coupon-invalid');
-        couponInput.disabled = false;
-        applyButton.textContent = 'Apliko';
-        
-        // Përditëso përmbledhjen e porosisë
-        updateOrderSummaries();
-        
-        showNotification('Kodi promocional u hoq me sukses.');
-        return;
-    }
     
     // Lista e kuponëve të vlefshëm
     const validCoupons = {
@@ -443,8 +426,30 @@ function applyCouponCode(code) {
         }
     };
     
-    // Kontrollo nëse kodi është i vlefshëm
+    // Normalizimi i kodit
     const normalizedCode = code.trim().toUpperCase();
+    
+    // Kontrollo veprimin heqje/aplikim
+    const isRemoveAction = applyButton.textContent.trim() === 'Hiq';
+    
+    if (isRemoveAction) {
+        // HEQJE E KUPONIT
+        console.log("Removing existing coupon");
+        sessionStorage.removeItem('appliedCoupon');
+        couponInput.value = '';
+        couponInput.classList.remove('coupon-valid');
+        couponInput.classList.remove('coupon-invalid');
+        couponInput.disabled = false;
+        applyButton.textContent = 'Apliko';
+        
+        // Përditëso përmbledhjet e porosisë
+        updateOrderSummaries();
+        
+        showNotification('Kodi promocional u hoq me sukses.', 'info');
+        return;
+    }
+    
+    // SHTIM I KUPONIT TË RI
     
     if (normalizedCode === '') {
         showNotification('Ju lutemi shkruani një kod promocional.');
@@ -457,6 +462,8 @@ function applyCouponCode(code) {
             code: normalizedCode,
             ...validCoupons[normalizedCode]
         };
+        
+        console.log("Valid coupon found:", coupon);
         
         // Ruaj kuponin në sessionStorage
         sessionStorage.setItem('appliedCoupon', JSON.stringify(coupon));
@@ -487,227 +494,268 @@ function applyCouponCode(code) {
     }
 }
 
-// Ngarkimi i produkteve të rekomanduara
-function loadRecommendedProducts() {
-    const recommendationsContainer = document.querySelector('.recommendation-items');
-    if (!recommendationsContainer) return;
+// Rregulimi i funksionit të përmbledhjes
+function updateOrderSummaries() {
+    console.log("Updating order summaries");
+    // Merr përmbledhjen e porosisë në hapin 1
+    const orderItemsSummary = document.getElementById('order-items-summary');
+    if (!orderItemsSummary) return;
     
-    // Sigurohu që kemi produkte dhe shportë
-    if (!window.products || !Array.isArray(window.products) || window.products.length === 0) {
-        console.warn('Nuk janë gjetur produkte për rekomandimet.');
-        
-        // Nëse nuk kemi produkte, përdor ato që kemi definuar në products.js 
-        if (typeof enisiProducts !== 'undefined' && enisiProducts.length > 0) {
-            window.products = enisiProducts;
-        } else {
-            recommendationsContainer.innerHTML = '<p>Nuk ka produkte të rekomanduara për momentin.</p>';
-            return;
-        }
-    }
-    
-    // Merr IDs e produkteve në shportë
-    const cartProductIds = cart.map(item => item.id);
-    
-    // Filtro produktet që nuk janë në shportë
-    const availableProducts = window.products.filter(product => !cartProductIds.includes(product.id));
-    
-    // Nëse nuk kemi produkte të disponueshme
-    if (availableProducts.length === 0) {
-        recommendationsContainer.innerHTML = '<p>Nuk ka produkte të rekomanduara për momentin.</p>';
+    // Sigurohu që kemi artikuj në shportë
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+        orderItemsSummary.innerHTML = '<p class="empty-cart">Shporta juaj është bosh</p>';
         return;
     }
     
-    // Zgjidh 3 produkte të rastësishme
-    const recommendations = getRandomProducts(availableProducts, 3);
+    // Llogarit nëntotalin
+    let subtotal = 0;
+    cart.forEach(item => {
+        console.log(`Item ${item.name}: price=${item.price}, quantity=${item.quantity}, total=${item.price * item.quantity}`);
+        subtotal += item.price * item.quantity;
+    });
     
-    // Pastro kontejnerin
-    recommendationsContainer.innerHTML = '';
+    console.log("Calculated subtotal:", subtotal);
     
-    // Shto produktet e rekomanduara në UI
-    recommendations.forEach(product => {
-        const recommendationItem = document.createElement('div');
-        recommendationItem.className = 'recommendation-item';
-        
-        recommendationItem.innerHTML = `
-            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/80x80?text=Pa+Foto'">
-            <div class="rec-details">
-                <h4>${product.name}</h4>
-                <p>${product.price.toFixed(2)} €</p>
+    // Merr opsionin e transportit
+    const deliveryOption = JSON.parse(sessionStorage.getItem('deliveryOption')) || 
+                         { name: 'standard', price: 2.00, description: 'Dërgesa standarde (2-3 ditë pune)' };
+    
+    // Merr kuponin e aplikuar
+    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+    console.log("Applied coupon:", appliedCoupon);
+    
+    // Llogarit zbritjen
+    let discountAmount = 0;
+    let shippingPrice = deliveryOption.price;
+    
+    if (appliedCoupon) {
+        console.log("Processing coupon:", appliedCoupon);
+        if (appliedCoupon.type === 'percent') {
+            discountAmount = subtotal * appliedCoupon.discount;
+            console.log(`Calculating ${appliedCoupon.discount * 100}% discount: ${discountAmount}`);
+        } else if (appliedCoupon.type === 'fixed') {
+            discountAmount = appliedCoupon.discount;
+        } else if (appliedCoupon.type === 'shipping' && appliedCoupon.discount === 'free') {
+            shippingPrice = 0;
+            console.log("Free shipping applied");
+        }
+    }
+    
+    // Llogarit totalin
+    const total = subtotal - discountAmount + shippingPrice;
+    console.log(`Final calculation: ${subtotal} - ${discountAmount} + ${shippingPrice} = ${total}`);
+    
+    // Ruaj përmbledhjen e porosisë për përdorim të mëvonshëm
+    window.currentOrderSummary = {
+        items: cart.map(item => ({...item})),
+        subtotal: parseFloat(subtotal.toFixed(2)),
+        discount: parseFloat(discountAmount.toFixed(2)),
+        shipping: parseFloat(shippingPrice.toFixed(2)),
+        total: parseFloat(total.toFixed(2)),
+        coupon: appliedCoupon
+    };
+
+    // Përditëso HTML e përmbledhjes
+    let summaryHTML = '';
+    
+    // Shto artikujt
+    cart.forEach(item => {
+        summaryHTML += `
+            <div class="summary-item">
+                <span>${item.name} (x${item.quantity})</span>
+                <span>${(item.price * item.quantity).toFixed(2)} €</span>
             </div>
-            <button class="btn-add-recommendation" title="Shto në shportë" data-product-id="${product.id}">+</button>
         `;
-        
-        recommendationsContainer.appendChild(recommendationItem);
-        
-        // Shto event listener për butonin e shtimit
-        const addButton = recommendationItem.querySelector('.btn-add-recommendation');
-        addButton.addEventListener('click', function() {
-            const productToAdd = window.products.find(p => p.id === product.id);
-            if (productToAdd) {
-                addToCart(productToAdd);
-                
-                // Përditëso rekomandimet pas shtimit të produktit
-                setTimeout(() => {
-                    loadRecommendedProducts();
-                }, 500);
-            }
-        });
-    });
-}
-
-// Zgjedhja e produkteve të rastësishme
-function getRandomProducts(productsArray, count) {
-    // Kopjo arrayn që të mos ndryshojmë origjinalin
-    const productsCopy = [...productsArray];
-    
-    // Përzij arrayn
-    for (let i = productsCopy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [productsCopy[i], productsCopy[j]] = [productsCopy[j], productsCopy[i]];
-    }
-    
-    // Kthe numrin e kërkuar të produkteve
-    return productsCopy.slice(0, count);
-}
-
-// Inicializimi i opsioneve të transportit
-function initDeliveryOptions() {
-    const deliveryOptions = document.querySelectorAll('.delivery-option input');
-    if (!deliveryOptions || deliveryOptions.length === 0) return;
-    
-    // Shto event listeners për të gjitha radiobutton-at e transportit
-    deliveryOptions.forEach(option => {
-        option.addEventListener('change', function() {
-            const deliveryValue = this.value;
-            
-            // Krijo objektin e transportit bazuar në vlerën e zgjedhur
-            let deliveryOption = {
-                name: deliveryValue,
-                price: 2.00,
-                description: 'Dërgesa standarde (2-3 ditë pune)'
-            };
-            
-            if (deliveryValue === 'express') {
-                deliveryOption = {
-                    name: 'express',
-                    price: 8.00,
-                    description: 'Dërgesa e shpejtë (24 orë)'
-                };
-            } else if (deliveryValue === 'pickup') {
-                deliveryOption = {
-                    name: 'pickup',
-                    price: 0.00,
-                    description: 'Marrje në dyqan (Falas)'
-                };
-            }
-            
-            // Ruaj opsionin e transportit në sessionStorage
-            sessionStorage.setItem('deliveryOption', JSON.stringify(deliveryOption));
-            
-            // Përditëso përmbledhjet e porosisë
-            updateOrderSummaries();
-            
-            // Përditëso kohën e parashikuar të transportit
-            updateDeliveryEstimate(deliveryValue);
-        });
     });
     
-    // Kontrollo nëse ka opsion transporti të ruajtur në sessionStorage
-    const savedDeliveryOption = JSON.parse(sessionStorage.getItem('deliveryOption'));
-    if (savedDeliveryOption) {
-        // Zgjidh radiobutton-in e duhur
-        const radioToSelect = document.querySelector(`input[name="delivery"][value="${savedDeliveryOption.name}"]`);
-        if (radioToSelect) {
-            radioToSelect.checked = true;
+    // Shto nëntotalin
+    summaryHTML += `
+        <div class="summary-item">
+            <span>Nëntotali:</span>
+            <span>${subtotal.toFixed(2)} €</span>
+        </div>
+    `;
+    
+    // Shto zbritjen nëse është aplikuar një kupon
+    if (appliedCoupon) {
+        if (appliedCoupon.type === 'shipping') {
+            summaryHTML += `
+                <div class="summary-item">
+                    <span>Zbritja (${appliedCoupon.code}):</span>
+                    <span>Transport falas</span>
+                </div>
+            `;
+        } else if (appliedCoupon.type === 'percent') {
+            summaryHTML += `
+                <div class="summary-item">
+                    <span>Zbritja (${appliedCoupon.code}):</span>
+                    <span>-${discountAmount.toFixed(2)} €</span>
+                </div>
+            `;
         }
-    } else {
-        // Vendos opsionin standard si default dhe ruaje në sessionStorage
-        const standardOption = {
-            name: 'standard',
-            price: 2.00,
-            description: 'Dërgesa standarde (2-3 ditë pune)'
-        };
-        sessionStorage.setItem('deliveryOption', JSON.stringify(standardOption));
+    }
+    
+    // Shto transportin
+    summaryHTML += `
+        <div class="summary-item">
+            <span>Transport (${deliveryOption.description}):</span>
+            <span>${shippingPrice.toFixed(2)} €</span>
+        </div>
+    `;
+    
+    // Shto totalin
+    summaryHTML += `
+        <div class="summary-item total">
+            <span>TOTALI:</span>
+            <span>${total.toFixed(2)} €</span>
+        </div>
+    `;
+    
+    // Përditëso HTML
+    orderItemsSummary.innerHTML = summaryHTML;
+    
+    // Përditëso përmbledhjen e pagesës në hapin 3
+    updatePaymentSummary();
+}
+
+// Funksioni i përmirësuar për të përfunduar porosinë
+function initCheckoutSteps() {
+    // Butonat e navigimit të hapave
+    const nextToStep2 = document.getElementById('next-to-step-2');
+    const nextToStep3 = document.getElementById('next-to-step-3');
+    const nextToStep4 = document.getElementById('next-to-step-4');
+    const backToStep1 = document.getElementById('back-to-step-1');
+    const backToStep2 = document.getElementById('back-to-step-2');
+    
+    // Elementet e hapave
+    const step1 = document.getElementById('checkout-step-1');
+    const step2 = document.getElementById('checkout-step-2');
+    const step3 = document.getElementById('checkout-step-3');
+    const step4 = document.getElementById('checkout-step-4');
+    const progressSteps = document.querySelectorAll('.progress-step');
+
+    // Navigimi përpara
+    if (nextToStep2) {
+        nextToStep2.addEventListener('click', function() {
+            console.log("Next to step 2 clicked, cart:", cart);
+            if (!cart || cart.length === 0) {
+                showNotification('Shporta është bosh! Ju lutemi shtoni produkte para se të vazhdoni.');
+                return;
+            }
+            goToStep(2);
+        });
+    }
+
+    if (nextToStep3) {
+        nextToStep3.addEventListener('click', function() {
+            const customerForm = document.getElementById('customer-info-form');
+            if (customerForm && !customerForm.checkValidity()) {
+                customerForm.reportValidity();
+                return;
+            }
+            updatePaymentSummary();
+            goToStep(3);
+        });
+    }
+
+    if (nextToStep4) {
+        nextToStep4.addEventListener('click', function() {
+            console.log("Completing order button clicked");
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
+            if (!selectedPayment) {
+                showNotification('Ju lutemi zgjidhni një metodë pagese.');
+                return;
+            }
+            
+            const paymentMethodValue = selectedPayment.value;
+            console.log('Metoda e pagesës:', paymentMethodValue);
+            
+            const orderSummary = generateOrderSummary();
+            console.log("Generated order summary:", orderSummary);
+            
+            if (!orderSummary) {
+                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+                return;
+            }
+            
+            orderSummary.paymentMethod = paymentMethodValue;
+
+            // Ruaj përmbledhjen për faturën
+            sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+            console.log("Stored order summary in sessionStorage");
+
+            // Përditëso të dhënat e konfirmimit
+            updateConfirmationDetails(orderSummary, paymentMethodValue);
+            
+            // Aktivizo hapin 4
+            goToStep(4);
+            
+            // Pastro shportën vetëm pasi të kemi kaluar në hapin 4
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify([]));
+            updateCartCount();
+            
+            console.log("Order completed successfully");
+        });
+    }
+
+    // Navigimi prapa
+    if (backToStep1) {
+        backToStep1.addEventListener('click', function() {
+            goToStep(1);
+        });
+    }
+
+    if (backToStep2) {
+        backToStep2.addEventListener('click', function() {
+            goToStep(2);
+        });
+    }
+
+    // Funksioni i navigimit
+    function goToStep(step) {
+        console.log("Navigating to step:", step);
         
-        // Zgjidh radiobutton-in standard
-        const standardRadio = document.querySelector('input[name="delivery"][value="standard"]');
-        if (standardRadio) {
-            standardRadio.checked = true;
+        [step1, step2, step3, step4].forEach(s => {
+            if (s) s.classList.remove('active');
+        });
+        
+        // Përditëso indikatorët e progresit
+        progressSteps.forEach((s, index) => {
+            if (s) {
+                s.classList.remove('active', 'completed');
+                if (index < step - 1) {
+                    s.classList.add('completed');
+                } else if (index === step - 1) {
+                    s.classList.add('active');
+                }
+            }
+        });
+        
+        // Shfaq hapin e zgjedhur
+        const currentStep = document.getElementById(`checkout-step-${step}`);
+        if (currentStep) {
+            currentStep.classList.add('active');
         }
+        
+        // Scroll në krye të seksionit të checkout
+        window.scrollTo({
+            top: document.querySelector('.checkout-progress').offsetTop - 100,
+            behavior: 'smooth'
+        });
     }
     
-    // Sigurohu që datat e dërgesës janë të përditësuara
-    updateOrderSummaries();
+    // Bëje goToStep të disponueshëm jashtë funksionit
+    window.goToStep = goToStep;
 }
 
-// Përditësimi i parashikimit të transportit
-function updateDeliveryEstimate(deliveryType) {
-    const estimateText = document.querySelector('.estimate-text p.estimate-date strong');
-    if (!estimateText) return;
-    
-    estimateText.textContent = getDeliveryEstimate(deliveryType);
-}
-
-// Funksioni ndihmës për të marrë parashikimin e transportit
-function getDeliveryEstimate(deliveryType) {
-    const today = new Date();
-    let daysToAdd = 2;
-    
-    if (deliveryType === 'standard') {
-        daysToAdd = 2;
-    } else if (deliveryType === 'express') {
-        daysToAdd = 1;
-    } else if (deliveryType === 'pickup') {
-        return 'Sot, nëse vini para orës 18:00';
-    }
-    
-    const futureDate = new Date(today);
-    futureDate.setDate(today.getDate() + daysToAdd);
-    
-    // Shto ditë shtesë nëse është fundjavë
-    if (futureDate.getDay() === 0) { // E diel
-        futureDate.setDate(futureDate.getDate() + 1);
-    }
-    
-    return `Brenda ${daysToAdd} ditëve`;
-}
-
-// Përditësimi i detajet e konfirmimit
-function updateConfirmationDetails(orderSummary, paymentMethodValue) {
-    const orderNumberEl = document.getElementById('order-number');
-    if (orderNumberEl) orderNumberEl.textContent = orderSummary.orderId;
-
-    const orderDateEl = document.getElementById('order-date');
-    if (orderDateEl) {
-        const today = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        orderDateEl.textContent = today.toLocaleDateString('sq-AL', options);
-    }
-
-    const orderEmailEl = document.getElementById('order-email');
-    if (orderEmailEl) orderEmailEl.textContent = orderSummary.customerInfo.email || 'N/A';
-    
-    const orderPaymentMethodEl = document.getElementById('order-payment-method');
-    if (orderPaymentMethodEl) {
-        let paymentMethodText = 'Para në dorë';
-        if (paymentMethodValue === 'bank') {
-            paymentMethodText = 'Transfertë bankare';
-        } else if (paymentMethodValue === 'paypal') {
-            paymentMethodText = 'PayPal';
-        }
-        orderPaymentMethodEl.textContent = paymentMethodText;
-    }
-
-    updateFinalOrderSummary(orderSummary);
-}
-
-// Gjenerimi i përmbledhjes së porosisë
+// Gjenerimi i saktë i përmbledhjes së porosisë
 function generateOrderSummary() {
     console.log("Generating order summary, cart:", cart);
     
-    // PIKË KYÇ: Të sigurohemi që shporta ekziston dhe ka artikuj
+    // Të sigurohemi që shporta ekziston dhe ka artikuj
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
-        console.error("Cart is empty or invalid in generateOrderSummary");
+        console.error("Cart is empty or invalid");
         return null;
     }
 
@@ -724,21 +772,24 @@ function generateOrderSummary() {
     });
 
     const deliveryOption = JSON.parse(sessionStorage.getItem('deliveryOption')) || 
-                          { name: 'Standard', price: 2.00, description: 'Dërgesa standarde' };
+                          { name: 'standard', price: 2.00, description: 'Dërgesa standarde' };
     
     const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon')) || null;
 
     let discountAmount = 0;
+    let shippingPrice = deliveryOption.price;
+    
     if (appliedCoupon) {
         if (appliedCoupon.type === 'percent') {
             discountAmount = subtotal * appliedCoupon.discount;
-        } else {
+        } else if (appliedCoupon.type === 'fixed') {
             discountAmount = appliedCoupon.discount;
+        } else if (appliedCoupon.type === 'shipping' && appliedCoupon.discount === 'free') {
+            shippingPrice = 0;
         }
-        discountAmount = Math.min(discountAmount, subtotal);
     }
 
-    const total = subtotal - discountAmount + deliveryOption.price;
+    const total = subtotal - discountAmount + shippingPrice;
     const orderId = 'EC' + Date.now().toString().slice(-8);
 
     // Merr informacionin e blerësit nga formulari (Hapi 2)
@@ -756,7 +807,7 @@ function generateOrderSummary() {
         subtotal: parseFloat(subtotal.toFixed(2)),
         shipping: {
             name: deliveryOption.name || deliveryOption.description,
-            price: parseFloat(deliveryOption.price.toFixed(2))
+            price: parseFloat(shippingPrice.toFixed(2))
         },
         coupon: appliedCoupon ? {
             code: appliedCoupon.code,
@@ -771,7 +822,7 @@ function generateOrderSummary() {
             city,
             notes
         },
-        paymentMethod: '' // Do të vendoset nga handleri i klikimit
+        paymentMethod: ''
     };
 }
 
