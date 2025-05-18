@@ -141,7 +141,7 @@ function updateCartCount() {
     }
 }
 
-// Përditësimi i UI të shportës në faqen e checkout
+// Përditësimi i UI të shportës në faqen e checkout - zëvendësimi i plotë
 function updateCartUI() {
     const cartContainer = document.getElementById('cart-items');
     const cartSummary = document.getElementById('cart-summary');
@@ -213,31 +213,97 @@ function updateCartUI() {
         });
     });
     
-    // Përditëso përmbledhjen e shportës
+    // KËRTU GJENDET PROBLEMI: Përditëso përmbledhjen e shportës
     if (cartSummary) {
-        const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-        const shipping = subtotal > 0 ? 2.00 : 0; // Transporti standard
-        const total = subtotal + shipping;
+        // Llogarit nëntotalin
+        let subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
         
-        cartSummary.innerHTML = `
-            <h3>Përmbledhje e porosisë</h3>
+        // Merr opsionin e transportit
+        const deliveryOption = JSON.parse(sessionStorage.getItem('deliveryOption')) || 
+                              { name: 'standard', price: 2.00, description: 'Dërgesa standarde (2-3 ditë pune)' };
+        
+        // Merr kuponin e aplikuar
+        const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+        
+        // Llogarit zbritjen
+        let discountAmount = 0;
+        let shippingPrice = deliveryOption.price;
+        
+        if (appliedCoupon) {
+            if (appliedCoupon.type === 'percent') {
+                discountAmount = subtotal * appliedCoupon.discount;
+            } else if (appliedCoupon.type === 'shipping' && appliedCoupon.discount === 'free') {
+                shippingPrice = 0;
+            }
+        }
+        
+        // Llogarit totalin
+        const total = subtotal - discountAmount + shippingPrice;
+        
+        // Krijo HTML për përmbledhjen
+        let summaryHTML = `<h3>Përmbledhje e porosisë</h3>`;
+        
+        // Shto artikujt
+        cart.forEach(item => {
+            summaryHTML += `
+                <div class="summary-item">
+                    <span>${item.name} (x${item.quantity})</span>
+                    <span>${(item.price * item.quantity).toFixed(2)} €</span>
+                </div>
+            `;
+        });
+        
+        // Shto nëntotalin
+        summaryHTML += `
             <div class="summary-item">
                 <span>Nëntotali:</span>
                 <span>${subtotal.toFixed(2)} €</span>
             </div>
+        `;
+        
+        // Shto zbritjen nëse është aplikuar një kupon
+        if (appliedCoupon) {
+            if (appliedCoupon.type === 'percent') {
+                summaryHTML += `
+                    <div class="summary-item">
+                        <span>Zbritja (${appliedCoupon.code}):</span>
+                        <span>-${discountAmount.toFixed(2)} €</span>
+                    </div>
+                `;
+            } else if (appliedCoupon.type === 'shipping') {
+                summaryHTML += `
+                    <div class="summary-item">
+                        <span>Zbritja (${appliedCoupon.code}):</span>
+                        <span>Transport falas</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Shto transportin
+        summaryHTML += `
             <div class="summary-item">
                 <span>Transporti:</span>
-                <span>${shipping.toFixed(2)} €</span>
+                <span>${shippingPrice.toFixed(2)} €</span>
             </div>
+        `;
+        
+        // Shto totalin
+        summaryHTML += `
             <div class="summary-item total">
-                <span>Totali:</span>
+                <span>TOTALI:</span>
                 <span>${total.toFixed(2)} €</span>
             </div>
         `;
+        
+        // Vendos HTML-në në container
+        cartSummary.innerHTML = summaryHTML;
     }
     
-    // Përditëso përmbledhjet në hapat e checkout-it
-    updateOrderSummaries();
+    // Përditëso përmbledhjet në hapat e checkout-it (nëse është e nevojshme)
+    if (document.getElementById('order-items-summary')) {
+        updateOrderSummaries();
+    }
 }
 
 // ===== FUNKSIONET E CHECKOUT =====
@@ -580,7 +646,7 @@ function initPayPalCheckout() {
     // This would typically integrate with PayPal SDK
 }
 
-// Shfaqja e notifikimeve
+// Shfaqja e notifikimeve - zëvendësim i plotë
 function showNotification(message, type = 'info', duration = 3000) {
     console.log(`Notification (${type}):`, message);
     
@@ -890,7 +956,7 @@ function updatePaymentSummary() {
     if (bankTotal) bankTotal.textContent = orderSummary.total.toFixed(2);
 }
 
-// Funksioni i përmirësuar për kodet promocionale
+// Funksioni i përmirësuar për kodet promocionale - zëvendësimi i plotë
 function applyCouponCode(code) {
     console.log("Handling coupon code:", code);
     
@@ -902,8 +968,10 @@ function applyCouponCode(code) {
         return;
     }
     
-    // Kontrollo nëse po heqim një kupon ekzistues
-    if (applyButton.textContent.trim() === 'Hiq') {
+    // Kontrollo nëse po heqim apo po aplikojmë kuponin
+    const isRemoving = applyButton.textContent.trim() === 'Hiq';
+    
+    if (isRemoving) {
         console.log("Removing existing coupon");
         
         // Hiq kuponin nga sessionStorage
@@ -919,71 +987,70 @@ function applyCouponCode(code) {
         updateOrderSummaries();
         
         showNotification('Kodi promocional u hoq me sukses.', 'info');
-        return;
-    }
-    
-    // Kodi i promocionit që po aplikohet
-    const normalizedCode = code.trim().toUpperCase();
-    if (!normalizedCode) {
-        showNotification('Ju lutemi shkruani një kod promocional.');
-        return;
-    }
-    
-    // Lista e kuponëve të vlefshëm
-    const validCoupons = {
-        'WELCOME15': {
-            type: 'percent',
-            discount: 0.15,
-            description: '15% zbritje'
-        },
-        'ENISI10': {
-            type: 'percent',
-            discount: 0.10,
-            description: '10% zbritje'
-        },
-        'FREEDELIVERY': {
-            type: 'shipping',
-            discount: 'free',
-            description: 'Dërgesa falas'
+    } else {
+        // Po aplikojmë një kupon
+        const normalizedCode = code.trim().toUpperCase();
+        if (!normalizedCode) {
+            showNotification('Ju lutemi shkruani një kod promocional.');
+            return;
         }
-    };
-    
-    // Kontrollo nëse kuponi është i vlefshëm
-    if (validCoupons[normalizedCode]) {
-        // Kuponi është i vlefshëm
-        const coupon = {
-            code: normalizedCode,
-            ...validCoupons[normalizedCode]
+        
+        // Lista e kuponëve të vlefshëm
+        const validCoupons = {
+            'WELCOME15': {
+                type: 'percent',
+                discount: 0.15,
+                description: '15% zbritje'
+            },
+            'ENISI10': {
+                type: 'percent',
+                discount: 0.10,
+                description: '10% zbritje'
+            },
+            'FREEDELIVERY': {
+                type: 'shipping',
+                discount: 'free',
+                description: 'Dërgesa falas'
+            }
         };
         
-        console.log("Valid coupon found:", coupon);
-        
-        // Ruaj kuponin në sessionStorage
-        sessionStorage.setItem('appliedCoupon', JSON.stringify(coupon));
-        
-        // Update UI
-        couponInput.classList.add('coupon-valid');
-        couponInput.classList.remove('coupon-invalid');
-        couponInput.disabled = true;
-        applyButton.textContent = 'Hiq';
-        
-        // Create success message
-        let successMessage = '';
-        if (coupon.type === 'percent') {
-            successMessage = `Kodi promocional ${normalizedCode} u aplikua me sukses. ${coupon.description}.`;
-        } else if (coupon.type === 'shipping') {
-            successMessage = 'Kodi promocional u aplikua. Dërgesa juaj është falas!';
+        // Kontrollo nëse kuponi është i vlefshëm
+        if (validCoupons[normalizedCode]) {
+            // Kuponi është i vlefshëm
+            const coupon = {
+                code: normalizedCode,
+                ...validCoupons[normalizedCode]
+            };
+            
+            console.log("Valid coupon found:", coupon);
+            
+            // Ruaj kuponin në sessionStorage
+            sessionStorage.setItem('appliedCoupon', JSON.stringify(coupon));
+            
+            // Update UI
+            couponInput.classList.add('coupon-valid');
+            couponInput.classList.remove('coupon-invalid');
+            couponInput.disabled = true;
+            applyButton.textContent = 'Hiq';
+            
+            // Create success message
+            let successMessage = '';
+            if (coupon.type === 'percent') {
+                successMessage = `Kodi promocional ${normalizedCode} u aplikua me sukses. ${coupon.description}.`;
+            } else if (coupon.type === 'shipping') {
+                successMessage = 'Kodi promocional u aplikua. Dërgesa juaj është falas!';
+            }
+            
+            // Përditëso përmbledhjen e porosisë
+            updateOrderSummaries();
+            
+            showNotification(successMessage, 'success');
+        } else {
+            // Kuponi nuk është i vlefshëm
+            couponInput.classList.add('coupon-invalid');
+            couponInput.classList.remove('coupon-valid');
+            showNotification('Kodi promocional nuk është i vlefshëm.', 'error');
         }
-        
-        // Përditëso përmbledhjen e porosisë
-        updateOrderSummaries();
-        
-        showNotification(successMessage, 'success');
-    } else {
-        // Kuponi nuk është i vlefshëm
-        couponInput.classList.add('coupon-invalid');
-        couponInput.classList.remove('coupon-valid');
-        showNotification('Kodi promocional nuk është i vlefshëm.', 'error');
     }
 }
 
