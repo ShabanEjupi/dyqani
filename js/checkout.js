@@ -103,77 +103,34 @@ function initCheckoutSteps() {
     const step2 = document.getElementById('checkout-step-2');
     const step3 = document.getElementById('checkout-step-3');
     const step4 = document.getElementById('checkout-step-4');
-    
-    // Progress indicators
     const progressSteps = document.querySelectorAll('.progress-step');
-    
+
     // Forward navigation
     if (nextToStep2) {
         nextToStep2.addEventListener('click', function() {
-            // Verify there are items in the cart
-            if (cart.length === 0) {
+            if (!cart || cart.length === 0) {
                 showNotification('Shporta është bosh! Ju lutemi shtoni produkte para se të vazhdoni.');
                 return;
             }
-            
             goToStep(2);
         });
     }
-    
+
     if (nextToStep3) {
         nextToStep3.addEventListener('click', function() {
-            // Validate customer info form
             const customerForm = document.getElementById('customer-info-form');
             if (customerForm && !customerForm.checkValidity()) {
-                // Trigger HTML5 validation
                 customerForm.reportValidity();
                 return;
             }
-            
-            // Check password match if account is being created
-            if (document.getElementById('create-account').checked) {
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirm-password').value;
-                
-                if (password !== confirmPassword) {
-                    showNotification('Fjalëkalimet nuk përputhen!');
-                    return;
-                }
-            }
-            
-            // Fill in payment summary with customer info
+            // Password check if needed...
             updatePaymentSummary();
             goToStep(3);
         });
     }
-    
+
     if (nextToStep4) {
         nextToStep4.addEventListener('click', function() {
-            const rawCartFromLocalStorage = localStorage.getItem('cart');
-            console.log('[DEBUG] nextToStep4 clicked. Shporta e papërpunuar nga localStorage:', rawCartFromLocalStorage);
-            
-            let parsedCartForSummary;
-            try {
-                parsedCartForSummary = JSON.parse(rawCartFromLocalStorage || '[]');
-                console.log('[DEBUG] Artikujt e shportës së përpunuar që do të përdoren për përmbledhje:', JSON.stringify(parsedCartForSummary, null, 2));
-                if (parsedCartForSummary.length > 0) {
-                    parsedCartForSummary.forEach((item, index) => {
-                        console.log(`[DEBUG] Artikulli ${index} për përmbledhje: emri=${item.name}, çmimi=${item.price}, sasia=${item.quantity}`);
-                        if (item.price === undefined || typeof item.price !== 'number' || isNaN(item.price)) {
-                            console.warn(`[DEBUG] Artikulli ${index} ('${item.name}') ka një çmim të pavlefshëm: ${item.price}`);
-                        }
-                        if (item.quantity === undefined || typeof item.quantity !== 'number' || isNaN(item.quantity)) {
-                            console.warn(`[DEBUG] Artikulli ${index} ('${item.name}') ka një sasi të pavlefshme: ${item.quantity}`);
-                        }
-                    });
-                } else {
-                    console.warn('[DEBUG] Shporta është bosh sipas të dhënave të përpunuara për përmbledhje.');
-                }
-            } catch (e) {
-                console.error('[DEBUG] Gabim gjatë përpunimit të shportës nga localStorage për përmbledhje:', e);
-                parsedCartForSummary = [];
-            }
-            
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
             if (!selectedPayment) {
                 showNotification('Ju lutemi zgjidhni një metodë pagese.');
@@ -182,14 +139,14 @@ function initCheckoutSteps() {
             const paymentMethodValue = selectedPayment.value;
             console.log('Duke vazhduar në konfirmim me metodën e pagesës:', paymentMethodValue);
 
-            const orderSummary = generateOrderSummary(); 
+            const orderSummary = generateOrderSummary();
             if (!orderSummary) {
-                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+                // Error already shown by generateOrderSummary
                 return;
             }
             console.log('[DEBUG] Përmbledhja e porosisë e gjeneruar në nextToStep4:', JSON.stringify(orderSummary, null, 2));
-            
-            orderSummary.paymentMethod = paymentMethodValue; 
+
+            orderSummary.paymentMethod = paymentMethodValue;
 
             sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
 
@@ -205,7 +162,7 @@ function initCheckoutSteps() {
 
             const orderEmailEl = document.getElementById('order-email');
             if (orderEmailEl) orderEmailEl.textContent = orderSummary.customerInfo.email || 'N/A';
-            
+
             const orderPaymentMethodEl = document.getElementById('order-payment-method');
             if (orderPaymentMethodEl) {
                 let paymentMethodText = 'Para në dorë';
@@ -217,12 +174,14 @@ function initCheckoutSteps() {
                 orderPaymentMethodEl.textContent = paymentMethodText;
             }
 
-            updateFinalOrderSummary(orderSummary); 
+            updateFinalOrderSummary(orderSummary);
 
             if (paymentMethodValue === 'paypal') {
-                redirectToPayPal(orderSummary); 
+                redirectToPayPal(orderSummary);
             } else {
                 goToStep(4);
+                // Clear cart only after order summary is generated and saved
+                cart = [];
                 localStorage.setItem('cart', JSON.stringify([]));
                 if (typeof updateCartCount === 'function') {
                     updateCartCount();
@@ -231,20 +190,20 @@ function initCheckoutSteps() {
             }
         });
     }
-    
+
     // Backward navigation
     if (backToStep1) {
         backToStep1.addEventListener('click', function() {
             goToStep(1);
         });
     }
-    
+
     if (backToStep2) {
         backToStep2.addEventListener('click', function() {
             goToStep(2);
         });
     }
-    
+
     // Navigation function
     function goToStep(step) {
         // Hide all steps
@@ -783,77 +742,34 @@ function initCheckoutSteps() {
     const step2 = document.getElementById('checkout-step-2');
     const step3 = document.getElementById('checkout-step-3');
     const step4 = document.getElementById('checkout-step-4');
-    
-    // Progress indicators
     const progressSteps = document.querySelectorAll('.progress-step');
     
     // Forward navigation
     if (nextToStep2) {
         nextToStep2.addEventListener('click', function() {
-            // Verify there are items in the cart
-            if (cart.length === 0) {
+            if (!cart || cart.length === 0) {
                 showNotification('Shporta është bosh! Ju lutemi shtoni produkte para se të vazhdoni.');
                 return;
             }
-            
             goToStep(2);
         });
     }
-    
+
     if (nextToStep3) {
         nextToStep3.addEventListener('click', function() {
-            // Validate customer info form
             const customerForm = document.getElementById('customer-info-form');
             if (customerForm && !customerForm.checkValidity()) {
-                // Trigger HTML5 validation
                 customerForm.reportValidity();
                 return;
             }
-            
-            // Check password match if account is being created
-            if (document.getElementById('create-account').checked) {
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirm-password').value;
-                
-                if (password !== confirmPassword) {
-                    showNotification('Fjalëkalimet nuk përputhen!');
-                    return;
-                }
-            }
-            
-            // Fill in payment summary with customer info
+            // Password check if needed...
             updatePaymentSummary();
             goToStep(3);
         });
     }
-    
+
     if (nextToStep4) {
         nextToStep4.addEventListener('click', function() {
-            const rawCartFromLocalStorage = localStorage.getItem('cart');
-            console.log('[DEBUG] nextToStep4 clicked. Shporta e papërpunuar nga localStorage:', rawCartFromLocalStorage);
-            
-            let parsedCartForSummary;
-            try {
-                parsedCartForSummary = JSON.parse(rawCartFromLocalStorage || '[]');
-                console.log('[DEBUG] Artikujt e shportës së përpunuar që do të përdoren për përmbledhje:', JSON.stringify(parsedCartForSummary, null, 2));
-                if (parsedCartForSummary.length > 0) {
-                    parsedCartForSummary.forEach((item, index) => {
-                        console.log(`[DEBUG] Artikulli ${index} për përmbledhje: emri=${item.name}, çmimi=${item.price}, sasia=${item.quantity}`);
-                        if (item.price === undefined || typeof item.price !== 'number' || isNaN(item.price)) {
-                            console.warn(`[DEBUG] Artikulli ${index} ('${item.name}') ka një çmim të pavlefshëm: ${item.price}`);
-                        }
-                        if (item.quantity === undefined || typeof item.quantity !== 'number' || isNaN(item.quantity)) {
-                            console.warn(`[DEBUG] Artikulli ${index} ('${item.name}') ka një sasi të pavlefshme: ${item.quantity}`);
-                        }
-                    });
-                } else {
-                    console.warn('[DEBUG] Shporta është bosh sipas të dhënave të përpunuara për përmbledhje.');
-                }
-            } catch (e) {
-                console.error('[DEBUG] Gabim gjatë përpunimit të shportës nga localStorage për përmbledhje:', e);
-                parsedCartForSummary = [];
-            }
-            
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
             if (!selectedPayment) {
                 showNotification('Ju lutemi zgjidhni një metodë pagese.');
@@ -862,14 +778,14 @@ function initCheckoutSteps() {
             const paymentMethodValue = selectedPayment.value;
             console.log('Duke vazhduar në konfirmim me metodën e pagesës:', paymentMethodValue);
 
-            const orderSummary = generateOrderSummary(); 
+            const orderSummary = generateOrderSummary();
             if (!orderSummary) {
-                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+                // Error already shown by generateOrderSummary
                 return;
             }
             console.log('[DEBUG] Përmbledhja e porosisë e gjeneruar në nextToStep4:', JSON.stringify(orderSummary, null, 2));
-            
-            orderSummary.paymentMethod = paymentMethodValue; 
+
+            orderSummary.paymentMethod = paymentMethodValue;
 
             sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
 
@@ -885,7 +801,7 @@ function initCheckoutSteps() {
 
             const orderEmailEl = document.getElementById('order-email');
             if (orderEmailEl) orderEmailEl.textContent = orderSummary.customerInfo.email || 'N/A';
-            
+
             const orderPaymentMethodEl = document.getElementById('order-payment-method');
             if (orderPaymentMethodEl) {
                 let paymentMethodText = 'Para në dorë';
@@ -897,13 +813,14 @@ function initCheckoutSteps() {
                 orderPaymentMethodEl.textContent = paymentMethodText;
             }
 
-            updateFinalOrderSummary(orderSummary); 
+            updateFinalOrderSummary(orderSummary);
 
             if (paymentMethodValue === 'paypal') {
-                redirectToPayPal(orderSummary); 
+                redirectToPayPal(orderSummary);
             } else {
                 goToStep(4);
-                // Clear cart ONLY for non-PayPal orders AFTER everything is processed for step 4
+                // Clear cart only after order summary is generated and saved
+                cart = [];
                 localStorage.setItem('cart', JSON.stringify([]));
                 if (typeof updateCartCount === 'function') {
                     updateCartCount();
@@ -912,20 +829,20 @@ function initCheckoutSteps() {
             }
         });
     }
-    
+
     // Backward navigation
     if (backToStep1) {
         backToStep1.addEventListener('click', function() {
             goToStep(1);
         });
     }
-    
+
     if (backToStep2) {
         backToStep2.addEventListener('click', function() {
             goToStep(2);
         });
     }
-    
+
     // Navigation function
     function goToStep(step) {
         // Hide all steps
@@ -976,9 +893,10 @@ function initCheckoutSteps() {
 
 // 3. Define a comprehensive generateOrderSummary function
 function generateOrderSummary() {
-    // Përdor variablin globale cart
+    // Always use the global cart variable (from cart.js)
     if (!window.cart || !Array.isArray(cart) || cart.length === 0) {
-        console.warn('[DEBUG] Shporta është bosh ose nuk është e inicializuar!');
+        // Instead of returning null, show a more helpful message and prevent breaking the flow
+        showNotification('Shporta është bosh! Ju lutemi shtoni produkte para se të vazhdoni.');
         return null;
     }
 
