@@ -269,7 +269,7 @@ function redirectToPayPal(orderDetails) {
     sessionStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
     
     // Create PayPal URL with order details
-    const paypalUrl = `https://www.paypal.com/paypalme/shabanejupi5/${total}?description=Order%20${orderId}%20-%20Enisi%20Center`;
+    const paypalUrl = `https://www.paypal.com/paypalme/shabanejupi5/${total}?description=Order%20${orderId}%20-%20Enisi%20Center&locale.x=sq_AL`;
     
     // Show confirmation before redirect
     if (confirm(`Do të ridrejtoheni tek PayPal për të përfunduar pagesën prej ${total} €. Dëshironi të vazhdoni?`)) {
@@ -705,219 +705,365 @@ document.addEventListener('DOMContentLoaded', function() {
 // Simplified PayPal integration without client-side SDK loading
 function initPayPalCheckout() {
     const paymentMethods = document.querySelectorAll('input[name="payment"]');
-    const nextToStep4 = document.getElementById('next-to-step-4');
-    
-    if (!paymentMethods.length || !nextToStep4) return;
-    
-    // Store original button text
-    const originalButtonText = nextToStep4.innerHTML;
-    
-    // Listen for payment method changes
+    const nextToStep4Button = document.getElementById('next-to-step-4'); // Renamed for clarity
+
+    if (!paymentMethods.length || !nextToStep4Button) {
+        console.warn('Payment methods or next-to-step-4 button not found in initPayPalCheckout.');
+        return;
+    }
+
+    const originalButtonText = nextToStep4Button.innerHTML;
+
     paymentMethods.forEach(radio => {
         radio.addEventListener('change', function() {
-            // Get the selected payment method
             const selectedMethod = this.value;
             console.log('Selected payment method:', selectedMethod);
-            
+
             if (selectedMethod === 'paypal') {
-                nextToStep4.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
-                nextToStep4.classList.add('paypal-button');
+                nextToStep4Button.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
+                nextToStep4Button.classList.add('paypal-button');
+                // If you have specific PayPal SDK initialization, it could go here
+                // or be triggered by the main click handler in initCheckoutSteps.
             } else {
-                nextToStep4.innerHTML = originalButtonText;
-                nextToStep4.classList.remove('paypal-button');
+                nextToStep4Button.innerHTML = originalButtonText;
+                nextToStep4Button.classList.remove('paypal-button');
             }
-            
-            // Update payment totals
-            updatePaymentMethodTotals();
+            updatePaymentMethodTotals(); // Ensure this function is working correctly
         });
     });
-    
-    // Always ensure the button is clickable
-    nextToStep4.addEventListener('click', function(e) {
-        const selectedPayment = document.querySelector('input[name="payment"]:checked');
-        
-        if (!selectedPayment) {
-            showNotification('Ju lutemi zgjidhni një metodë pagese.');
-            return;
-        }
-        
-        const paymentMethod = selectedPayment.value;
-        console.log('Processing payment with method:', paymentMethod);
-        
-        if (paymentMethod === 'paypal') {
-            // Handle PayPal payment
-            e.preventDefault();
-            const orderSummary = generateOrderSummary();
-            redirectToPayPal(orderSummary);
-        } else {
-            // Handle other payment methods (cash, bank)
-            // Generate order summary
-            const orderSummary = generateOrderSummary();
-            
-            // Update order info
-            document.getElementById('order-number').textContent = orderSummary.orderId;
-            
-            // Format current date in Albanian
-            const today = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            const formattedDate = today.toLocaleDateString('sq-AL', options);
-            document.getElementById('order-date').textContent = formattedDate;
-            
-            document.getElementById('order-email').textContent = document.getElementById('email').value || 'N/A';
-            
-            // Set payment method text
-            let paymentMethodText = 'Para në dorë';
-            if (paymentMethod === 'bank') {
-                paymentMethodText = 'Transfertë bankare';
-            }
-            document.getElementById('order-payment-method').textContent = paymentMethodText;
-            
-            // Update final summary
-            updateFinalOrderSummary(orderSummary);
-            
-            // Go to step 4 (confirmation)
-            goToStep(4);
-            
-            // Clear cart
-            localStorage.setItem('cart', JSON.stringify([]));
-        }
-    });
+
+    // DO NOT add nextToStep4Button.addEventListener('click', ...) here.
+    // The main click handling for this button is in initCheckoutSteps.
 }
 
-// Initialize invoice download functionality
-function initInvoiceDownload() {
-    const downloadButton = document.getElementById('download-invoice');
-    if (!downloadButton) return;
+// 2. Refined initCheckoutSteps: Ensure the nextToStep4 listener is robust.
+function initCheckoutSteps() {
+    // Step navigation buttons
+    const nextToStep2 = document.getElementById('next-to-step-2');
+    const nextToStep3 = document.getElementById('next-to-step-3');
+    const nextToStep4 = document.getElementById('next-to-step-4');
+    const backToStep1 = document.getElementById('back-to-step-1');
+    const backToStep2 = document.getElementById('back-to-step-2');
     
-    downloadButton.addEventListener('click', function() {
-        console.log("Download invoice button clicked");
-        
-        // Get order information
-        const orderNumber = document.getElementById('order-number').textContent;
-        const orderDate = document.getElementById('order-date').textContent;
-        const customerEmail = document.getElementById('order-email').textContent;
-        const paymentMethod = document.getElementById('order-payment-method').textContent;
-        
-        // Get order items
-        const orderSummary = document.getElementById('order-summary-final');
-        
-        // Generate PDF for printing
-        const printWindow = window.open('', '_blank');
-        
-        // Create invoice HTML
-        const invoiceHTML = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Faturë ${orderNumber}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 20px;
-                    }
-                    .invoice-header {
-                        display: flex;
-                        justify-content: space-between;
-                        margin-bottom: 40px;
-                    }
-                    .company-info {
-                        text-align: left;
-                    }
-                    .invoice-info {
-                        text-align: right;
-                    }
-                    .invoice-title {
-                        font-size: 24px;
-                        font-weight: bold;
-                        margin-bottom: 20px;
-                        text-align: center;
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 20px 0;
-                    }
-                    th, td {
-                        border: 1px solid #ddd;
-                        padding: 12px;
-                        text-align: left;
-                    }
-                    th {
-                        background-color: #f2f2f2;
-                    }
-                    .footer {
-                        margin-top: 40px;
-                        text-align: center;
-                    }
-                    @media print {
-                        .no-print {
-                            display: none;
-                        }
-                        body {
-                            padding: 0;
-                            margin: 30px;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="invoice-title">FATURË</div>
+    // Step elements
+    const step1 = document.getElementById('checkout-step-1');
+    const step2 = document.getElementById('checkout-step-2');
+    const step3 = document.getElementById('checkout-step-3');
+    const step4 = document.getElementById('checkout-step-4');
+    
+    // Progress indicators
+    const progressSteps = document.querySelectorAll('.progress-step');
+    
+    // Forward navigation
+    if (nextToStep2) {
+        nextToStep2.addEventListener('click', function() {
+            // Verify there are items in the cart
+            if (cart.length === 0) {
+                showNotification('Shporta është bosh! Ju lutemi shtoni produkte para se të vazhdoni.');
+                return;
+            }
+            
+            goToStep(2);
+        });
+    }
+    
+    if (nextToStep3) {
+        nextToStep3.addEventListener('click', function() {
+            // Validate customer info form
+            const customerForm = document.getElementById('customer-info-form');
+            if (customerForm && !customerForm.checkValidity()) {
+                // Trigger HTML5 validation
+                customerForm.reportValidity();
+                return;
+            }
+            
+            // Check password match if account is being created
+            if (document.getElementById('create-account').checked) {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
                 
-                <div class="invoice-header">
-                    <div class="company-info">
-                        <h2>ENISI CENTER</h2>
-                        <p>Rr. Bedri Bajrami, nr. 15<br>
-                        Podujevë, Kosovë<br>
-                        Tel: +383 45 594 549<br>
-                        Email: center.enisi@gmail.com</p>
-                    </div>
-                    
-                    <div class="invoice-info">
-                        <h3>Nr. Faturës: ${orderNumber}</h3>
-                        <p>Data: ${orderDate}</p>
-                        <p>Email: ${customerEmail}</p>
-                        <p>Metoda e pagesës: ${paymentMethod}</p>
-                    </div>
-                </div>
-                
-                <div class="invoice-items">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Artikulli</th>
-                                <th>Çmimi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${orderSummary.innerHTML}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="footer">
-                    <p>Faleminderit për blerjen tuaj!</p>
-                    <p>Enisi Center SHPK | NUIS: K12345678A</p>
-                </div>
-                
-                <div class="no-print" style="text-align: center; margin-top: 30px;">
-                    <button onclick="window.print()">Printo Faturën</button>
-                </div>
-                
-                <script>
-                    // Automatically open print dialog when the page loads
-                    window.onload = function() {
-                        setTimeout(() => {
-                            window.print();
-                        }, 500);
-                    }
-                </script>
-            </body>
-            </html>
-        `;
+                if (password !== confirmPassword) {
+                    showNotification('Fjalëkalimet nuk përputhen!');
+                    return;
+                }
+            }
+            
+            // Fill in payment summary with customer info
+            updatePaymentSummary();
+            goToStep(3);
+        });
+    }
+    
+    if (nextToStep4) {
+        nextToStep4.addEventListener('click', function() {
+            // Get payment method
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
+            
+            if (!selectedPayment) {
+                showNotification('Ju lutemi zgjidhni një metodë pagese.');
+                return;
+            }
+            
+            const paymentMethodValue = selectedPayment.value;
+            console.log('Proceeding to confirmation with payment method:', paymentMethodValue);
+
+            const orderSummary = generateOrderSummary(); // Use the new comprehensive function
+            if (!orderSummary) {
+                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+                return;
+            }
+            
+            orderSummary.paymentMethod = paymentMethodValue; // Add payment method to summary
+
+            // Update common confirmation page details
+            const orderNumberEl = document.getElementById('order-number');
+            if (orderNumberEl) orderNumberEl.textContent = orderSummary.orderId;
+
+            const orderDateEl = document.getElementById('order-date');
+            if (orderDateEl) {
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                orderDateEl.textContent = today.toLocaleDateString('sq-AL', options);
+            }
+
+            const orderEmailEl = document.getElementById('order-email');
+            if (orderEmailEl) orderEmailEl.textContent = orderSummary.customerInfo.email || 'N/A';
+            
+            const orderPaymentMethodEl = document.getElementById('order-payment-method');
+            if (orderPaymentMethodEl) {
+                let paymentMethodText = 'Para në dorë';
+                if (paymentMethodValue === 'bank') {
+                    paymentMethodText = 'Transfertë bankare';
+                } else if (paymentMethodValue === 'paypal') {
+                    paymentMethodText = 'PayPal';
+                }
+                orderPaymentMethodEl.textContent = paymentMethodText;
+            }
+
+            updateFinalOrderSummary(orderSummary); // Populate the final summary section
+
+            if (paymentMethodValue === 'paypal') {
+                redirectToPayPal(orderSummary); // redirectToPayPal should also call goToStep(4) after initiating PayPal
+            } else {
+                // For Cash and Bank Transfer
+                goToStep(4);
+                // Clear cart and update count for non-PayPal orders
+                localStorage.setItem('cart', JSON.stringify([]));
+                if (typeof updateCartCount === 'function') {
+                    updateCartCount();
+                }
+                // Potentially save order to backend/localStorage here for cash/bank
+                console.log('Order submitted for cash/bank:', orderSummary);
+                // saveOrder(orderSummary); // You might want a function to save these orders
+            }
+        });
+    }
+    
+    // Backward navigation
+    if (backToStep1) {
+        backToStep1.addEventListener('click', function() {
+            goToStep(1);
+        });
+    }
+    
+    if (backToStep2) {
+        backToStep2.addEventListener('click', function() {
+            goToStep(2);
+        });
+    }
+    
+    // Navigation function
+    function goToStep(step) {
+        // Hide all steps
+        [step1, step2, step3, step4].forEach(s => {
+            if (s) s.classList.remove('active');
+        });
         
-        // Write to the new window
-        printWindow.document.write(invoiceHTML);
-        printWindow.document.close();
-    });
+        // Update progress indicators
+        progressSteps.forEach((s, index) => {
+            if (index < step) {
+                s.classList.add('completed');
+                s.classList.add('active');
+            } else if (index === step - 1) {
+                s.classList.remove('completed');
+                s.classList.add('active');
+            } else {
+                s.classList.remove('completed');
+                s.classList.remove('active');
+            }
+        });
+        
+        // Show the selected step
+        switch (step) {
+            case 1:
+                if (step1) step1.classList.add('active');
+                break;
+            case 2:
+                if (step2) step2.classList.add('active');
+                break;
+            case 3:
+                if (step3) step3.classList.add('active');
+                updatePaymentSummary();
+                updatePaymentMethodTotals();
+                break;
+            case 4:
+                if (step4) step4.classList.add('active');
+                break;
+        }
+        
+        // Scroll to top of checkout section
+        window.scrollTo({
+            top: document.querySelector('.checkout-progress').offsetTop - 100,
+            behavior: 'smooth'
+        });
+    }
+    
+    // Make goToStep available outside this function
+    window.goToStep = goToStep;
 }
+
+// 3. Define a comprehensive generateOrderSummary function
+function generateOrderSummary() {
+    const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+    if (!cartItems) {
+        console.error("Cart is not available to generate order summary.");
+        return null;
+    }
+
+    let subtotal = 0;
+    const itemsForSummary = cartItems.map(item => {
+        subtotal += item.price * item.quantity;
+        return {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image // Ensure image path is correct
+        };
+    });
+
+    const deliveryOption = JSON.parse(sessionStorage.getItem('deliveryOption')) || { name: 'Standard', price: 2.00, description: 'Dërgesa standarde' };
+    const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon')) || null;
+
+    let discountAmount = 0;
+    if (appliedCoupon) {
+        if (appliedCoupon.type === 'percent') {
+            discountAmount = subtotal * appliedCoupon.discount;
+        } else {
+            discountAmount = appliedCoupon.discount;
+        }
+        // Ensure discount doesn't exceed subtotal
+        discountAmount = Math.min(discountAmount, subtotal);
+    }
+
+    const total = subtotal - discountAmount + deliveryOption.price;
+    const orderId = 'EC' + Date.now().toString().slice(-8);
+
+    // Get customer info from form (Step 2)
+    const fullname = document.getElementById('fullname')?.value || '';
+    const email = document.getElementById('email')?.value || '';
+    const phone = document.getElementById('phone')?.value || '';
+    const address = document.getElementById('address')?.value || '';
+    const city = document.getElementById('city')?.value || '';
+    const notes = document.getElementById('notes')?.value || '';
+
+
+    return {
+        orderId: orderId,
+        date: new Date().toISOString(),
+        items: itemsForSummary,
+        subtotal: parseFloat(subtotal.toFixed(2)),
+        shipping: {
+            name: deliveryOption.name || deliveryOption.description, // Use name if available
+            price: parseFloat(deliveryOption.price.toFixed(2))
+        },
+        coupon: appliedCoupon ? {
+            code: appliedCoupon.code,
+            discountAmount: parseFloat(discountAmount.toFixed(2))
+        } : null,
+        total: parseFloat(total.toFixed(2)),
+        customerInfo: {
+            fullname,
+            email,
+            phone,
+            address,
+            city,
+            notes
+        },
+        paymentMethod: '' // Will be set by the click handler
+    };
+}
+
+// 4. Define updateFinalOrderSummary function
+function updateFinalOrderSummary(orderSummary) {
+    const finalSummaryContainer = document.getElementById('order-summary-final');
+    if (!finalSummaryContainer) {
+        console.error('Final order summary container not found.');
+        return;
+    }
+
+    let itemsHtml = '<div class="final-items"><h4>Artikujt e porositur:</h4>';
+    orderSummary.items.forEach(item => {
+        itemsHtml += `
+            <div class="final-item">
+                <img src="${item.image || '../assets/images/placeholder.png'}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                <div class="final-item-details">
+                    <p>${item.name} (x${item.quantity})</p>
+                    <p>${item.price.toFixed(2)} €</p>
+                </div>
+                <p class="final-item-total">${(item.price * item.quantity).toFixed(2)} €</p>
+            </div>
+        `;
+    });
+    itemsHtml += '</div>';
+
+    let totalsHtml = '<div class="final-summary-totals">';
+    totalsHtml += `<p>Nëntotali: <span>${orderSummary.subtotal.toFixed(2)} €</span></p>`;
+    totalsHtml += `<p>Transporti (${orderSummary.shipping.name}): <span>${orderSummary.shipping.price.toFixed(2)} €</span></p>`;
+    if (orderSummary.coupon) {
+        totalsHtml += `<p>Zbritja (${orderSummary.coupon.code}): <span>-${orderSummary.coupon.discountAmount.toFixed(2)} €</span></p>`;
+    }
+    totalsHtml += `<p class="grand-total"><strong>TOTALI: <span>${orderSummary.total.toFixed(2)} €</span></strong></p>`;
+    totalsHtml += '</div>';
+
+    finalSummaryContainer.innerHTML = itemsHtml + totalsHtml;
+}
+
+// Ensure redirectToPayPal also calls goToStep(4) if it doesn't already
+function redirectToPayPal(orderDetails) {
+    const total = orderDetails.total.toFixed(2);
+    const orderId = orderDetails.orderId;
+    
+    sessionStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
+    
+    // This is a simplified redirect. If using PayPal SDK, the flow would be different.
+    const paypalUrl = `https://www.paypal.com/paypalme/shabanejupi5/${total}?description=Order%20${orderId}%20-%20Enisi%20Center&locale.x=sq_AL`;
+    
+    // It's better to show the confirmation page *after* PayPal interaction.
+    // For now, we go to step 4 and user completes PayPal in new tab.
+    // A more robust solution would use PayPal SDK and handle onApprove.
+    
+    // Show a message that they are being redirected
+    showNotification(`Duke ju ridrejtuar tek PayPal për pagesën prej ${total} €. Ju lutemi prisni...`, 5000);
+
+    // Open PayPal in a new window/tab
+    const paypalWindow = window.open(paypalUrl, '_blank');
+
+    if (!paypalWindow || paypalWindow.closed || typeof paypalWindow.closed == 'undefined') {
+        showNotification('Dritarja e PayPal u bllokua. Ju lutemi lejoni pop-ups dhe provoni përsëri.', 'error');
+    }
+    
+    // Go to our confirmation page (Step 4)
+    // The confirmation page should indicate that payment is pending via PayPal.
+    document.getElementById('order-payment-method').textContent = 'PayPal (Në pritje të konfirmimit)';
+    goToStep(4); 
+    
+    // Cart should be cleared only after successful payment confirmation from PayPal.
+    // For this simplified flow, we might clear it optimistically or handle it later.
+    // localStorage.setItem('cart', JSON.stringify([]));
+    // if (typeof updateCartCount === 'function') updateCartCount();
+}
+
+
+// Make sure this is called after DOM is loaded and components (if any) are loaded.
+// The existing DOMContentLoaded listener that calls initCheckoutPage should be sufficient.
