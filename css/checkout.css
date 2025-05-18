@@ -818,3 +818,55 @@
 .payment-method[data-method="bank"] label i {
     color: #1f9d55;
 }
+
+/* Dark theme payment method styling */
+.dark-theme .payment-method {
+    border: 2px solid var(--medium-gray);
+    background-color: var(--card-bg);
+}
+
+.dark-theme .payment-method label {
+    color: var(--text-color);
+}
+
+.dark-theme .payment-method input:checked + label {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .payment-details {
+    border-top: 1px solid var(--medium-gray);
+    color: var(--text-color);
+}
+
+/* Blue theme payment method styling */
+.blue-theme .payment-method {
+    border: 2px solid var(--medium-gray);
+    background-color: var(--card-bg);
+}
+
+.blue-theme .payment-method label {
+    color: var(--text-color);
+}
+
+.blue-theme .payment-method input:checked + label {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.blue-theme .payment-details {
+    border-top: 1px solid var(--medium-gray);
+    color: var(--text-color);
+}
+
+/* Make payment methods more visible across all themes */
+.payment-method label i {
+    font-size: 24px;
+    margin-right: 10px;
+    width: 30px;
+    text-align: center;
+}
+
+/* Enhance visibility of payment details */
+.payment-details {
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+}

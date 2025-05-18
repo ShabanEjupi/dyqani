@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initCheckoutPage() {
+    console.log('Initializing checkout page...');
+    
     // Initialize checkout step functionality
     initCheckoutSteps();
     
@@ -55,7 +57,9 @@ function initCheckoutPage() {
     initDeliveryOptions();
     
     // Initialize account creation toggling
-    initAccountCreation();
+    if (typeof initAccountCreation === 'function') {
+        initAccountCreation();
+    }
     
     // Initialize step summaries
     updateOrderSummaries();
@@ -64,12 +68,25 @@ function initCheckoutPage() {
     initInvoiceDownload();
     
     // Initialize PayPal checkout
+    console.log('Setting up payment methods...');
     initPayPalCheckout();
+    console.log('Payment methods initialized');
+    
+    // Select the default payment method and trigger the change event to update UI
+    const defaultPayment = document.querySelector('input[name="payment"]:checked');
+    if (defaultPayment) {
+        console.log('Default payment method:', defaultPayment.value);
+        // Manually trigger change event
+        const event = new Event('change');
+        defaultPayment.dispatchEvent(event);
+    }
     
     // Update cart count
     if (typeof updateCartCount === 'function') {
         updateCartCount();
     }
+    
+    console.log('Checkout page fully initialized');
 }
 
 // Initialize multi-step checkout process
@@ -609,7 +626,11 @@ function updatePaymentSummary() {
 // Update payment method totals
 function updatePaymentMethodTotals() {
     // Get current total
-    let subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    let subtotal = 0;
+    if (cart && cart.length) {
+        subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    }
+    
     const deliveryInfo = JSON.parse(sessionStorage.getItem('deliveryOption')) || { price: 2.00 };
     const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
     
@@ -683,96 +704,84 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Simplified PayPal integration without client-side SDK loading
 function initPayPalCheckout() {
-    const paymentMethods = document.querySelectorAll('.payment-method');
+    const paymentMethods = document.querySelectorAll('input[name="payment"]');
     const nextToStep4 = document.getElementById('next-to-step-4');
     
     if (!paymentMethods.length || !nextToStep4) return;
     
-    // Store original button text and function
+    // Store original button text
     const originalButtonText = nextToStep4.innerHTML;
-    let isPayPalSelected = false;
     
     // Listen for payment method changes
-    document.querySelectorAll('input[name="payment"]').forEach(radio => {
+    paymentMethods.forEach(radio => {
         radio.addEventListener('change', function() {
+            // Get the selected payment method
             const selectedMethod = this.value;
+            console.log('Selected payment method:', selectedMethod);
             
             if (selectedMethod === 'paypal') {
-                // PayPal selected
                 nextToStep4.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
                 nextToStep4.classList.add('paypal-button');
-                isPayPalSelected = true;
             } else {
-                // Bank transfer or cash selected
                 nextToStep4.innerHTML = originalButtonText;
                 nextToStep4.classList.remove('paypal-button');
-                isPayPalSelected = false;
             }
             
-            // Update payment method totals
+            // Update payment totals
             updatePaymentMethodTotals();
         });
     });
     
-    // Remove any existing click handlers first to avoid duplication
-    nextToStep4.removeEventListener('click', handleCheckoutCompletion);
-    
-    // Add the main click handler for all payment methods
-    nextToStep4.addEventListener('click', handleCheckoutCompletion);
-}
-
-// Separate function for handling checkout completion
-function handleCheckoutCompletion(e) {
-    // Get selected payment method
-    const selectedPayment = document.querySelector('input[name="payment"]:checked');
-    
-    if (!selectedPayment) {
-        showNotification('Ju lutemi zgjidhni një metodë pagese.');
-        return;
-    }
-    
-    const paymentMethod = selectedPayment.value;
-    
-    // Generate order summary
-    const orderSummary = generateOrderSummary();
-    
-    if (paymentMethod === 'paypal') {
-        // Handle PayPal payment
-        e.preventDefault(); // Prevent default step navigation
-        redirectToPayPal(orderSummary);
-    } else {
-        // Handle other payment methods (cash, bank transfer)
+    // Always ensure the button is clickable
+    nextToStep4.addEventListener('click', function(e) {
+        const selectedPayment = document.querySelector('input[name="payment"]:checked');
         
-        // Update order info in confirmation page
-        document.getElementById('order-number').textContent = orderSummary.orderId;
-        
-        // Format current date in Albanian
-        const today = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        const formattedDate = today.toLocaleDateString('sq-AL', options);
-        document.getElementById('order-date').textContent = formattedDate;
-        
-        document.getElementById('order-email').textContent = document.getElementById('email').value || 'N/A';
-        
-        // Set payment method text
-        let paymentMethodText = 'Para në dorë';
-        if (paymentMethod === 'bank') {
-            paymentMethodText = 'Transfertë bankare';
+        if (!selectedPayment) {
+            showNotification('Ju lutemi zgjidhni një metodë pagese.');
+            return;
         }
-        document.getElementById('order-payment-method').textContent = paymentMethodText;
         
-        // Update final order summary
-        updateFinalOrderSummary(orderSummary);
+        const paymentMethod = selectedPayment.value;
+        console.log('Processing payment with method:', paymentMethod);
         
-        // Go to confirmation step
-        goToStep(4);
-        
-        // Clear cart
-        localStorage.setItem('cart', JSON.stringify([]));
-        
-        // Show success notification
-        showNotification('Porosia u krye me sukses!');
-    }
+        if (paymentMethod === 'paypal') {
+            // Handle PayPal payment
+            e.preventDefault();
+            const orderSummary = generateOrderSummary();
+            redirectToPayPal(orderSummary);
+        } else {
+            // Handle other payment methods (cash, bank)
+            // Generate order summary
+            const orderSummary = generateOrderSummary();
+            
+            // Update order info
+            document.getElementById('order-number').textContent = orderSummary.orderId;
+            
+            // Format current date in Albanian
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = today.toLocaleDateString('sq-AL', options);
+            document.getElementById('order-date').textContent = formattedDate;
+            
+            document.getElementById('order-email').textContent = document.getElementById('email').value || 'N/A';
+            
+            // Set payment method text
+            let paymentMethodText = 'Para në dorë';
+            if (paymentMethod === 'bank') {
+                paymentMethodText = 'Transfertë bankare';
+            }
+            document.getElementById('order-payment-method').textContent = paymentMethodText;
+            
+            // Update final summary
+            updateFinalOrderSummary(orderSummary);
+            
+            // Go to step 4 (confirmation)
+            goToStep(4);
+            
+            // Clear cart
+            localStorage.setItem('cart', JSON.stringify([]));
+        }
+    });
 }
 
 // Initialize invoice download functionality
