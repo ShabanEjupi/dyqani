@@ -976,21 +976,21 @@ function initCheckoutSteps() {
 
 // 3. Define a comprehensive generateOrderSummary function
 function generateOrderSummary() {
-    const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
-    if (!cartItems) {
-        console.error("Cart is not available to generate order summary.");
+    // Përdor variablin globale cart
+    if (!window.cart || !Array.isArray(cart) || cart.length === 0) {
+        console.warn('[DEBUG] Shporta është bosh ose nuk është e inicializuar!');
         return null;
     }
 
     let subtotal = 0;
-    const itemsForSummary = cartItems.map(item => {
+    const itemsForSummary = cart.map(item => {
         subtotal += item.price * item.quantity;
         return {
             id: item.id,
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            image: item.image // Ensure image path is correct
+            image: item.image
         };
     });
 
@@ -1004,7 +1004,6 @@ function generateOrderSummary() {
         } else {
             discountAmount = appliedCoupon.discount;
         }
-        // Ensure discount doesn't exceed subtotal
         discountAmount = Math.min(discountAmount, subtotal);
     }
 
@@ -1019,14 +1018,13 @@ function generateOrderSummary() {
     const city = document.getElementById('city')?.value || '';
     const notes = document.getElementById('notes')?.value || '';
 
-
     return {
         orderId: orderId,
         date: new Date().toISOString(),
         items: itemsForSummary,
         subtotal: parseFloat(subtotal.toFixed(2)),
         shipping: {
-            name: deliveryOption.name || deliveryOption.description, // Use name if available
+            name: deliveryOption.name || deliveryOption.description,
             price: parseFloat(deliveryOption.price.toFixed(2))
         },
         coupon: appliedCoupon ? {
@@ -1042,7 +1040,7 @@ function generateOrderSummary() {
             city,
             notes
         },
-        paymentMethod: '' // Will be set by the click handler
+        paymentMethod: '' // Vendoset më vonë
     };
 }
 
