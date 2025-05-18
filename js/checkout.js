@@ -149,50 +149,67 @@ function initCheckoutSteps() {
     
     if (nextToStep4) {
         nextToStep4.addEventListener('click', function() {
-            // Get payment method
-            const selectedPayment = document.querySelector('input[name="payment"]:checked');
+            // LOGGING: Check cart content from localStorage at the moment of click
+            console.log('[DEBUG] nextToStep4 clicked. Cart from localStorage:', localStorage.getItem('cart'));
             
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
             if (!selectedPayment) {
                 showNotification('Ju lutemi zgjidhni një metodë pagese.');
                 return;
             }
+            const paymentMethodValue = selectedPayment.value;
+            console.log('Proceeding to confirmation with payment method:', paymentMethodValue);
+
+            const orderSummary = generateOrderSummary(); 
+            if (!orderSummary) {
+                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+                return;
+            }
+            // LOGGING: Check the generated order summary
+            console.log('[DEBUG] Order summary generated in nextToStep4:', JSON.stringify(orderSummary, null, 2));
             
-            const paymentMethod = selectedPayment.value;
-            
-            if (paymentMethod === 'paypal') {
-                // Handle PayPal payment
-                const orderSummary = generateOrderSummary();
-                redirectToPayPal(orderSummary);
-            } else {
-                // Standard checkout flow - update confirmation page
-                // Generate order summary
-                const orderSummary = generateOrderSummary();
-                
-                // Update order info in confirmation page
-                document.getElementById('order-number').textContent = orderSummary.orderId;
-                
-                // Format current date in Albanian
+            orderSummary.paymentMethod = paymentMethodValue; 
+
+            // Store the generated summary in sessionStorage for the invoice download function
+            sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+
+            // Update common confirmation page details
+            const orderNumberEl = document.getElementById('order-number');
+            if (orderNumberEl) orderNumberEl.textContent = orderSummary.orderId;
+
+            const orderDateEl = document.getElementById('order-date');
+            if (orderDateEl) {
                 const today = new Date();
                 const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                const formattedDate = today.toLocaleDateString('sq-AL', options);
-                document.getElementById('order-date').textContent = formattedDate;
-                
-                document.getElementById('order-email').textContent = document.getElementById('email').value || 'N/A';
-                
-                // Set payment method text
+                orderDateEl.textContent = today.toLocaleDateString('sq-AL', options);
+            }
+
+            const orderEmailEl = document.getElementById('order-email');
+            if (orderEmailEl) orderEmailEl.textContent = orderSummary.customerInfo.email || 'N/A';
+            
+            const orderPaymentMethodEl = document.getElementById('order-payment-method');
+            if (orderPaymentMethodEl) {
                 let paymentMethodText = 'Para në dorë';
-                if (paymentMethod === 'bank') {
+                if (paymentMethodValue === 'bank') {
                     paymentMethodText = 'Transfertë bankare';
-                } else if (paymentMethod === 'paypal') {
+                } else if (paymentMethodValue === 'paypal') {
                     paymentMethodText = 'PayPal';
                 }
-                document.getElementById('order-payment-method').textContent = paymentMethodText;
-                
-                // Update final summary
-                updateFinalOrderSummary(orderSummary);
-                
-                // Go to step 4 (confirmation)
+                orderPaymentMethodEl.textContent = paymentMethodText;
+            }
+
+            updateFinalOrderSummary(orderSummary); 
+
+            if (paymentMethodValue === 'paypal') {
+                redirectToPayPal(orderSummary); 
+            } else {
                 goToStep(4);
+                // Clear cart ONLY for non-PayPal orders AFTER everything is processed for step 4
+                localStorage.setItem('cart', JSON.stringify([]));
+                if (typeof updateCartCount === 'function') {
+                    updateCartCount();
+                }
+                console.log('Order submitted for cash/bank:', orderSummary);
             }
         });
     }
@@ -219,15 +236,13 @@ function initCheckoutSteps() {
         
         // Update progress indicators
         progressSteps.forEach((s, index) => {
-            if (index < step) {
-                s.classList.add('completed');
-                s.classList.add('active');
-            } else if (index === step - 1) {
-                s.classList.remove('completed');
-                s.classList.add('active');
-            } else {
-                s.classList.remove('completed');
-                s.classList.remove('active');
+            if (s) {
+                s.classList.remove('active', 'completed');
+                if (index < step -1 ) { 
+                    s.classList.add('completed');
+                } else if (index === step - 1) { 
+                    s.classList.add('active');
+                }
             }
         });
         
@@ -796,24 +811,29 @@ function initCheckoutSteps() {
     
     if (nextToStep4) {
         nextToStep4.addEventListener('click', function() {
-            // Get payment method
-            const selectedPayment = document.querySelector('input[name="payment"]:checked');
+            // LOGGING: Check cart content from localStorage at the moment of click
+            console.log('[DEBUG] nextToStep4 clicked. Cart from localStorage:', localStorage.getItem('cart'));
             
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
             if (!selectedPayment) {
                 showNotification('Ju lutemi zgjidhni një metodë pagese.');
                 return;
             }
-            
             const paymentMethodValue = selectedPayment.value;
             console.log('Proceeding to confirmation with payment method:', paymentMethodValue);
 
-            const orderSummary = generateOrderSummary(); // Use the new comprehensive function
+            const orderSummary = generateOrderSummary(); 
             if (!orderSummary) {
                 showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
                 return;
             }
+            // LOGGING: Check the generated order summary
+            console.log('[DEBUG] Order summary generated in nextToStep4:', JSON.stringify(orderSummary, null, 2));
             
-            orderSummary.paymentMethod = paymentMethodValue; // Add payment method to summary
+            orderSummary.paymentMethod = paymentMethodValue; 
+
+            // Store the generated summary in sessionStorage for the invoice download function
+            sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
 
             // Update common confirmation page details
             const orderNumberEl = document.getElementById('order-number');
@@ -840,21 +860,18 @@ function initCheckoutSteps() {
                 orderPaymentMethodEl.textContent = paymentMethodText;
             }
 
-            updateFinalOrderSummary(orderSummary); // Populate the final summary section
+            updateFinalOrderSummary(orderSummary); 
 
             if (paymentMethodValue === 'paypal') {
-                redirectToPayPal(orderSummary); // redirectToPayPal should also call goToStep(4) after initiating PayPal
+                redirectToPayPal(orderSummary); 
             } else {
-                // For Cash and Bank Transfer
                 goToStep(4);
-                // Clear cart and update count for non-PayPal orders
+                // Clear cart ONLY for non-PayPal orders AFTER everything is processed for step 4
                 localStorage.setItem('cart', JSON.stringify([]));
                 if (typeof updateCartCount === 'function') {
                     updateCartCount();
                 }
-                // Potentially save order to backend/localStorage here for cash/bank
                 console.log('Order submitted for cash/bank:', orderSummary);
-                // saveOrder(orderSummary); // You might want a function to save these orders
             }
         });
     }
@@ -881,15 +898,13 @@ function initCheckoutSteps() {
         
         // Update progress indicators
         progressSteps.forEach((s, index) => {
-            if (index < step) {
-                s.classList.add('completed');
-                s.classList.add('active');
-            } else if (index === step - 1) {
-                s.classList.remove('completed');
-                s.classList.add('active');
-            } else {
-                s.classList.remove('completed');
-                s.classList.remove('active');
+            if (s) {
+                s.classList.remove('active', 'completed');
+                if (index < step -1 ) { 
+                    s.classList.add('completed');
+                } else if (index === step - 1) { 
+                    s.classList.add('active');
+                }
             }
         });
         
@@ -1064,6 +1079,207 @@ function redirectToPayPal(orderDetails) {
     // if (typeof updateCartCount === 'function') updateCartCount();
 }
 
+// ...existing code...
 
-// Make sure this is called after DOM is loaded and components (if any) are loaded.
-// The existing DOMContentLoaded listener that calls initCheckoutPage should be sufficient.
+function initInvoiceDownload() {
+    const downloadButton = document.getElementById('download-invoice');
+    if (!downloadButton) {
+        console.warn('Download invoice button ("download-invoice") not found.');
+        return;
+    }
+
+    downloadButton.addEventListener('click', function() {
+        const orderSummaryString = sessionStorage.getItem('currentOrderSummaryForInvoice');
+        if (!orderSummaryString) {
+            showNotification('Detajet e porosisë nuk u gjetën për faturë.', 'error');
+            console.error('No order summary found in sessionStorage for invoice.');
+            return;
+        }
+
+        try {
+            const orderSummary = JSON.parse(orderSummaryString);
+            if (orderSummary.total === undefined || orderSummary.subtotal === undefined) {
+                showNotification('Detajet e porosisë janë jo të plota. Fatura nuk mund të gjenerohet.', 'error');
+                console.error('Order summary is incomplete for invoice:', orderSummary);
+                return;
+            }
+            generateAndDownloadInvoice(orderSummary);
+        } catch (error) {
+            console.error('Error parsing order summary for invoice:', error);
+            showNotification('Gabim gjatë përgatitjes së faturës.', 'error');
+        }
+    });
+}
+
+function generateAndDownloadInvoice(orderSummary) {
+    if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+        showNotification('Libraria jsPDF nuk është ngarkuar. Fatura nuk mund të gjenerohet.', 'error');
+        console.error('jsPDF is not defined. Please include the jsPDF library in your HTML.');
+        return;
+    }
+
+    const { jsPDF } = jspdf; // Correct way to access jsPDF constructor from the UMD global
+    const doc = new jsPDF();
+
+    let yPos = 20;
+    const lineSpacing = 7;
+    const sectionSpacing = 10;
+    const leftMargin = 15;
+    const contentWidth = doc.internal.pageSize.getWidth() - (2 * leftMargin);
+
+    const addText = (text, x = leftMargin, options = {}) => {
+        doc.text(text, x, yPos, options);
+        yPos += lineSpacing;
+    };
+    
+    const addTitle = (text) => {
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.text(text, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+        doc.setFont(undefined, 'normal');
+        yPos += sectionSpacing;
+    };
+
+    // Header
+    addTitle("Faturë - Enisi Center");
+    doc.setFontSize(10);
+    addText(`Rr. Bedri Bajrami, nr. 15, Podujevë`, doc.internal.pageSize.getWidth() / 2, { align: 'center' });
+    yPos -= lineSpacing; // Adjust for single line address
+    addText(`Email: center.enisi@gmail.com | Tel: +383 45 594 549`, doc.internal.pageSize.getWidth() / 2, { align: 'center' });
+    yPos += sectionSpacing;
+
+    // Order Details
+    doc.setFontSize(12);
+    addText(`Numri i Porosisë: ${orderSummary.orderId || 'N/A'}`);
+    addText(`Data: ${new Date(orderSummary.date || Date.now()).toLocaleDateString('sq-AL', { day: '2-digit', month: 'long', year: 'numeric' })}`);
+    yPos += lineSpacing;
+
+    // Customer Information
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    addText("Faturuar Për:");
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    addText(`${orderSummary.customerInfo.fullname || 'N/A'}`);
+    addText(`${orderSummary.customerInfo.address || 'N/A'}, ${orderSummary.customerInfo.city || 'N/A'}`);
+    addText(`Email: ${orderSummary.customerInfo.email || 'N/A'}`);
+    addText(`Tel: ${orderSummary.customerInfo.phone || 'N/A'}`);
+    yPos += sectionSpacing;
+
+    // Items Table Header
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    const tableHeaderY = yPos;
+    doc.text("Artikulli", leftMargin, tableHeaderY);
+    doc.text("Sasia", leftMargin + contentWidth * 0.6, tableHeaderY, { align: 'right' });
+    doc.text("Çmimi", leftMargin + contentWidth * 0.75, tableHeaderY, { align: 'right' });
+    doc.text("Totali", leftMargin + contentWidth * 0.95, tableHeaderY, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+    yPos += lineSpacing;
+    doc.setLineWidth(0.2);
+    doc.line(leftMargin, yPos - (lineSpacing * 0.7) , leftMargin + contentWidth, yPos - (lineSpacing*0.7));
+
+
+    // Items
+    doc.setFontSize(10);
+    orderSummary.items.forEach(item => {
+        const itemPrice = parseFloat(item.price) || 0;
+        const itemQuantity = parseInt(item.quantity) || 0;
+        const itemTotal = itemPrice * itemQuantity;
+
+        // Handle multi-line item name
+        const itemNameLines = doc.splitTextToSize(item.name || 'Artikull i panjohur', contentWidth * 0.55);
+        let currentYForItem = yPos;
+        doc.text(itemNameLines, leftMargin, currentYForItem);
+        
+        doc.text(itemQuantity.toString(), leftMargin + contentWidth * 0.6, currentYForItem, { align: 'right' });
+        doc.text(`${itemPrice.toFixed(2)} €`, leftMargin + contentWidth * 0.75, currentYForItem, { align: 'right' });
+        doc.text(`${itemTotal.toFixed(2)} €`, leftMargin + contentWidth * 0.95, currentYForItem, { align: 'right' });
+        yPos += (itemNameLines.length * (lineSpacing * 0.8)); // Adjust yPos based on number of lines for item name
+        yPos = Math.max(yPos, currentYForItem + lineSpacing); // Ensure yPos advances at least one line
+    });
+    doc.line(leftMargin, yPos - (lineSpacing * 0.7) , leftMargin + contentWidth, yPos - (lineSpacing*0.7));
+    yPos += sectionSpacing * 0.5;
+
+    // Totals Section
+    const totalsXLabel = leftMargin + contentWidth * 0.6;
+    const totalsXValue = leftMargin + contentWidth * 0.95;
+
+    doc.setFontSize(10);
+    doc.text("Nëntotali:", totalsXLabel, yPos, { align: 'right' });
+    doc.text(`${(parseFloat(orderSummary.subtotal) || 0).toFixed(2)} €`, totalsXValue, yPos, { align: 'right' });
+    yPos += lineSpacing;
+
+    doc.text("Transporti:", totalsXLabel, yPos, { align: 'right' });
+    doc.text(`${(parseFloat(orderSummary.shipping.price) || 0).toFixed(2)} €`, totalsXValue, yPos, { align: 'right' });
+    yPos += lineSpacing;
+
+    if (orderSummary.coupon && orderSummary.coupon.discountAmount) {
+        doc.text(`Zbritja (${orderSummary.coupon.code}):`, totalsXLabel, yPos, { align: 'right' });
+        doc.text(`-${(parseFloat(orderSummary.coupon.discountAmount) || 0).toFixed(2)} €`, totalsXValue, yPos, { align: 'right' });
+        yPos += lineSpacing;
+    }
+    
+    doc.setLineWidth(0.3);
+    doc.line(totalsXLabel - 5, yPos - (lineSpacing * 0.7), totalsXValue + 5, yPos - (lineSpacing * 0.7) );
+
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text("TOTALI:", totalsXLabel, yPos, { align: 'right' });
+    doc.text(`${(parseFloat(orderSummary.total) || 0).toFixed(2)} €`, totalsXValue, yPos, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+    yPos += sectionSpacing * 1.5;
+
+    // Payment Method
+    doc.setFontSize(10);
+    let paymentMethodText = 'Para në dorë';
+    if (orderSummary.paymentMethod === 'bank') paymentMethodText = 'Transfertë bankare';
+    else if (orderSummary.paymentMethod === 'paypal') paymentMethodText = 'PayPal';
+    addText(`Metoda e Pagesës: ${paymentMethodText}`);
+    yPos += sectionSpacing;
+
+    // Footer Note
+    doc.setFontSize(9);
+    doc.text("Faleminderit për blerjen tuaj!", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+    yPos += lineSpacing * 0.8;
+    doc.text("www.enisicenter.tech", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+
+    doc.save(`Fature-EnisiCenter-${orderSummary.orderId || 'XXXX'}.pdf`);
+    showNotification('Fatura u gjenerua me sukses!');
+}
+
+// Ensure initInvoiceDownload is called when the checkout page initializes
+function initCheckoutPage() {
+    // ... (your existing initializations in initCheckoutPage) ...
+    console.log('Initializing checkout page...');
+    
+    initCheckoutSteps();
+    loadRecommendedProducts();
+    initCouponCode();
+    initDeliveryOptions();
+    if (typeof initAccountCreation === 'function') {
+        initAccountCreation();
+    }
+    updateOrderSummaries();
+    initInvoiceDownload(); // Make sure this is called
+    
+    console.log('Setting up payment methods...');
+    initPayPalCheckout();
+    console.log('Payment methods initialized');
+    
+    const defaultPayment = document.querySelector('input[name="payment"]:checked');
+    if (defaultPayment) {
+        console.log('Default payment method:', defaultPayment.value);
+        const event = new Event('change');
+        defaultPayment.dispatchEvent(event);
+    }
+    
+    if (typeof updateCartCount === 'function') {
+        updateCartCount();
+    }
+    
+    console.log('Checkout page fully initialized');
+}
+
+// ... (rest of your checkout.js code) ...
