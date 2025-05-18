@@ -459,7 +459,7 @@ function initCheckoutSteps() {
     }
 }
 
-// Inicializimi i funksionalitetit të kodit promocional - përmirësuar
+// Inicializimi i funksionalitetit të kodit promocional - zëvendësim i plotë
 function initCouponCode() {
     console.log("Initializing coupon code functionality");
     
@@ -471,25 +471,99 @@ function initCouponCode() {
         return;
     }
     
-    // Apply coupon when button is clicked
+    // Rregullimi kryesor: Përdor preventDefault dhe bind për event handler-in
     applyButton.addEventListener('click', function(e) {
-        e.preventDefault(); // Shto këtë për të parandaluar refreshimin e faqes
-        applyCouponCode(couponInput.value);
+        e.preventDefault(); // Parandalon refreshimin e faqes
+        const code = couponInput.value.trim();
+        
+        // Kontrollojmë nëse po heqim apo aplikojmë
+        if (this.textContent.trim() === 'Hiq') {
+            // Hiq kuponin nga sessionStorage
+            sessionStorage.removeItem('appliedCoupon');
+            
+            // Reset UI
+            couponInput.value = '';
+            couponInput.disabled = false;
+            couponInput.classList.remove('coupon-valid', 'coupon-invalid');
+            this.textContent = 'Apliko';
+            
+            // Përditëso përmbledhjen
+            updateFullCheckoutUI();
+            showNotification('Kodi promocional u hoq me sukses.', 'info');
+        } else {
+            // Aplikojmë kuponin
+            if (!code) {
+                showNotification('Ju lutemi shkruani një kod promocional.');
+                return;
+            }
+            
+            // Lista e kuponëve të vlefshëm
+            const validCoupons = {
+                'WELCOME15': {
+                    type: 'percent',
+                    discount: 0.15,
+                    description: '15% zbritje'
+                },
+                'ENISI10': {
+                    type: 'percent',
+                    discount: 0.10,
+                    description: '10% zbritje'
+                },
+                'FREEDELIVERY': {
+                    type: 'shipping',
+                    discount: 'free',
+                    description: 'Dërgesa falas'
+                }
+            };
+            
+            const normalizedCode = code.toUpperCase();
+            
+            // Kontrollo nëse kuponi është i vlefshëm
+            if (validCoupons[normalizedCode]) {
+                // Kuponi është i vlefshëm
+                const coupon = {
+                    code: normalizedCode,
+                    ...validCoupons[normalizedCode]
+                };
+                
+                // Ruaj kuponin në sessionStorage
+                sessionStorage.setItem('appliedCoupon', JSON.stringify(coupon));
+                
+                // Update UI
+                couponInput.classList.add('coupon-valid');
+                couponInput.classList.remove('coupon-invalid');
+                couponInput.disabled = true;
+                this.textContent = 'Hiq';
+                
+                // Create success message
+                let successMessage = '';
+                if (coupon.type === 'percent') {
+                    successMessage = `Kodi promocional ${normalizedCode} u aplikua me sukses. ${coupon.description}.`;
+                } else if (coupon.type === 'shipping') {
+                    successMessage = 'Kodi promocional u aplikua. Dërgesa juaj është falas!';
+                }
+                
+                // Përditëso përmbledhjen e porosisë
+                updateFullCheckoutUI();
+                showNotification(successMessage, 'success');
+            } else {
+                // Kuponi nuk është i vlefshëm
+                couponInput.classList.add('coupon-invalid');
+                couponInput.classList.remove('coupon-valid');
+                showNotification('Kodi promocional nuk është i vlefshëm.', 'error');
+            }
+        }
     });
     
     // Apply coupon when Enter is pressed
     couponInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault(); // Parandalon refreshimin e faqes
-            applyCouponCode(couponInput.value);
+            applyButton.click(); // Thërret click event në buton
         }
     });
     
-    // Reset state to ensure it starts in "apply" mode
-    couponInput.disabled = false;
-    applyButton.textContent = 'Apliko';
-    
-    // Check for existing coupon in session storage
+    // Kontrollo për kupon ekzistues në session storage
     const existingCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
     if (existingCoupon) {
         console.log("Found existing coupon:", existingCoupon);
@@ -643,8 +717,150 @@ function getPaymentMethodText(method) {
 
 // Inicializimi i funksionalitetit të PayPal checkout
 function initPayPalCheckout() {
-    console.log("PayPal checkout functionality would be initialized here");
-    // This would typically integrate with PayPal SDK
+    console.log("Initializing PayPal checkout functionality");
+    
+    // Gjej butonin e përfundimit të porosisë dhe metodat e pagesës
+    const nextToStep4 = document.getElementById('next-to-step-4');
+    const paymentMethods = document.getElementsByName('payment');
+    
+    if (!nextToStep4 || !paymentMethods.length) {
+        console.error("Payment elements not found");
+        return;
+    }
+    
+    // Krijojmë një kontejner për butonin PayPal nëse nuk ekziston
+    let paypalButtonContainer = document.getElementById('paypal-button-container');
+    if (!paypalButtonContainer) {
+        paypalButtonContainer = document.createElement('div');
+        paypalButtonContainer.id = 'paypal-button-container';
+        paypalButtonContainer.className = 'paypal-buttons-wrapper';
+        paypalButtonContainer.style.display = 'none';
+        
+        // Vendosim kontejnerin poshtë metodave të pagesës
+        const paymentSection = document.querySelector('.payment-section');
+        if (paymentSection) {
+            paymentSection.appendChild(paypalButtonContainer);
+        }
+    }
+    
+    // Ndryshojmë stilin e butonit kur përdoruesi zgjedh PayPal
+    for (let i = 0; i < paymentMethods.length; i++) {
+        paymentMethods[i].addEventListener('change', function() {
+            if (this.value === 'paypal') {
+                nextToStep4.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
+                nextToStep4.classList.add('paypal-button');
+            } else {
+                nextToStep4.innerHTML = 'Përfundo porosinë <i class="fas fa-check"></i>';
+                nextToStep4.classList.remove('paypal-button');
+            }
+        });
+    }
+    
+    // Shtojmë logjikën për butonin e përfundimit
+    if (nextToStep4) {
+        // Remove any existing event listeners (to prevent duplicates)
+        const newNextToStep4 = nextToStep4.cloneNode(true);
+        nextToStep4.parentNode.replaceChild(newNextToStep4, nextToStep4);
+        
+        // Add the new event listener
+        newNextToStep4.addEventListener('click', function(e) {
+            // Check if payment method is selected
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
+            if (!selectedPayment) {
+                showNotification('Ju lutemi zgjidhni një metodë pagese.');
+                return;
+            }
+            
+            const paymentMethod = selectedPayment.value;
+            console.log("Selected payment method:", paymentMethod);
+            
+            // If PayPal is selected, handle differently
+            if (paymentMethod === 'paypal') {
+                e.preventDefault(); // Prevent default navigation
+                
+                // Generate order summary
+                const orderSummary = generateOrderSummary();
+                if (!orderSummary) {
+                    showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+                    return;
+                }
+                
+                // Save payment method to order summary
+                orderSummary.paymentMethod = paymentMethod;
+                
+                // Show PayPal button container
+                paypalButtonContainer.innerHTML = '<div class="loading-text">Duke ngarkuar PayPal...</div>';
+                paypalButtonContainer.style.display = 'block';
+                
+                // Scroll to PayPal button container
+                paypalButtonContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Simulate loading PayPal button (in a real app, you would integrate with PayPal SDK here)
+                setTimeout(() => {
+                    paypalButtonContainer.innerHTML = `
+                        <div class="paypal-message">
+                            <h3>PayPal Demo Mode</h3>
+                            <p>Në një implementim të vërtetë, këtu do të shfaqej butoni i PayPal.</p>
+                            <button class="btn paypal-button" id="simulate-paypal-success">
+                                Simuloni Pagesë të Suksesshme 
+                                <i class="fab fa-paypal"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Simulate successful PayPal payment
+                    document.getElementById('simulate-paypal-success').addEventListener('click', function() {
+                        // Save order with payment details
+                        sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+                        
+                        // Update confirmation page with order details
+                        updateConfirmationDetails(orderSummary);
+                        
+                        // Navigate to confirmation step
+                        goToStep(4);
+                        
+                        // Clear cart after successful order
+                        cart = [];
+                        localStorage.setItem('cart', JSON.stringify([]));
+                        updateCartCount();
+                        
+                        // Show success notification
+                        showNotification('Pagesa me PayPal u krye me sukses!', 'success');
+                    });
+                }, 1500);
+                
+                return; // Stop here for PayPal
+            }
+            
+            // For other payment methods, proceed with standard checkout
+            // (existing code for non-PayPal payment methods)
+            const orderSummary = generateOrderSummary();
+            if (!orderSummary) {
+                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+                return;
+            }
+            
+            // Save payment method to order summary
+            orderSummary.paymentMethod = paymentMethod;
+            
+            // Save order summary for invoice generation
+            sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+            
+            // Update confirmation page with order details
+            updateConfirmationDetails(orderSummary);
+            
+            // Navigate to confirmation step
+            goToStep(4);
+            
+            // Clear cart after successful order
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify([]));
+            updateCartCount();
+            
+            // Show success notification
+            showNotification('Porosia juaj u përpunua me sukses!', 'success');
+        });
+    }
 }
 
 // Shfaqja e notifikimeve - zëvendësim i plotë
