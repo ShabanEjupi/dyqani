@@ -459,7 +459,7 @@ function initCheckoutSteps() {
     }
 }
 
-// Inicializimi i funksionalitetit të kodit promocional
+// Inicializimi i funksionalitetit të kodit promocional - përmirësuar
 function initCouponCode() {
     console.log("Initializing coupon code functionality");
     
@@ -472,14 +472,15 @@ function initCouponCode() {
     }
     
     // Apply coupon when button is clicked
-    applyButton.addEventListener('click', function() {
+    applyButton.addEventListener('click', function(e) {
+        e.preventDefault(); // Shto këtë për të parandaluar refreshimin e faqes
         applyCouponCode(couponInput.value);
     });
     
     // Apply coupon when Enter is pressed
     couponInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            e.preventDefault();
+            e.preventDefault(); // Parandalon refreshimin e faqes
             applyCouponCode(couponInput.value);
         }
     });
@@ -721,8 +722,8 @@ function initDeliveryOptions() {
             // Update the estimate text
             updateDeliveryEstimate(deliveryValue);
             
-            // Update order summaries to reflect new shipping cost
-            updateOrderSummaries();
+            // NDRYSHIMI KRYESOR: Përditëso të gjithë UI-n
+            updateFullCheckoutUI();
         });
     });
     
@@ -956,7 +957,7 @@ function updatePaymentSummary() {
     if (bankTotal) bankTotal.textContent = orderSummary.total.toFixed(2);
 }
 
-// Funksioni i përmirësuar për kodet promocionale - zëvendësimi i plotë
+// Funkioni i rregulluar për kodin promocional
 function applyCouponCode(code) {
     console.log("Handling coupon code:", code);
     
@@ -966,6 +967,16 @@ function applyCouponCode(code) {
     if (!couponInput || !applyButton) {
         console.error("Coupon elements not found");
         return;
+    }
+    
+    // Kritike: Lexo vlerën aktuale nga fusha nëse nuk është kaluar një kod
+    if (!code || code.trim() === '') {
+        code = couponInput.value.trim();
+        // Kontrollo prap nëse është bosh pas trim()
+        if (code === '') {
+            showNotification('Ju lutemi shkruani një kod promocional.', 'info');
+            return;
+        }
     }
     
     // Kontrollo nëse po heqim apo po aplikojmë kuponin
@@ -984,73 +995,70 @@ function applyCouponCode(code) {
         applyButton.textContent = 'Apliko';
         
         // Përditëso përmbledhjet
-        updateOrderSummaries();
+        updateFullCheckoutUI();
         
         showNotification('Kodi promocional u hoq me sukses.', 'info');
-    } else {
-        // Po aplikojmë një kupon
-        const normalizedCode = code.trim().toUpperCase();
-        if (!normalizedCode) {
-            showNotification('Ju lutemi shkruani një kod promocional.');
-            return;
+        return;
+    }
+    
+    // Po aplikojmë një kupon - kodi është marrë nga input-i tashmë
+    const normalizedCode = code.toUpperCase();
+    
+    // Lista e kuponëve të vlefshëm
+    const validCoupons = {
+        'WELCOME15': {
+            type: 'percent',
+            discount: 0.15,
+            description: '15% zbritje'
+        },
+        'ENISI10': {
+            type: 'percent',
+            discount: 0.10,
+            description: '10% zbritje'
+        },
+        'FREEDELIVERY': {
+            type: 'shipping',
+            discount: 'free',
+            description: 'Dërgesa falas'
         }
-        
-        // Lista e kuponëve të vlefshëm
-        const validCoupons = {
-            'WELCOME15': {
-                type: 'percent',
-                discount: 0.15,
-                description: '15% zbritje'
-            },
-            'ENISI10': {
-                type: 'percent',
-                discount: 0.10,
-                description: '10% zbritje'
-            },
-            'FREEDELIVERY': {
-                type: 'shipping',
-                discount: 'free',
-                description: 'Dërgesa falas'
-            }
+    };
+    
+    // Kontrollo nëse kuponi është i vlefshëm
+    if (validCoupons[normalizedCode]) {
+        // Kuponi është i vlefshëm
+        const coupon = {
+            code: normalizedCode,
+            ...validCoupons[normalizedCode]
         };
         
-        // Kontrollo nëse kuponi është i vlefshëm
-        if (validCoupons[normalizedCode]) {
-            // Kuponi është i vlefshëm
-            const coupon = {
-                code: normalizedCode,
-                ...validCoupons[normalizedCode]
-            };
-            
-            console.log("Valid coupon found:", coupon);
-            
-            // Ruaj kuponin në sessionStorage
-            sessionStorage.setItem('appliedCoupon', JSON.stringify(coupon));
-            
-            // Update UI
-            couponInput.classList.add('coupon-valid');
-            couponInput.classList.remove('coupon-invalid');
-            couponInput.disabled = true;
-            applyButton.textContent = 'Hiq';
-            
-            // Create success message
-            let successMessage = '';
-            if (coupon.type === 'percent') {
-                successMessage = `Kodi promocional ${normalizedCode} u aplikua me sukses. ${coupon.description}.`;
-            } else if (coupon.type === 'shipping') {
-                successMessage = 'Kodi promocional u aplikua. Dërgesa juaj është falas!';
-            }
-            
-            // Përditëso përmbledhjen e porosisë
-            updateOrderSummaries();
-            
-            showNotification(successMessage, 'success');
-        } else {
-            // Kuponi nuk është i vlefshëm
-            couponInput.classList.add('coupon-invalid');
-            couponInput.classList.remove('coupon-valid');
-            showNotification('Kodi promocional nuk është i vlefshëm.', 'error');
+        console.log("Valid coupon applied:", coupon);
+        
+        // Ruaj kuponin në sessionStorage
+        sessionStorage.setItem('appliedCoupon', JSON.stringify(coupon));
+        
+        // Update UI
+        couponInput.classList.add('coupon-valid');
+        couponInput.classList.remove('coupon-invalid');
+        couponInput.disabled = true;
+        applyButton.textContent = 'Hiq';
+        
+        // Create success message
+        let successMessage = '';
+        if (coupon.type === 'percent') {
+            successMessage = `Kodi promocional ${normalizedCode} u aplikua me sukses. ${coupon.description}.`;
+        } else if (coupon.type === 'shipping') {
+            successMessage = 'Kodi promocional u aplikua. Dërgesa juaj është falas!';
         }
+        
+        // Përditëso përmbledhjen e porosisë
+        updateFullCheckoutUI();
+        
+        showNotification(successMessage, 'success');
+    } else {
+        // Kuponi nuk është i vlefshëm
+        couponInput.classList.add('coupon-invalid');
+        couponInput.classList.remove('coupon-valid');
+        showNotification('Kodi promocional nuk është i vlefshëm.', 'error');
     }
 }
 
@@ -1221,7 +1229,7 @@ function updateConfirmationDetails(orderSummary) {
     }
 }
 
-// Funksioni për të ngarkuar produktet e rekomanduara
+// Funksioni për të ngarkuar produktet e rekomanduara - me përmirësim
 function loadRecommendedProducts() {
     console.log("Loading recommended products");
     
@@ -1251,14 +1259,39 @@ function loadRecommendedProducts() {
             `;
             recommendationContainer.appendChild(recItem);
             
-            // Add event listener to add button
+            // PËRMIRËSIMI: Shtimi i event listener me funksionin e përmirësuar
             const addBtn = recItem.querySelector('.btn-add-recommendation');
             addBtn.addEventListener('click', function() {
                 const productToAdd = {...product, quantity: 1};
                 addToCart(productToAdd);
+                
+                // NDRYSHIMI KRYESOR: Përditëso të gjithë UI-n pas shtimit
+                updateFullCheckoutUI();
+                
+                // Trego njoftim të suksesshëm
+                showNotification(`${product.name} u shtua në shportë!`, 'success');
             });
         });
     } else {
         recommendationContainer.innerHTML = '<p>Nuk ka produkte të rekomanduara.</p>';
     }
+}
+
+// Funksion i ri për përditësimin e plotë të UI
+function updateFullCheckoutUI() {
+    // Përditëso shportën
+    updateCartUI();
+    
+    // Përditëso përmbledhjen e porosisë
+    updateOrderSummaries();
+    
+    // Përditëso përmbledhjen e pagesës
+    if (window.currentOrderSummary) {
+        updatePaymentSummary();
+    }
+    
+    // Përditëso numëruesin e artikujve
+    updateCartCount();
+    
+    console.log("Full checkout UI updated");
 }
