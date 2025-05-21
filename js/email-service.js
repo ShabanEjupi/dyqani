@@ -1,9 +1,10 @@
 // Example for email service
 const EmailService = {
-    // Your Gmail credentials from app password
+    // Your email credentials
     credentials: {
-        email: 'center.enisi@gmail.com',
-        appPassword: process.env.GMAIL_APP_PASSWORD
+        email: 'info@enisicenter.tech',
+        adminEmail: 'shabanejupi@enisicenter.tech',
+        appPassword: process.env.EMAIL_APP_PASSWORD
     },
     
     init: function() {

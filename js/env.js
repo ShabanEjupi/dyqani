@@ -11,7 +11,8 @@ const ENV = {
     },
     STORE: {
         NAME: 'Enisi Center',
-        EMAIL: 'center.enisi@gmail.com'
+        EMAIL: 'info@enisicenter.tech',
+        ADMIN_EMAIL: 'shabanejupi@enisicenter.tech'
     }
 };
 
