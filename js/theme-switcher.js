@@ -1,6 +1,6 @@
 /**
  * Theme Switcher - Enhanced version
- * Supports Light, Dark, and Blue themes
+ * Supports Light, Dark, Blue, and Vibrant themes
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -43,10 +43,18 @@ document.addEventListener('DOMContentLoaded', function() {
         blueBtn.setAttribute('title', 'Stili blu');
         blueBtn.setAttribute('aria-label', 'Aktivizo stilin blu');
         
+        // Create vibrant theme button
+        const vibrantBtn = document.createElement('div');
+        vibrantBtn.className = 'theme-btn theme-btn-vibrant';
+        vibrantBtn.setAttribute('data-theme', 'vibrant');
+        vibrantBtn.setAttribute('title', 'Stili i gjallë');
+        vibrantBtn.setAttribute('aria-label', 'Aktivizo stilin e gjallë');
+        
         // Add them to the options container
         optionsContainer.appendChild(lightBtn);
         optionsContainer.appendChild(darkBtn);
         optionsContainer.appendChild(blueBtn);
+        optionsContainer.appendChild(vibrantBtn);
         
         // Add elements to the toggle container
         toggleContainer.appendChild(label);
@@ -60,7 +68,8 @@ document.addEventListener('DOMContentLoaded', function() {
             buttons: {
                 light: lightBtn,
                 dark: darkBtn,
-                blue: blueBtn
+                blue: blueBtn,
+                vibrant: vibrantBtn
             }
         };
     }
@@ -68,13 +77,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to set theme
     function setTheme(theme) {
         // Remove all theme classes first
-        document.body.classList.remove('dark-theme', 'blue-theme');
+        document.body.classList.remove('dark-theme', 'blue-theme', 'vibrant-theme');
         
         // Set the appropriate theme
         if (theme === 'dark') {
             document.body.classList.add('dark-theme');
         } else if (theme === 'blue') {
             document.body.classList.add('blue-theme');
+        } else if (theme === 'vibrant') {
+            document.body.classList.add('vibrant-theme');
         }
         
         // Store the selected theme
@@ -82,6 +93,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Store when the theme was last changed (for promotional popups)
         localStorage.setItem('theme-last-changed', Date.now());
+        
+        // Update active state on buttons
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`.theme-btn-${theme}`).classList.add('active');
     }
     
     // Wait for the components to load
@@ -92,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const {buttons} = themeToggle;
         
         // Check for saved theme preference
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme') || 'vibrant'; // Set vibrant as default
         
         // Apply theme based on preference
         setTheme(savedTheme);
@@ -127,6 +144,7 @@ function showThemeNotification(theme) {
     let themeName = 'çelët';
     if (theme === 'dark') themeName = 'errët';
     if (theme === 'blue') themeName = 'blu';
+    if (theme === 'vibrant') themeName = 'i gjallë';
     
     // Create notification element if it doesn't exist
     let notification = document.querySelector('.theme-notification');
