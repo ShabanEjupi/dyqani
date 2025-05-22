@@ -74,23 +74,24 @@
     --newsletter-bg: #1a4f8c;
 }
 
-/* Purple Vibrant Theme */
+/* Boys Theme */
 .vibrant-theme {
-    --primary-color: #8e44ad;
-    --secondary-color: #9b59b6;
-    --accent-color: #f39c12;
-    --text-color: #333;
-    --bg-color: #f8f1fe;
+    /* Boy-friendly color scheme */
+    --primary-color: #1565c0;    /* Strong blue */
+    --secondary-color: #0d47a1;  /* Darker blue */
+    --accent-color: #f57c00;     /* Orange accent */
+    --text-color: #333333;
+    --bg-color: #e3f2fd;        /* Light blue background */
     --card-bg: #fff;
-    --light-gray: #f0e6f8;
-    --medium-gray: #d8c6e6;
-    --dark-gray: #7d5a9e;
+    --light-gray: #eceff1;
+    --medium-gray: #b0bec5;
+    --dark-gray: #546e7a;
     --white: #fff;
-    --footer-bg: #5c2d7d;
+    --footer-bg: #0d47a1;
     --footer-text: #fff;
-    --shadow: 0 4px 15px rgba(142, 68, 173, 0.15);
-    --hero-overlay: rgba(142, 68, 173, 0.6);
-    --newsletter-bg: linear-gradient(135deg, #8e44ad, #9b59b6);
+    --shadow: 0 4px 15px rgba(21, 101, 192, 0.15);
+    --hero-overlay: rgba(13, 71, 161, 0.6);
+    --newsletter-bg: linear-gradient(135deg, #1565c0, #0d47a1);
 }
 
 /* Apply theme variables */
@@ -158,36 +159,36 @@ body {
     background-image: linear-gradient(135deg, #1e88e5, #42a5f5);
 }
 
-/* Add the new theme button */
+/* Boys theme button */
 .theme-btn-vibrant {
-    background-image: linear-gradient(135deg, #8e44ad, #9b59b6);
+    background-image: linear-gradient(135deg, #1565c0, #0d47a1);
 }
 
 /* Card design enhancements */
 .vibrant-theme .product-card {
-    border-radius: 12px;
-    box-shadow: 0 10px 20px rgba(142, 68, 173, 0.1);
-    border-bottom: 3px solid #8e44ad;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(21, 101, 192, 0.1);
+    border-bottom: 3px solid #1565c0;
     transition: all 0.3s ease;
 }
 
 .vibrant-theme .product-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(142, 68, 173, 0.2);
+    box-shadow: 0 15px 30px rgba(21, 101, 192, 0.2);
 }
 
 /* Button styling */
 .vibrant-theme .btn {
-    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    background: linear-gradient(135deg, #1565c0, #0d47a1);
     border-radius: 30px;
     padding: 10px 25px;
-    box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);
+    box-shadow: 0 4px 10px rgba(21, 101, 192, 0.3);
 }
 
 .vibrant-theme .btn:hover {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    background: linear-gradient(135deg, #0d47a1, #1565c0);
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(142, 68, 173, 0.4);
+    box-shadow: 0 6px 12px rgba(21, 101, 192, 0.4);
 }
 
 /* Blue theme specific adjustments */

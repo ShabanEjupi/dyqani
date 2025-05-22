@@ -79,7 +79,7 @@ function getThemeName(theme) {
         case 'light': return 'e çiltër';
         case 'dark': return 'e errët';
         case 'blue': return 'blu';
-        case 'vibrant': return 'e gjallë';
+        case 'vibrant': return 'për djem'; // Changed from 'e gjallë' to 'për djem'
         default: return theme;
     }
 }
@@ -146,7 +146,7 @@ function showThemeNotification(theme) {
     let themeName = 'çelët';
     if (theme === 'dark') themeName = 'errët';
     if (theme === 'blue') themeName = 'blu';
-    if (theme === 'vibrant') themeName = 'i gjallë';
+    if (theme === 'vibrant') themeName = 'për djem'; // Changed to match the new theme name
     
     // Create notification element if it doesn't exist
     let notification = document.querySelector('.theme-notification');
@@ -208,14 +208,16 @@ function setBlueThemeVars(root) {
 }
 
 function setVibrantThemeVars(root) {
-    root.style.setProperty('--primary-color', '#8e44ad');
-    root.style.setProperty('--secondary-color', '#9b59b6');
-    root.style.setProperty('--accent-color', '#f39c12');
-    root.style.setProperty('--text-color', '#333');
-    root.style.setProperty('--bg-color', '#f8f1fe');
+    root.style.setProperty('--primary-color', '#1565c0');
+    root.style.setProperty('--secondary-color', '#0d47a1');
+    root.style.setProperty('--accent-color', '#f57c00');
+    root.style.setProperty('--text-color', '#333333');
+    root.style.setProperty('--bg-color', '#e3f2fd');
     root.style.setProperty('--card-bg', '#fff');
-    root.style.setProperty('--light-gray', '#f0e6f8');
-    root.style.setProperty('--medium-gray', '#d8c6e6');
-    root.style.setProperty('--dark-gray', '#7d5a9e');
+    root.style.setProperty('--light-gray', '#eceff1');
+    root.style.setProperty('--medium-gray', '#b0bec5');
+    root.style.setProperty('--dark-gray', '#546e7a');
     root.style.setProperty('--white', '#fff');
+    root.style.setProperty('--footer-bg', '#0d47a1');
+    root.style.setProperty('--footer-text', '#ffffff');
 }
