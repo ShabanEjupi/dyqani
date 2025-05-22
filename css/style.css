@@ -1,16 +1,21 @@
-/* Main Styles for Product Website */
+/* Main Styles for Product Website - Dark mode as default */
 
 :root {
-    --primary-color: #4a6da7;
-    --secondary-color: #5a81c5;
-    --accent-color: #f8b400;
-    --text-color: #333;
-    --light-gray: #f4f4f4;
-    --medium-gray: #ddd;
-    --dark-gray: #888;
-    --white: #fff;
-    --shadow: 0 2px 10px rgba(0,0,0,0.1);
+    /* Default to dark theme values */
+    --primary-color: #5d84c2;
+    --secondary-color: #7095d9;
+    --accent-color: #ffb700;
+    --text-color: #e0e0e0;
+    --bg-color: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --light-gray: #2a2a2a;
+    --medium-gray: #3d3d3d;
+    --dark-gray: #999;
+    --white: #2d2d2d;
+    --shadow: 0 2px 10px rgba(0,0,0,0.5);
     --transition: all 0.3s ease;
+    --footer-bg: #121212;
+    --footer-text: #e0e0e0;
 }
 
 * {
@@ -23,7 +28,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: var(--text-color);
-    background-color: var(--light-gray);
+    background-color: var(--bg-color);
 }
 
 a {

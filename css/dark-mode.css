@@ -36,25 +36,6 @@
     --newsletter-bg: #1e2b46;
 }
 
-/* Blue theme - special for stores */
-.blue-theme {
-    --primary-color: #0056b3;
-    --secondary-color: #007bff;
-    --accent-color: #ffc107;
-    --text-color: #333;
-    --bg-color: #e9f0f8;
-    --card-bg: #fff;
-    --light-gray: #eef5ff;
-    --medium-gray: #d0e1f9;
-    --dark-gray: #7d8fb1;
-    --white: #fff;
-    --footer-bg: #0c2d5e;
-    --footer-text: #fff;
-    --shadow: 0 4px 15px rgba(0,86,179,0.15);
-    --hero-overlay: rgba(0, 67, 139, 0.6);
-    --newsletter-bg: #0056b3;
-}
-
 /* Blue Theme Variables */
 .blue-theme {
     --primary-color: #1e88e5;
@@ -144,11 +125,6 @@ body {
     box-shadow: 0 0 5px var(--accent-color);
 }
 
-.theme-btn-light {
-    background-color: #f5f5f5;
-    background-image: linear-gradient(145deg, #ffffff, #f0f0f0);
-}
-
 .theme-btn-dark {
     background-color: #333333;
     background-image: linear-gradient(145deg, #444444, #222222);
@@ -216,7 +192,7 @@ body {
     background-image: linear-gradient(var(--hero-overlay), var(--hero-overlay)), url('../assets/images/blue-hero.jpg');
 }
 
-/* Fix for footer text visibility in dark theme */
+/* Fix for footer text visibility */
 .dark-theme footer,
 .dark-theme .footer-content,
 .dark-theme .footer-section,
@@ -228,7 +204,6 @@ body {
     color: #ffffff !important;
 }
 
-/* Fix for footer text visibility in blue theme */
 .blue-theme footer,
 .blue-theme .footer-content,
 .blue-theme .footer-section,
