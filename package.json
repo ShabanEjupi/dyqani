@@ -1,7 +1,7 @@
 {
   "name": "enisi-center",
   "version": "1.0.0",
-  "description": "Enisi Center E-commerce Website",
+  "description": "Enisi Center - Growing retail and distribution company based in Kosovo, specializing in high-quality consumer electronics and smart devices",
   "main": "index.html",
   "scripts": {
     "start": "webpack serve --open",

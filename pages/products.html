@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produktet | Enisi Center</title>
+    <title>Elektronikë | Enisi Center</title>
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/dark-mode.css">
@@ -16,8 +16,8 @@
 
     <section class="hero products-hero">
         <div class="hero-content">
-            <h2>Mirë se vini në Enisi Center</h2>
-            <p>Zbuloni koleksionin tonë të veçantë të produkteve të cilësisë së lartë</p>
+            <h2>Enisi Center - Elektronikë dhe Pajisje Inteligjente</h2>
+            <p>Kompania në rritje e shitjes me pakicë dhe distribuimit në Kosovë - Zbuloni produktet tona elektronike cilësore</p>
             
             <!-- Search bar in hero section -->
             <div class="hero-search-container">
@@ -36,17 +36,17 @@
                         <div class="category-icon"><i class="fas fa-border-all"></i></div>
                         <span>Të gjitha</span>
                     </button>
-                    <button class="category-item" data-category="girls">
-                        <div class="category-icon"><i class="fas fa-female"></i></div>
-                        <span>Për vajza</span>
+                    <button class="category-item" data-category="smartphones">
+                        <div class="category-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <span>Telefona</span>
                     </button>
-                    <button class="category-item" data-category="boys">
-                        <div class="category-icon"><i class="fas fa-male"></i></div>
-                        <span>Për djem</span>
+                    <button class="category-item" data-category="audio">
+                        <div class="category-icon"><i class="fas fa-headphones"></i></div>
+                        <span>Audio</span>
                     </button>
-                    <button class="category-item" data-category="babies">
-                        <div class="category-icon"><i class="fas fa-baby"></i></div>
-                        <span>Për foshnja</span>
+                    <button class="category-item" data-category="smart_home">
+                        <div class="category-icon"><i class="fas fa-home"></i></div>
+                        <span>Smart Home</span>
                     </button>
                     <button class="category-item" data-category="sets">
                         <div class="category-icon"><i class="fas fa-layer-group"></i></div>
@@ -224,10 +224,12 @@
             
             // Map categories to product descriptions/names for filtering
             const categoryMap = {
-                'girls': ['vajza'],
-                'boys': ['djem'],
-                'babies': ['muaj', 'foshnje'],
-                'sets': ['set', '3-pjesësh']
+                'smartphones': ['smartphone', 'telefon', 'android', 'phone'],
+                'audio': ['earbuds', 'speaker', 'kufje', 'altoparlant', 'wireless'],
+                'smart_home': ['smart', 'home', 'security', 'camera', 'hub'],
+                'tablets': ['tablet'],
+                'wearables': ['watch', 'orë'],
+                'accessories': ['power bank', 'charger', 'mbushës', 'bateri']
             };
             
             const keywords = categoryMap[category] || [];

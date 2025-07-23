@@ -1,4 +1,4 @@
-// Instagram Products Fetcher with Image Proxy
+// Electronics Products Configuration
 
 // Configuration
 const config = {
@@ -6,69 +6,69 @@ const config = {
     imageProxyEndpoint: '/api/instagram-image-proxy'
 };
 
-// Define the products from your Instagram links
+// Define the electronics products
 const enisiProducts = [
     {
-        id: 'insta1',
-        name: 'Trenerka termo për vajza',
-        description: 'Mosha: 6 - 12 vjeç',
-        price: 12.00,
+        id: 'elec1',
+        name: 'Smartphone Android',
+        description: 'Telefon inteligjent me ekran 6.5" dhe 128GB memorie',
+        price: 299.00,
         image: '../assets/icons/product1.png',
         instagramLink: 'https://www.instagram.com/p/DC9njmdIeNT/'
     },
     {
-        id: 'insta2',
-        name: 'Fustana për vajza',
-        description: 'Mosha: 6 - 24 muaj',
-        price: 8.00,
+        id: 'elec2',
+        name: 'Wireless Earbuds',
+        description: 'Kufje wireless me cilësi të lartë zëri',
+        price: 89.00,
         image: '../assets/icons/product2.png',
         instagramLink: 'https://www.instagram.com/p/DC9oeeXsIxD/'
     },
     {
-        id: 'insta3',
-        name: 'Fustana për vajza',
-        description: 'Mosha: 7 - 11 vjeç',
-        price: 12.00,
+        id: 'elec3',
+        name: 'Smart Watch',
+        description: 'Orë inteligjente me GPS dhe monitorim shëndetësor',
+        price: 199.00,
         image: '../assets/icons/product3.png',
         instagramLink: 'https://www.instagram.com/p/DDrbMUTohRm/'
     },
     {
-        id: 'insta4',
-        name: 'Bluza për vajza',
-        description: 'Mosha: 9 - 12 vjeç',
-        price: 5.00,
+        id: 'elec4',
+        name: 'Bluetooth Speaker',
+        description: 'Altoparlant portable me cilësi të lartë zëri',
+        price: 79.00,
         image: '../assets/icons/product4.png',
         instagramLink: 'https://www.instagram.com/p/DE2H4BGqEy9/'
     },
     {
-        id: 'insta5',
-        name: 'Bluza për djem',
-        description: 'Mosha: 9 - 12 vjeç',
-        price: 5.00,
+        id: 'elec5',
+        name: 'Tablet 10"',
+        description: 'Tablet me ekran 10 inç dhe 64GB memorie',
+        price: 249.00,
         image: '../assets/icons/product5.png',
         instagramLink: 'https://www.instagram.com/p/DE2IdJ5qub5/'
     },
     {
-        id: 'insta6',
-        name: 'Trenerka të poshtme për djem',
-        description: 'Mosha: 8 - 16 vjeç',
-        price: 5.00,
+        id: 'elec6',
+        name: 'Power Bank 20000mAh',
+        description: 'Bateri portable me kapacitet të lartë',
+        price: 45.00,
         image: '../assets/icons/product6.png',
         instagramLink: 'https://www.instagram.com/p/DE2Jy0NKbLi/'
     },
     {
-        id: 'insta7',
-        name: 'Trenerka set për djem',
-        description: 'Mosha: 8 - 16 vjeç',
-        price: 12.00,
+        id: 'elec7',
+        name: 'Wireless Charger',
+        description: 'Mbushës wireless për telefona inteligjentë',
+        price: 35.00,
         image: '../assets/icons/product7.png',
         instagramLink: 'https://www.instagram.com/p/DE2KF1RK7yK/'
     },
     {
-        id: 'insta8',
-        name: 'Set 3-pjesësh për vajza',
-        description: 'Mosha: 6 - 24 muaj',
-        price: 10.00,
+        id: 'elec8',
+        name: 'Smart Home Hub',
+        description: 'Qendër kontrolli për shtëpinë inteligjente',
+        price: 159.00,
         image: '../assets/icons/product8.png',
         instagramLink: 'https://www.instagram.com/p/DC9khPuIaql/'
     }

@@ -1,0 +1,89 @@
+<?php include 'includes/header.php'; ?>
+
+<main class="home-page">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Welcome to Enisi Center</h1>
+            <p>Quality Children's Clothing for Every Occasion</p>
+            <a href="shop.php" class="btn btn-primary">Shop Now</a>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-products">
+        <div class="container">
+            <h2>Featured Collections</h2>
+            <div class="products-grid">
+                <?php
+                // Fetch featured products from database
+                include 'includes/db.php';
+                $stmt = $conn->prepare("SELECT * FROM products WHERE featured = 1 LIMIT 8");
+                $stmt->execute();
+                $result = $stmt->get_result();
+                
+                while ($product = $result->fetch_assoc()) {
+                    ?>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="img/products/<?php echo $product['image']; ?>" alt="<?php echo $product['name']; ?>">
+                        </div>
+                        <div class="product-info">
+                            <h3><?php echo $product['name']; ?></h3>
+                            <p class="price">€<?php echo number_format($product['price'], 2); ?></p>
+                            <a href="product.php?id=<?php echo $product['id']; ?>" class="btn">View Details</a>
+                        </div>
+                    </div>
+                    <?php
+                }
+                ?>
+            </div>
+            <div class="view-all">
+                <a href="shop.php" class="btn btn-secondary">View All Products</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories">
+        <div class="container">
+            <h2>Shop by Category</h2>
+            <div class="category-grid">
+                <div class="category-card">
+                    <img src="img/categories/boys.jpg" alt="Boys Clothing">
+                    <h3>Boys</h3>
+                    <a href="shop.php?category=boys" class="category-link">Shop Now</a>
+                </div>
+                <div class="category-card">
+                    <img src="img/categories/girls.jpg" alt="Girls Clothing">
+                    <h3>Girls</h3>
+                    <a href="shop.php?category=girls" class="category-link">Shop Now</a>
+                </div>
+                <div class="category-card">
+                    <img src="img/categories/babies.jpg" alt="Baby Clothing">
+                    <h3>Babies</h3>
+                    <a href="shop.php?category=babies" class="category-link">Shop Now</a>
+                </div>
+                <div class="category-card">
+                    <img src="img/categories/accessories.jpg" alt="Accessories">
+                    <h3>Accessories</h3>
+                    <a href="shop.php?category=accessories" class="category-link">Shop Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-preview">
+        <div class="container">
+            <div class="about-content">
+                <h2>About Enisi Center</h2>
+                <p>Enisi Center specializes in high-quality, comfortable children's clothing. We focus on sustainable materials and ethical manufacturing to provide the best for your little ones.</p>
+                <p>Our collections feature playful designs, vibrant colors, and durable fabrics that withstand the adventures of childhood.</p>
+                <a href="about.php" class="btn btn-outline">Learn More</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<?php include 'includes/footer.php'; ?>

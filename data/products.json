@@ -1,0 +1,66 @@
+[
+    {
+        "id": 1,
+        "name": "Smartphone Android Pro",
+        "description": "Telefon inteligjent me performancë të lartë, ekran 6.7\", kamerë 108MP dhe 256GB memorie",
+        "price": 449.99,
+        "image": "assets/images/smartphone.jpg",
+        "category": "smartphones"
+    },
+    {
+        "id": 2,
+        "name": "Wireless Earbuds Premium",
+        "description": "Kufje wireless me anulim të zhurmës, cilësi Hi-Fi dhe bateri 30 orë",
+        "price": 129.99,
+        "image": "assets/images/earbuds.jpg",
+        "category": "audio"
+    },
+    {
+        "id": 3,
+        "name": "Smart Watch Pro",
+        "description": "Orë inteligjente me GPS, monitorizim shëndetësor dhe ekran AMOLED",
+        "price": 279.99,
+        "image": "assets/images/smartwatch.jpg",
+        "category": "wearables"
+    },
+    {
+        "id": 4,
+        "name": "Bluetooth Speaker Portable",
+        "description": "Altoparlant portable me cilësi të lartë zëri, rezistent ndaj ujit (IPX7)",
+        "price": 89.99,
+        "image": "assets/images/speaker.jpg",
+        "category": "audio"
+    },
+    {
+        "id": 5,
+        "name": "Gaming Tablet 12\"",
+        "description": "Tablet me performancë të lartë për gaming, ekran 12\", 8GB RAM dhe 128GB memorie",
+        "price": 399.99,
+        "image": "assets/images/tablet.jpg",
+        "category": "tablets"
+    },
+    {
+        "id": 6,
+        "name": "Power Bank 25000mAh",
+        "description": "Bateri portable me kapacitet të lartë, mbushje e shpejtë dhe 3 porta USB",
+        "price": 65.99,
+        "image": "assets/images/powerbank.jpg",
+        "category": "accessories"
+    },
+    {
+        "id": 7,
+        "name": "Wireless Charging Station",
+        "description": "Stacion mbushjeje wireless për 3 pajisje njëkohësisht, kompatibël me të gjitha pajisjet",
+        "price": 79.99,
+        "image": "assets/images/wireless_charger.jpg",
+        "category": "accessories"
+    },
+    {
+        "id": 8,
+        "name": "Smart Home Security Camera",
+        "description": "Kamerë sigurie e shtëpisë inteligjente me cilësi 4K, detektim lëvizjeje dhe aplikacion mobil",
+        "price": 159.99,
+        "image": "assets/images/security_camera.jpg",
+        "category": "smart_home"
+    }
+]

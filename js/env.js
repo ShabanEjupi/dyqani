@@ -1,23 +1,17 @@
 /**
- * Environment Variables
- * This module provides access to environment variables for the application
+ * Environment configuration
+ * IMPORTANT: This file should be added to .gitignore
+ * Contains sensitive credentials that should not be exposed in version control
  */
 
 const ENV = {
-    PAYPAL: {
-        CLIENT_ID: 'AUlpyjRm4L4cm8Vj3oi9n-kZJxWAKz-vircJRReAXEONIHjy1ksLnzaoMqT0nQ9hxBCNDbwiuw51F9fw',
-        CURRENCY: 'EUR',
-        INTENT: 'capture'
-    },
-    STORE: {
-        NAME: 'Enisi Center',
-        EMAIL: 'info@enisicenter.tech',
-        ADMIN_EMAIL: 'shabanejupi@enisicenter.tech'
-    }
+    // Gmail configuration
+    GMAIL_APP_PASSWORD: 'wuzf eksy qvbg mohg',
+    EMAIL_API_KEY: '361672263:AAH4Z70G953dXb46c3m9b0HJN17sQ',
+    
+    // Email service configuration
+    EMAIL_SERVICE_URL: 'https://script.google.com/macros/s/AKfycbz8m00j69wKmI9cduO3TCgAqCLInxy4YNoc7x6FWagCRD_s47yXKhzELBrU3wj5i7k/exec',
+    
+    // PayPal configuration
+    PAYPAL_CLIENT_ID: 'AZtrRB6jra0YEO0fUBsmT5Hpnv7BQ-wZtGpxHGgVwWE8XOcJBOV8StGCm8b1g7E4l9OSLyXYhzXpGwIy'
 };
-
-// For development use only - don't expose in production
-console.log('Environment loaded for: ' + ENV.STORE.NAME);
-
-// Make environment variables available
-window.ENV = ENV;
