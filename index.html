@@ -1,89 +1,95 @@
-<?php include 'includes/header.php'; ?>
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enisi Center - Elektronikë dhe Pajisje Inteligjente | Kosovë</title>
+    <meta name="description" content="Enisi Center - Kompani në rritje e elektronikës dhe pajisjeve inteligjente në Kosovë. Zbuloni produktet tona cilësore elektronike.">
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/responsive-fixes.css">
+    <link rel="stylesheet" href="css/mobile-fixes.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+</head>
+<body>
+    <div id="header-container"></div>
 
-<main class="home-page">
-    <!-- Hero Section -->
     <section class="hero">
-        <div class="container">
-            <h1>Welcome to Enisi Center</h1>
-            <p>Quality Children's Clothing for Every Occasion</p>
-            <a href="shop.php" class="btn btn-primary">Shop Now</a>
+        <div class="hero-content">
+            <h2>Enisi Center - Elektronikë dhe Pajisje Inteligjente</h2>
+            <p>Kompania e shitjes me pakicë dhe distribuimit në rritje në Kosovë, e specializuar në elektronikë cilësore dhe pajisje inteligjente</p>
+            <a href="pages/products.html" class="btn">Shiko Produktet</a>
         </div>
     </section>
 
-    <!-- Featured Products -->
-    <section class="featured-products">
-        <div class="container">
-            <h2>Featured Collections</h2>
-            <div class="products-grid">
-                <?php
-                // Fetch featured products from database
-                include 'includes/db.php';
-                $stmt = $conn->prepare("SELECT * FROM products WHERE featured = 1 LIMIT 8");
-                $stmt->execute();
-                $result = $stmt->get_result();
-                
-                while ($product = $result->fetch_assoc()) {
-                    ?>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="img/products/<?php echo $product['image']; ?>" alt="<?php echo $product['name']; ?>">
-                        </div>
-                        <div class="product-info">
-                            <h3><?php echo $product['name']; ?></h3>
-                            <p class="price">€<?php echo number_format($product['price'], 2); ?></p>
-                            <a href="product.php?id=<?php echo $product['id']; ?>" class="btn">View Details</a>
-                        </div>
-                    </div>
-                    <?php
-                }
-                ?>
+    <main>
+        <section id="all-products">
+            <h2>Elektronikë dhe Pajisje Inteligjente</h2>
+            <p class="section-description">Koleksioni ynë i specializuar i produkteve elektronike cilësore</p>
+            <div id="product-list" class="product-grid"></div>
+            <div class="loading" id="loading-products">Duke ngarkuar produktet...</div>
+        </section>
+
+        <section id="about-preview">
+            <h2>Rreth Nesh</h2>
+            <div class="about-container">
+                <div class="about-image">
+                    <img src="assets/images/shop.jpg" alt="Enisi Center" onerror="this.src='https://via.placeholder.com/400x300?text=Enisi+Center'">
+                </div>
+                <div class="about-text">
+                    <p>Enisi Center është një kompani në rritje e shitjes me pakicë dhe distribuimit në Kosovë, e specializuar në elektronikë cilësore dhe pajisje inteligjente. Ne ofrojmë teknologjinë më të fundit dhe më të avancuar për të përmirësuar jetën tuaj të përditshme.</p>
+                    <a href="pages/about.html" class="btn btn-secondary">Mëso më shumë</a>
+                </div>
             </div>
-            <div class="view-all">
-                <a href="shop.php" class="btn btn-secondary">View All Products</a>
+        </section>
+
+        <section id="testimonials">
+            <h2>Çfarë thonë klientët tanë</h2>
+            <div class="testimonial-container">
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"Produktet janë të një cilësie shumë të mirë dhe shërbimi është i shkëlqyeshëm!"</p>
+                    <p class="client-name">- Andi K.</p>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"Enisi Center ka përdorueshmërinë më të mirë dhe çmimet konkurruese."</p>
+                    <p class="client-name">- Fatma M.</p>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"Rekomandoj pa dyshim! Kualiteti i produkteve është i jashtëzakonshëm."</p>
+                    <p class="client-name">- Burim S.</p>
+                </div>
             </div>
+        </section>
+    </main>
+
+    <section id="newsletter">
+        <div class="newsletter-container">
+            <h3>Abonohuni për të rejat më të fundit</h3>
+            <p>Merrni njoftime për produktet e reja dhe ofertat speciale</p>
+            <form id="newsletter-form">
+                <input type="email" placeholder="E-mail juaj" required>
+                <button type="submit" class="btn">Abonohu</button>
+            </form>
         </div>
     </section>
 
-    <!-- Categories Section -->
-    <section class="categories">
-        <div class="container">
-            <h2>Shop by Category</h2>
-            <div class="category-grid">
-                <div class="category-card">
-                    <img src="img/categories/boys.jpg" alt="Boys Clothing">
-                    <h3>Boys</h3>
-                    <a href="shop.php?category=boys" class="category-link">Shop Now</a>
-                </div>
-                <div class="category-card">
-                    <img src="img/categories/girls.jpg" alt="Girls Clothing">
-                    <h3>Girls</h3>
-                    <a href="shop.php?category=girls" class="category-link">Shop Now</a>
-                </div>
-                <div class="category-card">
-                    <img src="img/categories/babies.jpg" alt="Baby Clothing">
-                    <h3>Babies</h3>
-                    <a href="shop.php?category=babies" class="category-link">Shop Now</a>
-                </div>
-                <div class="category-card">
-                    <img src="img/categories/accessories.jpg" alt="Accessories">
-                    <h3>Accessories</h3>
-                    <a href="shop.php?category=accessories" class="category-link">Shop Now</a>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div id="footer-container"></div>
 
-    <!-- About Section -->
-    <section class="about-preview">
-        <div class="container">
-            <div class="about-content">
-                <h2>About Enisi Center</h2>
-                <p>Enisi Center specializes in high-quality, comfortable children's clothing. We focus on sustainable materials and ethical manufacturing to provide the best for your little ones.</p>
-                <p>Our collections feature playful designs, vibrant colors, and durable fabrics that withstand the adventures of childhood.</p>
-                <a href="about.php" class="btn btn-outline">Learn More</a>
-            </div>
-        </div>
-    </section>
-</main>
-
-<?php include 'includes/footer.php'; ?>
+    <script src="js/instagram-image-cache.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/shopping-cart.js"></script>
+</body>
+</html>
