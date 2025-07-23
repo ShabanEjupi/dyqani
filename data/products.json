@@ -4,7 +4,7 @@
         "name": "Smartphone Android Pro",
         "description": "Telefon inteligjent me performancë të lartë, ekran 6.7\", kamerë 108MP dhe 256GB memorie",
         "price": 449.99,
-        "image": "assets/images/smartphone.jpg",
+        "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         "category": "smartphones"
     },
     {
@@ -12,7 +12,7 @@
         "name": "Wireless Earbuds Premium",
         "description": "Kufje wireless me anulim të zhurmës, cilësi Hi-Fi dhe bateri 30 orë",
         "price": 129.99,
-        "image": "assets/images/earbuds.jpg",
+        "image": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         "category": "audio"
     },
     {
@@ -20,7 +20,7 @@
         "name": "Smart Watch Pro",
         "description": "Orë inteligjente me GPS, monitorizim shëndetësor dhe ekran AMOLED",
         "price": 279.99,
-        "image": "assets/images/smartwatch.jpg",
+        "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         "category": "wearables"
     },
     {
@@ -28,7 +28,7 @@
         "name": "Bluetooth Speaker Portable",
         "description": "Altoparlant portable me cilësi të lartë zëri, rezistent ndaj ujit (IPX7)",
         "price": 89.99,
-        "image": "assets/images/speaker.jpg",
+        "image": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         "category": "audio"
     },
     {
@@ -36,7 +36,7 @@
         "name": "Gaming Tablet 12\"",
         "description": "Tablet me performancë të lartë për gaming, ekran 12\", 8GB RAM dhe 128GB memorie",
         "price": 399.99,
-        "image": "assets/images/tablet.jpg",
+        "image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         "category": "tablets"
     },
     {
@@ -44,7 +44,7 @@
         "name": "Power Bank 25000mAh",
         "description": "Bateri portable me kapacitet të lartë, mbushje e shpejtë dhe 3 porta USB",
         "price": 65.99,
-        "image": "assets/images/powerbank.jpg",
+        "image": "https://images.unsplash.com/photo-1609592804120-0cc8cf2cd6e3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         "category": "accessories"
     },
     {
@@ -52,7 +52,7 @@
         "name": "Wireless Charging Station",
         "description": "Stacion mbushjeje wireless për 3 pajisje njëkohësisht, kompatibël me të gjitha pajisjet",
         "price": 79.99,
-        "image": "assets/images/wireless_charger.jpg",
+        "image": "https://images.unsplash.com/photo-1588508065123-287b28e013da?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         "category": "accessories"
     },
     {
@@ -60,7 +60,7 @@
         "name": "Smart Home Security Camera",
         "description": "Kamerë sigurie e shtëpisë inteligjente me cilësi 4K, detektim lëvizjeje dhe aplikacion mobil",
         "price": 159.99,
-        "image": "assets/images/security_camera.jpg",
+        "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         "category": "smart_home"
     }
 ]
