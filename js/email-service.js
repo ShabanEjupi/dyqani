@@ -1,16 +1,9 @@
 /**
  * Email Service for Order Confirmations
- * Uses EmailJS to send order confirmation emails
+ * Sends emails via Netlify function using Google SMTP
  */
 
 const EmailService = {
-    // EmailJS Configuration
-    config: {
-        serviceId: 'service_enisicenter',  // Create this in EmailJS dashboard
-        templateId: 'template_order_confirm',  // Create this in EmailJS dashboard
-        publicKey: 'YOUR_EMAILJS_PUBLIC_KEY'  // Get from EmailJS dashboard
-    },
-    
     // Store configuration
     store: {
         name: 'Enisi Center',
@@ -21,14 +14,9 @@ const EmailService = {
         website: 'https://enisicenter.tech'
     },
     
-    // Initialize EmailJS
+    // Initialize
     init: function() {
-        if (typeof emailjs !== 'undefined') {
-            emailjs.init(this.config.publicKey);
-            console.log('EmailJS initialized successfully');
-        } else {
-            console.warn('EmailJS library not loaded');
-        }
+        console.log('Email service initialized - using Netlify SMTP function');
     },
     
     // Send order confirmation email to customer
@@ -55,7 +43,7 @@ const EmailService = {
                 'bank': 'Transfertë bankare'
             }[orderData.paymentMethod] || 'Para në dorë';
             
-            // Template parameters for EmailJS
+            // Template parameters
             const templateParams = {
                 to_email: orderData.customerInfo.email,
                 to_name: orderData.customerInfo.fullname,
@@ -81,32 +69,7 @@ const EmailService = {
                 store_address: this.store.address
             };
             
-            // Check if EmailJS is available
-            if (typeof emailjs !== 'undefined') {
-                const response = await emailjs.send(
-                    this.config.serviceId,
-                    this.config.templateId,
-                    templateParams
-                );
-                console.log('Email sent successfully:', response);
-                return { success: true, response };
-            } else {
-                // Fallback: Log the email that would be sent
-                console.log('EmailJS not available. Email would be sent with:', templateParams);
-                
-                // Alternative: Send via Netlify function
-                return await this.sendViaNetlify(orderData, templateParams);
-            }
-            
-        } catch (error) {
-            console.error('Error sending email:', error);
-            return { success: false, error: error.message };
-        }
-    },
-    
-    // Send email via Netlify function (fallback)
-    sendViaNetlify: async function(orderData, templateParams) {
-        try {
+            // Send via Netlify function
             const response = await fetch('/.netlify/functions/send-order-email', {
                 method: 'POST',
                 headers: {
@@ -119,43 +82,26 @@ const EmailService = {
             });
             
             const result = await response.json();
-            return result;
+            
+            if (result.success) {
+                console.log('Confirmation email sent successfully');
+                return { success: true };
+            } else {
+                console.error('Failed to send email:', result.error);
+                return { success: false, error: result.error };
+            }
+            
         } catch (error) {
-            console.error('Netlify email function error:', error);
+            console.error('Error sending email:', error);
             return { success: false, error: error.message };
         }
     },
     
     // Send notification to admin about new order
     sendAdminNotification: async function(orderData) {
-        console.log('Sending admin notification for new order...');
-        
-        try {
-            const templateParams = {
-                to_email: this.store.adminEmail,
-                order_number: orderData.orderNumber || orderData.orderId,
-                customer_name: orderData.customerInfo.fullname,
-                customer_phone: orderData.customerInfo.phone,
-                total: orderData.total.toFixed(2),
-                items_count: orderData.items.length,
-                order_link: `${this.store.website}/admin.html?order=${orderData.orderNumber}`
-            };
-            
-            if (typeof emailjs !== 'undefined') {
-                const response = await emailjs.send(
-                    this.config.serviceId,
-                    'template_admin_notify',  // Separate template for admin
-                    templateParams
-                );
-                console.log('Admin notification sent:', response);
-                return { success: true, response };
-            }
-            
-            return { success: false, error: 'EmailJS not available' };
-        } catch (error) {
-            console.error('Error sending admin notification:', error);
-            return { success: false, error: error.message };
-        }
+        console.log('Admin notification will be sent via the same Netlify function');
+        // Admin notification is handled in the Netlify function itself
+        return { success: true };
     }
 };
 

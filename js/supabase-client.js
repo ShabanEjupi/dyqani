@@ -4,8 +4,8 @@
  */
 
 // Supabase configuration - these are safe to expose (anon key has RLS protection)
-const SUPABASE_URL = 'https://ahjqgncpupqlbuzrpocl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoanFnbmNwdXBxbGJ1enJwb2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc2MjQ2NDMsImV4cCI6MjA1MzIwMDY0M30.7L9V4ZOLPsW1HNL4p2Vu3mGYFpPy82GNrW_BQKbpYhY';
+const SUPABASE_URL = 'https://eimquqgpznhticgfsysz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbXF1cWdwem5odGljZ2ZzeXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxODgzNTUsImV4cCI6MjA4Mzc2NDM1NX0.0vu1z8qTytrV2zxIn2fkxb88XETUwVWYbkKR1sk54g0';
 
 // Create Supabase client using the CDN-loaded library
 let supabaseClient = null;
