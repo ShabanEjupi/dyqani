@@ -406,7 +406,7 @@ function initCheckoutSteps() {
     }
     
     if (nextToStep4) {
-        nextToStep4.addEventListener('click', function() {
+        nextToStep4.addEventListener('click', async function() {
             console.log("Finalizing order");
             
             // Check if payment method is selected
@@ -429,19 +429,74 @@ function initCheckoutSteps() {
             // Save payment method to order summary
             orderSummary.paymentMethod = paymentMethod;
             
-            // Save order summary for invoice generation
-            sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+            // Show loading state
+            const submitBtn = nextToStep4;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Duke procesuar...';
+            submitBtn.disabled = true;
             
-            // Update confirmation page with order details
-            updateConfirmationDetails(orderSummary);
-            
-            // Navigate to confirmation step
-            goToStep(4);
-            
-            // Clear cart after successful order
-            cart = [];
-            localStorage.setItem('cart', JSON.stringify([]));
-            updateCartCount();
+            try {
+                // Save order to Supabase database
+                if (typeof window.SupabaseOrders !== 'undefined' && window.SupabaseOrders.createOrder) {
+                    console.log('Saving order to database...');
+                    const dbResult = await window.SupabaseOrders.createOrder(orderSummary);
+                    
+                    if (dbResult.success) {
+                        // Update order summary with database order number
+                        orderSummary.orderNumber = dbResult.orderNumber;
+                        orderSummary.orderId = dbResult.orderNumber;
+                        orderSummary.databaseId = dbResult.orderId;
+                        console.log('Order saved to database:', dbResult);
+                    } else {
+                        console.warn('Failed to save order to database, continuing with local order');
+                    }
+                } else {
+                    console.warn('SupabaseOrders not available, order will not be saved to database');
+                }
+                
+                // Send confirmation email
+                if (typeof window.EmailService !== 'undefined' && window.EmailService.sendOrderConfirmation) {
+                    console.log('Sending confirmation email...');
+                    const emailResult = await window.EmailService.sendOrderConfirmation(orderSummary);
+                    
+                    if (emailResult.success) {
+                        console.log('Confirmation email sent successfully');
+                    } else {
+                        console.warn('Failed to send confirmation email:', emailResult.error);
+                    }
+                    
+                    // Also notify admin
+                    if (window.EmailService.sendAdminNotification) {
+                        await window.EmailService.sendAdminNotification(orderSummary);
+                    }
+                }
+                
+                // Save order summary for invoice generation
+                sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+                
+                // Update confirmation page with order details
+                updateConfirmationDetails(orderSummary);
+                
+                // Navigate to confirmation step
+                goToStep(4);
+                
+                // Clear cart after successful order
+                cart = [];
+                localStorage.setItem('cart', JSON.stringify([]));
+                updateCartCount();
+                
+                // Clear session storage for next order
+                sessionStorage.removeItem('appliedCoupon');
+                sessionStorage.removeItem('deliveryOption');
+                
+            } catch (error) {
+                console.error('Error processing order:', error);
+                showNotification('Gabim gjatë procesimit të porosisë. Ju lutemi provoni përsëri.');
+            } finally {
+                // Restore button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
         });
     }
     

@@ -73,14 +73,14 @@ Add these to your `.env` file (local) and Netlify dashboard (production):
 
 ```env
 # Already in your .env
-SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_URL=https://ahjqgncpupqlbuzrpocl.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_KEY=your-service-key
 
 # POS Configuration
-POS_API_URL=https://your-pos-api.com/api
+POS_API_URL=http://localhost:5000/api
 POS_API_KEY=your-pos-api-key
-POS_WEBHOOK_SECRET=your-secret-token
+POS_WEBHOOK_SECRET=enisicenter-pos-webhook-2026-xK9mN4pQ7sT2
 ```
 
 ### Step 3: ASP.NET Core POS Webhook Implementation
@@ -158,8 +158,10 @@ public class WebhookController : ControllerBase
 
 ```json
 {
-  "WebhookUrl": "https://your-site.netlify.app/webhooks/pos",
-  "WebhookSecret": "your-webhook-secret-here"
+  "EcommerceWebhook": {
+    "Url": "https://enisicenter.tech/.netlify/functions/pos-webhook",
+    "Secret": "enisicenter-pos-webhook-2026-xK9mN4pQ7sT2"
+  }
 }
 ```
 

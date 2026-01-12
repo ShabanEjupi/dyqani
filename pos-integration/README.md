@@ -17,12 +17,12 @@ YourPOSProject/
 Add to your `appsettings.json`:
 
 ```json
-{
-  "EcommerceWebhook": {
-    "Url": "https://your-site.netlify.app/webhooks/pos",
-    "Secret": "your-webhook-secret-matching-env-file"
-  }
-}
+    {
+    "EcommerceWebhook": {
+        "Url": "https://enisicenter.tech/.netlify/functions/pos-webhook",
+        "Secret": "enisicenter-pos-webhook-2026-xK9mN4pQ7sT2"
+    }
+    }
 ```
 
 **Important**: The `Secret` must match `POS_WEBHOOK_SECRET` in your `.env` file!
@@ -259,8 +259,8 @@ public class OrderService
    ```json
    {
      "EcommerceWebhook": {
-       "Url": "https://your-actual-site.netlify.app/webhooks/pos",
-       "Secret": "your-production-secret"
+       "Url": "https://enisicenter.tech/.netlify/functions/pos-webhook",
+       "Secret": "enisicenter-pos-webhook-2026-xK9mN4pQ7sT2"
      }
    }
    ```

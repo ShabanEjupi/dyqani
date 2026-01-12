@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 
-namespace YourPOSNamespace.Controllers
+namespace KosovaPOS.Controllers
 {
     /// <summary>
     /// Webhook integration controller for syncing with Netlify/Supabase e-commerce platform
