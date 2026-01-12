@@ -10,7 +10,7 @@ const instagramConfig = {
     businessAccountId: process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || 'YOUR_INSTAGRAM_BUSINESS_ACCOUNT_ID',
     accessToken: process.env.INSTAGRAM_ACCESS_TOKEN || 'YOUR_INSTAGRAM_ACCESS_TOKEN',
     apiVersion: 'v18.0', // Use current Graph API version
-    redirectUri: 'https://enisicenter.netlify.app/instagram-callback'
+    redirectUri: 'https://enisicenter.tech/instagram-callback'
 };
 
 // Function to fetch media from Instagram Graph API

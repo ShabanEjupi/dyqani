@@ -1,8 +1,9 @@
 {
   "name": "enisi-center",
   "version": "1.0.0",
-  "description": "Enisi Center E-commerce Website",
+  "description": "Enisi Center E-commerce Website with Real-time POS Integration",
   "main": "index.html",
+  "type": "module",
   "scripts": {
     "start": "webpack serve --open",
     "build": "webpack --mode=production",
@@ -10,11 +11,12 @@
   },
   "dependencies": {
     "axios": "^0.26.1",
-    "cheerio": "^1.0.0-rc.10"
+    "cheerio": "^1.0.0-rc.10",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "author": "",
   "license": "ISC",
-  "keywords": [],
+  "keywords": ["ecommerce", "pos", "real-time", "supabase"],
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.26.9",

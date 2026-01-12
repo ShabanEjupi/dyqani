@@ -5,9 +5,16 @@
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
 
+# API redirects
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
+  status = 200
+
+# POS webhook endpoint
+[[redirects]]
+  from = "/webhooks/pos"
+  to = "/.netlify/functions/pos-webhook"
   status = 200
 
 # Redirect root to products page
@@ -34,3 +41,13 @@
 
 [dev]
   framework = "#static"
+
+# Environment variables (these should also be set in Netlify UI)
+[context.production.environment]
+  NODE_VERSION = "18"
+
+[context.deploy-preview.environment]
+  NODE_VERSION = "18"
+
+[context.branch-deploy.environment]
+  NODE_VERSION = "18"
