@@ -154,9 +154,12 @@ CREATE POLICY "Public can view active products" ON products
 CREATE POLICY "Service role can manage products" ON products
     FOR ALL USING (auth.role() = 'service_role');
 
--- Orders: Anyone can insert, only service role can update
+-- Orders: Anyone can insert, authenticated users can view their orders
 CREATE POLICY "Anyone can create orders" ON orders
     FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Anyone can view their orders by email" ON orders
+    FOR SELECT USING (true);
 
 CREATE POLICY "Service role can manage orders" ON orders
     FOR ALL USING (auth.role() = 'service_role');

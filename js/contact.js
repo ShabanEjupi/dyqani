@@ -110,28 +110,53 @@ function initContactForm() {
     }
     
     // Form submission function
-    function submitForm() {
+    async function submitForm() {
         // Show loading state
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Duke dërguar...';
-        
-        // Simulate form submission delay
-        setTimeout(() => {
-            // Hide form and show success message
-            form.style.display = 'none';
-            if (successMessage) {
-                successMessage.style.display = 'block';
-                
-                // Add animation
-                successMessage.classList.add('success-animation');
+
+        try {
+            // Collect form data
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone')?.value.trim() || '',
+                reason: document.getElementById('reason')?.value || 'other',
+                message: document.getElementById('message').value.trim()
+            };
+
+            // Send to Netlify function
+            const response = await fetch('/.netlify/functions/send-contact-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Hide form and show success message
+                form.style.display = 'none';
+                if (successMessage) {
+                    successMessage.style.display = 'block';
+                    successMessage.classList.add('success-animation');
+                }
+                console.log('Contact form submitted successfully');
+            } else {
+                throw new Error(result.error || 'Failed to send message');
             }
-            
+        } catch (error) {
+            console.error('Error submitting contact form:', error);
+            showNotification('Gabim gjatë dërgimit të mesazhit. Ju lutemi provoni përsëri ose na kontaktoni direkt.');
+        } finally {
             // Reset button state
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
-        }, 1500);
+        }
     }
 }
 

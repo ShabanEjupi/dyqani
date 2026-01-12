@@ -406,98 +406,9 @@ function initCheckoutSteps() {
     }
     
     if (nextToStep4) {
-        nextToStep4.addEventListener('click', async function() {
-            console.log("Finalizing order");
-            
-            // Check if payment method is selected
-            const selectedPayment = document.querySelector('input[name="payment"]:checked');
-            if (!selectedPayment) {
-                showNotification('Ju lutemi zgjidhni një metodë pagese.');
-                return;
-            }
-            
-            const paymentMethod = selectedPayment.value;
-            console.log("Selected payment method:", paymentMethod);
-            
-            // Generate order summary
-            const orderSummary = generateOrderSummary();
-            if (!orderSummary) {
-                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
-                return;
-            }
-            
-            // Save payment method to order summary
-            orderSummary.paymentMethod = paymentMethod;
-            
-            // Show loading state
-            const submitBtn = nextToStep4;
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Duke procesuar...';
-            submitBtn.disabled = true;
-            
-            try {
-                // Save order to Supabase database
-                if (typeof window.SupabaseOrders !== 'undefined' && window.SupabaseOrders.createOrder) {
-                    console.log('Saving order to database...');
-                    const dbResult = await window.SupabaseOrders.createOrder(orderSummary);
-                    
-                    if (dbResult.success) {
-                        // Update order summary with database order number
-                        orderSummary.orderNumber = dbResult.orderNumber;
-                        orderSummary.orderId = dbResult.orderNumber;
-                        orderSummary.databaseId = dbResult.orderId;
-                        console.log('Order saved to database:', dbResult);
-                    } else {
-                        console.warn('Failed to save order to database, continuing with local order');
-                    }
-                } else {
-                    console.warn('SupabaseOrders not available, order will not be saved to database');
-                }
-                
-                // Send confirmation email
-                if (typeof window.EmailService !== 'undefined' && window.EmailService.sendOrderConfirmation) {
-                    console.log('Sending confirmation email...');
-                    const emailResult = await window.EmailService.sendOrderConfirmation(orderSummary);
-                    
-                    if (emailResult.success) {
-                        console.log('Confirmation email sent successfully');
-                    } else {
-                        console.warn('Failed to send confirmation email:', emailResult.error);
-                    }
-                    
-                    // Also notify admin
-                    if (window.EmailService.sendAdminNotification) {
-                        await window.EmailService.sendAdminNotification(orderSummary);
-                    }
-                }
-                
-                // Save order summary for invoice generation
-                sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
-                
-                // Update confirmation page with order details
-                updateConfirmationDetails(orderSummary);
-                
-                // Navigate to confirmation step
-                goToStep(4);
-                
-                // Clear cart after successful order
-                cart = [];
-                localStorage.setItem('cart', JSON.stringify([]));
-                updateCartCount();
-                
-                // Clear session storage for next order
-                sessionStorage.removeItem('appliedCoupon');
-                sessionStorage.removeItem('deliveryOption');
-                
-            } catch (error) {
-                console.error('Error processing order:', error);
-                showNotification('Gabim gjatë procesimit të porosisë. Ju lutemi provoni përsëri.');
-            } finally {
-                // Restore button state
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
-        });
+        // Event listener for step 4 is now handled in initPayPalCheckout
+        // to avoid duplicate listeners
+        console.log("nextToStep4 button found - will be handled by initPayPalCheckout");
     }
     
     // Backward navigation
@@ -747,50 +658,90 @@ function initPayPalCheckout() {
     // Ndryshojmë stilin e butonit kur përdoruesi zgjedh PayPal
     for (let i = 0; i < paymentMethods.length; i++) {
         paymentMethods[i].addEventListener('change', function() {
-            if (this.value === 'paypal') {
-                nextToStep4.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
-                nextToStep4.classList.add('paypal-button');
-            } else {
-                nextToStep4.innerHTML = 'Përfundo porosinë <i class="fas fa-check"></i>';
-                nextToStep4.classList.remove('paypal-button');
+            const btn = document.getElementById('next-to-step-4');
+            if (btn) {
+                if (this.value === 'paypal') {
+                    btn.innerHTML = 'Vazhdo me PayPal <i class="fab fa-paypal"></i>';
+                    btn.classList.add('paypal-button');
+                } else {
+                    btn.innerHTML = 'Përfundo porosinë <i class="fas fa-check"></i>';
+                    btn.classList.remove('paypal-button');
+                }
             }
         });
     }
     
-    // Shtojmë logjikën për butonin e përfundimit
-    if (nextToStep4) {
-        // Remove any existing event listeners (to prevent duplicates)
-        const newNextToStep4 = nextToStep4.cloneNode(true);
-        nextToStep4.parentNode.replaceChild(newNextToStep4, nextToStep4);
+    // Add the order processing event listener (do NOT clone the button - keep the existing listener)
+    nextToStep4.addEventListener('click', async function(e) {
+        // Check if payment method is selected
+        const selectedPayment = document.querySelector('input[name="payment"]:checked');
+        if (!selectedPayment) {
+            showNotification('Ju lutemi zgjidhni një metodë pagese.');
+            return;
+        }
         
-        // Add the new event listener
-        newNextToStep4.addEventListener('click', function(e) {
-            // Check if payment method is selected
-            const selectedPayment = document.querySelector('input[name="payment"]:checked');
-            if (!selectedPayment) {
-                showNotification('Ju lutemi zgjidhni një metodë pagese.');
-                return;
+        const paymentMethod = selectedPayment.value;
+        console.log("Selected payment method:", paymentMethod);
+        
+        // Generate order summary for any payment method
+        const orderSummary = generateOrderSummary();
+        if (!orderSummary) {
+            showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
+            return;
+        }
+        
+        // Save payment method to order summary
+        orderSummary.paymentMethod = paymentMethod;
+        
+        // Show loading state
+        const submitBtn = this;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Duke procesuar...';
+        submitBtn.disabled = true;
+        
+        try {
+            // Save order to Supabase database
+            if (typeof window.SupabaseOrders !== 'undefined' && window.SupabaseOrders.createOrder) {
+                console.log('Saving order to database...');
+                const dbResult = await window.SupabaseOrders.createOrder(orderSummary);
+                
+                if (dbResult.success) {
+                    // Update order summary with database order number
+                    orderSummary.orderNumber = dbResult.orderNumber;
+                    orderSummary.orderId = dbResult.orderNumber;
+                    orderSummary.databaseId = dbResult.orderId;
+                    console.log('Order saved to database:', dbResult);
+                } else {
+                    console.warn('Failed to save order to database:', dbResult.error);
+                    // Use the local order number if database save failed
+                    if (dbResult.orderNumber) {
+                        orderSummary.orderNumber = dbResult.orderNumber;
+                    }
+                }
+            } else {
+                console.warn('SupabaseOrders not available, order will not be saved to database');
             }
             
-            const paymentMethod = selectedPayment.value;
-            console.log("Selected payment method:", paymentMethod);
-            
-            // Generate order summary for any payment method
-            const orderSummary = generateOrderSummary();
-            if (!orderSummary) {
-                showNotification('Gabim gjatë gjenerimit të përmbledhjes së porosisë.');
-                return;
+            // Send confirmation email
+            if (typeof window.EmailService !== 'undefined' && window.EmailService.sendOrderConfirmation) {
+                console.log('Sending confirmation email...');
+                const emailResult = await window.EmailService.sendOrderConfirmation(orderSummary);
+                
+                if (emailResult.success) {
+                    console.log('Confirmation email sent successfully');
+                } else {
+                    console.warn('Failed to send confirmation email:', emailResult.error);
+                }
+            } else {
+                console.warn('EmailService not available, confirmation email will not be sent');
             }
-            
-            // Save payment method to order summary
-            orderSummary.paymentMethod = paymentMethod;
             
             // If PayPal is selected, redirect to PayPal.me
             if (paymentMethod === 'paypal') {
-                e.preventDefault(); // Prevent default navigation
+                e.preventDefault();
                 
                 // Generate PayPal.me URL with the proper username and amount
-                const paypalUsername = 'shabanejupi5'; // Username-i juaj i PayPal.me
+                const paypalUsername = 'shabanejupi5';
                 const amount = orderSummary.total.toFixed(2);
                 const description = `Order ${orderSummary.orderId} - Enisi Center`;
                 
@@ -798,6 +749,11 @@ function initPayPalCheckout() {
                 
                 // Save order data before redirect
                 sessionStorage.setItem('currentOrderSummaryForInvoice', JSON.stringify(orderSummary));
+                
+                // Clear cart
+                cart = [];
+                localStorage.setItem('cart', JSON.stringify([]));
+                updateCartCount();
                 
                 // Show notification before redirect
                 showNotification('Duke ju ridrejtuar në PayPal për pagesë...', 'info');
@@ -807,7 +763,7 @@ function initPayPalCheckout() {
                     window.location.href = paypalUrl;
                 }, 1500);
                 
-                return; // Stop here for PayPal
+                return;
             }
             
             // For other payment methods, proceed with standard checkout
@@ -825,10 +781,22 @@ function initPayPalCheckout() {
             localStorage.setItem('cart', JSON.stringify([]));
             updateCartCount();
             
+            // Clear session storage for next order
+            sessionStorage.removeItem('appliedCoupon');
+            sessionStorage.removeItem('deliveryOption');
+            
             // Show success notification
             showNotification('Porosia juaj u përpunua me sukses!', 'success');
-        });
-    }
+            
+        } catch (error) {
+            console.error('Error processing order:', error);
+            showNotification('Gabim gjatë procesimit të porosisë. Ju lutemi provoni përsëri.');
+        } finally {
+            // Restore button state
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
 }
 
 // Shfaqja e notifikimeve - zëvendësim i plotë

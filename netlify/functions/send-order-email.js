@@ -26,7 +26,24 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { orderData, templateParams } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    const { orderData, templateParams } = body;
+    
+    // Log incoming data for debugging
+    console.log('Received order email request:', JSON.stringify(body, null, 2));
+    
+    // Validate required data
+    if (!templateParams || !templateParams.to_email) {
+      console.error('Missing required data: templateParams or to_email');
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ 
+          success: false, 
+          error: 'Missing required data: templateParams.to_email is required' 
+        })
+      };
+    }
     
     // Create transporter using Gmail SMTP with App Password
     const transporter = nodemailer.createTransport({
@@ -34,12 +51,20 @@ exports.handler = async (event, context) => {
       port: parseInt(process.env.SMTP_PORT) || 587,
       secure: false, // Use TLS
       auth: {
-        user: process.env.SMTP_USER || process.env.STORE_EMAIL || 'center.enisi@gmail.com',
+        user: process.env.SMTP_USER || 'center.enisi@gmail.com',
         pass: process.env.SMTP_PASSWORD || process.env.GMAIL_APP_PASSWORD
       },
       tls: {
         rejectUnauthorized: false
       }
+    });
+
+    // Log SMTP config (without password)
+    console.log('SMTP Config:', {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      user: process.env.SMTP_USER || 'center.enisi@gmail.com',
+      hasPassword: !!(process.env.SMTP_PASSWORD || process.env.GMAIL_APP_PASSWORD)
     });
 
     // Verify connection

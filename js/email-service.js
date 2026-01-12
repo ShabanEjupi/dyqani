@@ -21,20 +21,28 @@ const EmailService = {
     
     // Send order confirmation email to customer
     sendOrderConfirmation: async function(orderData) {
-        console.log('Sending order confirmation email...', orderData);
+        console.log('EmailService: Sending order confirmation email...', orderData);
         
         try {
+            // Validate required data
+            if (!orderData || !orderData.customerInfo || !orderData.customerInfo.email) {
+                console.error('EmailService: Missing customer email in orderData');
+                return { success: false, error: 'Missing customer email' };
+            }
+            
             // Build items HTML for email
             let itemsHtml = '';
-            orderData.items.forEach(item => {
-                itemsHtml += `
-                    <tr>
-                        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} €</td>
-                    </tr>
-                `;
-            });
+            if (orderData.items && orderData.items.length > 0) {
+                orderData.items.forEach(item => {
+                    itemsHtml += `
+                        <tr>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} €</td>
+                        </tr>
+                    `;
+                });
+            }
             
             // Payment method in Albanian
             const paymentMethodText = {
@@ -58,16 +66,18 @@ const EmailService = {
                 customer_phone: orderData.customerInfo.phone,
                 customer_address: `${orderData.customerInfo.address}, ${orderData.customerInfo.city}`,
                 items_html: itemsHtml,
-                subtotal: orderData.subtotal.toFixed(2),
-                shipping: orderData.shipping.price.toFixed(2),
+                subtotal: (orderData.subtotal || 0).toFixed(2),
+                shipping: (orderData.shipping?.price || 0).toFixed(2),
                 discount: orderData.discount ? orderData.discount.toFixed(2) : '0.00',
-                total: orderData.total.toFixed(2),
+                total: (orderData.total || 0).toFixed(2),
                 payment_method: paymentMethodText,
                 store_name: this.store.name,
                 store_email: this.store.email,
                 store_phone: this.store.phone,
                 store_address: this.store.address
             };
+            
+            console.log('EmailService: Prepared templateParams:', templateParams);
             
             // Send via Netlify function
             const response = await fetch('/.netlify/functions/send-order-email', {
@@ -82,17 +92,18 @@ const EmailService = {
             });
             
             const result = await response.json();
+            console.log('EmailService: Response from Netlify function:', result);
             
             if (result.success) {
-                console.log('Confirmation email sent successfully');
+                console.log('EmailService: Confirmation email sent successfully');
                 return { success: true };
             } else {
-                console.error('Failed to send email:', result.error);
+                console.error('EmailService: Failed to send email:', result.error);
                 return { success: false, error: result.error };
             }
             
         } catch (error) {
-            console.error('Error sending email:', error);
+            console.error('EmailService: Error sending email:', error);
             return { success: false, error: error.message };
         }
     },
